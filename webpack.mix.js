@@ -15,8 +15,9 @@ let vendors = [
     'moment',
 ]
 
-mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css')
+mix.sass('resources/sass/app.scss', 'public/css')
+
+mix.js('resources/js/notifications/main.js', 'public/js/notification')
     .extract(vendors)
 
 mix.version()
