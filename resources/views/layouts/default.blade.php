@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>@yield('title') - {{ \Meta::get('title') }}</title>
+    <title>{{ \Meta::get('title') }}</title>
 
     <!-- Favicon -->
     <link href="/assets/img/brand/favicon.png" rel="icon" type="image/png">
@@ -31,7 +31,22 @@
 
 <div class="main-content" id="panel">
     @include('components.navbar')
-    @include('components.header')
+
+    <div class="header pb-6">
+        <div class="container-fluid">
+            <div class="header-body">
+                <div class="row align-items-center py-4">
+                    <div class="col-lg-6 col-7">
+                        <h6 class="h2 d-inline-block mb-0">@yield('title')</h6>
+                    </div>
+                    <div class="col-lg-6 col-5 text-right">
+                        @yield('actions')
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="container-fluid mt--6">
         @yield('content')

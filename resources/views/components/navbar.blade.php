@@ -8,17 +8,20 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                         </div>
-                        <input class="form-control" placeholder="Search" type="text">
+
+                        <label class="sr-only" for="search">Pesquisar produto</label>
+                        <input class="form-control" placeholder="Pesquisar" type="text" name="search" id="search">
                     </div>
                 </div>
+
                 <button type="button" class="close" data-action="search-close" data-target="#navbar-search-main" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </form>
-            <!-- Navbar links -->
+
+
             <ul class="navbar-nav align-items-center ml-md-auto">
                 <li class="nav-item d-xl-none">
-                    <!-- Sidenav toggler -->
                     <div class="pr-3 sidenav-toggler sidenav-toggler-light" data-action="sidenav-pin" data-target="#sidenav-main">
                         <div class="sidenav-toggler-inner">
                             <i class="sidenav-toggler-line"></i>
@@ -27,21 +30,22 @@
                         </div>
                     </div>
                 </li>
+
                 <li class="nav-item d-sm-none">
                     <a class="nav-link" href="#" data-action="search-show" data-target="#navbar-search-main">
                         <i class="ni ni-zoom-split-in"></i>
                     </a>
                 </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="ni ni-bell-55"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right py-0 overflow-hidden">
-                        <!-- Dropdown header -->
                         <div class="px-3 py-3">
                             <h6 class="text-sm text-muted m-0">You have <strong class="text-primary">13</strong> notifications.</h6>
                         </div>
-                        <!-- List group -->
+
                         <div class="list-group list-group-flush">
                             <a href="#!" class="list-group-item list-group-item-action">
                                 <div class="row align-items-center">
