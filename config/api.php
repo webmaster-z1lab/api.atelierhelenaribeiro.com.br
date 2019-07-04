@@ -13,6 +13,7 @@ return [
 
     'version' => [
         'app'     => '1',
+        'user'    => '1',
     ],
 
     /*
@@ -27,6 +28,7 @@ return [
 
     'resources_path' => [
         'app'     => 'App\Http\Resources',
+        'user'    => 'Modules\User\Http\Resources',
     ],
 
     /*
@@ -40,6 +42,7 @@ return [
 
     'resources' => [
         'app'     => '',
+        'user'    => '',
     ],
 
 ];

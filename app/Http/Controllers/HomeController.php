@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
 
 class HomeController extends Controller
 {
     /**
-     * @return \Illuminate\View\View
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index() : View
+    public function index()
     {
-        return View('home');
+        return view('home');
     }
 }
