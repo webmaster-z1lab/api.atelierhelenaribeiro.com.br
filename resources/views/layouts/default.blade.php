@@ -65,6 +65,7 @@
 <script src="{{ asset('assets/vendor/jvectormap-next/jquery-jvectormap.min.js') }}"></script>
 <script src="{{ asset('assets/js/vendor/jvectormap/jquery-jvectormap-world-mill.js') }}"></script>
 <script src="{{ asset('assets/vendor/js-cookie/js.cookie.js') }}"></script>
+<script src="{{ asset('assets/vendor/dropzone/dist/min/dropzone.min.js') }}"></script>
 
 <!-- Argon JS -->
 <script src="{{ asset('assets/js/argon.min.js?v=1.1.0') }}"></script>
