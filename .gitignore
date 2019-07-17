@@ -20,4 +20,5 @@ public/img/*
 /_ide_helper_models.php
 /.phpstorm.meta.php
 /laravel-echo-server.lock
+/laravel-echo-server.json
 /package-lock.json

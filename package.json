@@ -15,7 +15,6 @@
         "dexie": "^2.0.4",
         "flatpickr": "^4.5.2",
         "http-build-query": "^0.7.0",
-        "idb": "^4.0.3",
         "laravel-echo": "^1.5.4",
         "moment": "^2.20.1",
         "socket.io-client": "^2.2.0",
