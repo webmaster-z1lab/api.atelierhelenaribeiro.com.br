@@ -41,18 +41,43 @@ class LoginController extends Controller
     }
 
     /**
-     * The user has been authenticated.
+     * Log the user out of the application.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Jenssegers\Mongodb\Auth\User  $user
-     * @return mixed
+     * @return \Illuminate\Http\Response
      */
-    protected function authenticated(Request $request, $user)
+    public function logout(Request $request)
     {
-        if ($request->wantsJson()) {
-            return User::make($user);
-        }
+        /** @var \Modules\User\Models\User $user */
+        $user = \Auth::guard('api')->user();
 
-        return NULL;
+        $user->setRememberToken($token = \Str::random(60));
+
+        $user->save();
+
+        return response()->json(NULL, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Send the response after the user was authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    protected function sendLoginResponse(Request $request)
+    {
+        $this->clearLoginAttempts($request);
+
+        return User::make($this->guard()->user());
+    }
+
+    /**
+     * Get the guard to be used during authentication.
+     *
+     * @return \Illuminate\Contracts\Auth\StatefulGuard
+     */
+    protected function guard()
+    {
+        return \Auth::guard('web');
     }
 }
