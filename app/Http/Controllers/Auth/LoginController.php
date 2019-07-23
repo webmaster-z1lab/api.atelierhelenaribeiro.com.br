@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\User\Http\Resources\v1\User;
 
 class LoginController extends Controller
 {
@@ -43,13 +44,13 @@ class LoginController extends Controller
      * The user has been authenticated.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  mixed  $user
+     * @param  \Jenssegers\Mongodb\Auth\User  $user
      * @return mixed
      */
     protected function authenticated(Request $request, $user)
     {
         if ($request->wantsJson()) {
-            return response()->json(NULL, Response::HTTP_NO_CONTENT);
+            return User::make($user);
         }
 
         return NULL;
