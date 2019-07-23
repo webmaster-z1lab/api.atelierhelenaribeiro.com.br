@@ -81,10 +81,8 @@ return array(
 
     'model_locations' => array(
         "App\Models",
-        "Modules\Message\Models",
-        "Modules\Project\Models",
-        "Modules\Stage\Models",
-        "Modules\User\Models",
+        "Modules\Model\Models",
+        "Modules\Dress\Models",
     ),
 
 
