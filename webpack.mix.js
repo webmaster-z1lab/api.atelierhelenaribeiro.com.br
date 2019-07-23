@@ -1,23 +1,12 @@
 const mix = require('laravel-mix')
-const { resolve, vendors } = require('./webpack.config.js')
 
-mix.webpackConfig({
-    resolve
-})
-
-/**
- * Compile SASS to Stylesheets
+/*
+ |--------------------------------------------------------------------------
+ | Mix Asset Management
+ |--------------------------------------------------------------------------
+ |
+ | Mix provides a clean, fluent API for defining some Webpack build steps
+ | for your Laravel application. By default, we are compiling the Sass
+ | file for the application as well as bundling up all the JS files.
+ |
  */
-mix.sass('resources/sass/app.scss', 'public/css')
-
-/**
- * Compile Javascript-Vue using Webpack
- */
-mix.js('resources/js/notifications/main.js', 'public/js/notification')
-    .extract(vendors)
-
-mix.version()
-
-if (mix.inProduction()) {
-    mix.disableNotifications()
-}
