@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -50,10 +51,23 @@ class LoginController extends Controller
     {
         /** @var \Modules\User\Models\User $user */
         $user = \Auth::guard('api')->user();
+        if (! is_null($user)) {
+            if (!empty($user->getRememberToken())) {
+                $user->setRememberToken($token = \Str::random(60));
 
-        $user->setRememberToken($token = \Str::random(60));
+                $timestamps = $user->timestamps;
 
-        $user->save();
+                $user->timestamps = FALSE;
+
+                $user->save();
+
+                $user->timestamps = $timestamps;
+
+                $user->save();
+            }
+
+            event(new Logout('web', $user));
+        }
 
         return response()->json(NULL, Response::HTTP_NO_CONTENT);
     }
