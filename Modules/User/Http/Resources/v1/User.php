@@ -24,14 +24,12 @@ class User extends Resource
     {
         return [
             'id'         => $this->resource->id,
-            'type'       => 'users',
-            'attributes' => [
-                'type'       => $this->resource->type,
-                'name'       => $this->resource->name,
-                'email'      => $this->resource->email,
-                'created_at' => $this->resource->created_at->toW3cString(),
-                'updated_at' => $this->resource->updated_at->toW3cString(),
-            ],
+            'type'       => $this->resource->type,
+            'name'       => $this->resource->name,
+            'email'      => $this->resource->email,
+            'avatar'     => NULL,
+            'created_at' => $this->resource->created_at->toW3cString(),
+            'updated_at' => $this->resource->updated_at->toW3cString(),
         ];
     }
 }

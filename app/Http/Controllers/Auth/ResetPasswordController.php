@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\User\Http\Resources\v1\User;
+use Z1lab\JsonApi\Exceptions\ErrorObject;
 
 class ResetPasswordController extends Controller
 {
@@ -57,11 +59,12 @@ class ResetPasswordController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $response
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
     protected function sendResetFailedResponse(Request $request, $response)
     {
-        return response()->json(['email' => trans($response)], Response::HTTP_UNPROCESSABLE_ENTITY);
+        $errors = new ErrorObject(['email' => trans($response)], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 
     /**

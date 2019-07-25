@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Z1lab\JsonApi\Exceptions\ErrorObject;
 
 class ForgotPasswordController extends Controller
 {
@@ -49,10 +51,11 @@ class ForgotPasswordController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $response
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
     protected function sendResetLinkFailedResponse(Request $request, $response)
     {
-        return response()->json(['email' => trans($response)], Response::HTTP_UNPROCESSABLE_ENTITY);
+        $errors = new ErrorObject(['email' => trans($response)], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 }
