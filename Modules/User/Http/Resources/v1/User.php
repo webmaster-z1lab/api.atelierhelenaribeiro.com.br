@@ -28,6 +28,9 @@ class User extends Resource
             'name'       => $this->resource->name,
             'email'      => $this->resource->email,
             'avatar'     => NULL,
+            $this->mergeWhen($this->resource->id === \Auth::id(), function () {
+                return ['api_token' => $this->resource->api_token];
+            }),
             'created_at' => $this->resource->created_at->toW3cString(),
             'updated_at' => $this->resource->updated_at->toW3cString(),
         ];

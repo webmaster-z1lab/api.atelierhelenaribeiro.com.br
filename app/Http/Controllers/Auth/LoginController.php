@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use Modules\User\Http\Resources\v1\User;
+use Z1lab\JsonApi\Exceptions\ErrorObject;
 
 class LoginController extends Controller
 {
@@ -73,6 +76,22 @@ class LoginController extends Controller
     }
 
     /**
+     * Get the failed login response instance.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        $validation =  ValidationException::withMessages([
+            $this->username() => [trans('auth.failed')],
+        ]);
+
+        $errors = new ErrorObject($validation->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
+    }
+
+    /**
      * Send the response after the user was authenticated.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -81,6 +100,11 @@ class LoginController extends Controller
     protected function sendLoginResponse(Request $request)
     {
         $this->clearLoginAttempts($request);
+
+        /** @var \Modules\User\Models\User $user */
+        $user = $this->guard()->user();
+
+        $request->headers->add(['Authorization' => 'Bearer ' . $user->api_token]);
 
         return User::make($this->guard()->user());
     }
