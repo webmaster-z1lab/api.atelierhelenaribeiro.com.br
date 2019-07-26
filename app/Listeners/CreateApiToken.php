@@ -8,7 +8,6 @@ use Modules\User\Models\User;
 
 class CreateApiToken
 {
-
     /**
      * Handle the event.
      *

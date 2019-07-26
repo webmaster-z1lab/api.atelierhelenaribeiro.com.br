@@ -51,7 +51,12 @@ class ResetPasswordController extends Controller
      */
     protected function sendResetResponse(Request $request, $response)
     {
-        return User::make($this->guard()->user());
+        /** @var \Modules\User\Models\User $user */
+        $user = $this->guard()->user();
+
+        $request->headers->add(['Authorization' => 'Bearer ' . $user->api_token]);
+
+        return User::make($user);
     }
 
     /**

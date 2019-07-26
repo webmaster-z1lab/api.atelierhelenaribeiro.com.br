@@ -106,7 +106,7 @@ class LoginController extends Controller
 
         $request->headers->add(['Authorization' => 'Bearer ' . $user->api_token]);
 
-        return User::make($this->guard()->user());
+        return User::make($user);
     }
 
     /**
