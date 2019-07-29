@@ -1,12 +1,12 @@
 {
-    "name": "laravel/laravel",
+    "name": "chr/api",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "Core Api for CHR admin panel.",
     "keywords": [
         "framework",
         "laravel"
     ],
-    "license": "MIT",
+    "license": "proprietary",
     "require": {
         "ext-json": "*",
         "ext-mongodb": "*",
@@ -18,10 +18,11 @@
         "pusher/pusher-php-server": "~4.0",
         "nwidart/laravel-modules": "^5.0",
         "respect/validation": "^1.1",
+        "tightenco/ziggy": "^0.7.1",
         "jenssegers/mongodb": "^3.5",
-        "z1lab/laravel-meta-tags": "^3.1",
-        "z1lab/laravel-json-api": "v0.2.0-rc1",
-        "z1lab/laravel-vue-form": "v1.0.0-rc1"
+        "barryvdh/laravel-cors": "^0.11.3",
+        "optimus/heimdal": "~1.5",
+        "predis/predis": "^1.1"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.6",
