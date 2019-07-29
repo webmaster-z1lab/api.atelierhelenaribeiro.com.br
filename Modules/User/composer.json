@@ -1,5 +1,6 @@
 {
     "name": "z1lab/user",
+    "license": "",
     "description": "",
     "authors": [
         {
@@ -13,7 +14,7 @@
                 "Modules\\User\\Providers\\UserServiceProvider"
             ],
             "aliases": {
-                
+
             }
         }
     },

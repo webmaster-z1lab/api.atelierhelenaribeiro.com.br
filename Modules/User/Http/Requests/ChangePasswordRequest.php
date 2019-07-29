@@ -2,7 +2,7 @@
 
 namespace Modules\User\Http\Requests;
 
-use Z1lab\JsonApi\Http\Requests\ApiFormRequest;
+use App\Http\Requests\ApiFormRequest;
 
 class ChangePasswordRequest extends ApiFormRequest
 {

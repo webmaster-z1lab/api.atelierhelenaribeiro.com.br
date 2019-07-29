@@ -2,51 +2,39 @@
 
 namespace Modules\User\Http\Controllers;
 
-use Illuminate\Routing\Controller;
-use Modules\User\Repositories\FormRepository;
+use App\Http\Controllers\Controller;
+use Modules\User\Http\Requests\ChangePasswordRequest;
+use Modules\User\Http\Resources\User;
 use Modules\User\Repositories\UserRepository;
 
+/**
+ * Class UserController
+ *
+ * @package Modules\User\Http\Controllers\Api
+ *
+ * @property-read \Modules\User\Repositories\UserRepository $repository
+ */
 class UserController extends Controller
 {
-    /**
-     * @var FormRepository
-     */
-    protected $formRepository;
-
-    /**
-     * @var UserRepository
-     */
-    protected $userRepository;
+    protected $repository;
 
     /**
      * UserController constructor.
      *
-     * @param  FormRepository  $formRepository
-     * @param  UserRepository  $userRepository
+     * @param  \Modules\User\Repositories\UserRepository  $repository
      */
-    public function __construct(FormRepository $formRepository, UserRepository $userRepository)
+    public function __construct(UserRepository $repository)
     {
-        $this->formRepository = $formRepository;
-        $this->userRepository = $userRepository;
+        $this->repository = $repository;
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @param  \Modules\User\Http\Requests\ChangePasswordRequest  $request
+     *
+     * @return \Illuminate\Http\Resources\Json\Resource
      */
-    public function changePassword()
+    public function changePassword(ChangePasswordRequest $request)
     {
-        $form = $this->formRepository->formChangePassword();
-
-        return view('user.change-password', compact('form'));
-    }
-
-    /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function sendPasswordRecovery()
-    {
-        $form = $this->formRepository->formRecoveryPassword();
-
-        return view('user.send-password-recovery', compact('form'));
+        return User::make($this->repository->changePassword($request->get('password')));
     }
 }

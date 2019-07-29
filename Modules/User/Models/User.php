@@ -138,4 +138,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->morphMany(DatabaseNotification::class, 'notifiable')->count() > 0;
     }
+
+    /**
+     * @return int
+     */
+    public function countUnreadNotifications()
+    {
+        return $this->morphMany(DatabaseNotification::class, 'notifiable')->count();
+    }
 }

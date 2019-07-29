@@ -7,8 +7,8 @@ use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\User\Http\Resources\v1\User;
-use Z1lab\JsonApi\Exceptions\ErrorObject;
+use Modules\User\Http\Resources\User;
+use App\Exceptions\ErrorObject;
 
 class ResetPasswordController extends Controller
 {

@@ -4,7 +4,6 @@
 namespace Modules\User\Repositories;
 
 use Modules\User\Models\User;
-use Z1lab\JsonApi\Repositories\ApiRepository;
 
 /**
  * Class UserRepository
@@ -13,16 +12,19 @@ use Z1lab\JsonApi\Repositories\ApiRepository;
  *
  * @property-read \Modules\User\Models\User $model
  */
-class UserRepository extends ApiRepository
+class UserRepository
 {
     /**
-     * UserRepository constructor.
-     *
-     * @param  \Modules\User\Models\User  $user
+     * @var \Modules\User\Models\User
      */
-    public function __construct(User $user)
+    protected $model;
+
+    /**
+     * UserRepository constructor.
+     */
+    public function __construct()
     {
-        parent::__construct($user, 'user');
+        $this->model = \Auth::guard('api')->user();;
     }
 
     /**
@@ -32,16 +34,10 @@ class UserRepository extends ApiRepository
      */
     public function changePassword(string $password)
     {
-        /** @var \Modules\User\Models\User $user */
-        $user = \Auth::guard('api')->user();
-
         $password = \Hash::make($password);
 
-        $user->update(compact('password'));
+        $this->model->update(compact('password'));
 
-        $this->setCacheKey($user->id);
-        $this->flush()->remember($user);
-
-        return $user->fresh();
+        return $this->model->fresh();
     }
 }

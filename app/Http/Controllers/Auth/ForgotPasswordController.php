@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Z1lab\JsonApi\Exceptions\ErrorObject;
+use App\Exceptions\ErrorObject;
 
 class ForgotPasswordController extends Controller
 {

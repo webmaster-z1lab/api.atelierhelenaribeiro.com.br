@@ -9,8 +9,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
-use Modules\User\Http\Resources\v1\User;
-use Z1lab\JsonApi\Exceptions\ErrorObject;
+use Modules\User\Http\Resources\User;
+use App\Exceptions\ErrorObject;
 
 class LoginController extends Controller
 {
