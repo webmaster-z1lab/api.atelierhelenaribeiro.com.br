@@ -119,7 +119,7 @@ return [
             'jobs'          => ['path' => 'Jobs', 'generate' => FALSE],
             'emails'        => ['path' => 'Emails', 'generate' => FALSE],
             'notifications' => ['path' => 'Notifications', 'generate' => FALSE],
-            'resource'      => ['path' => 'Http/Resources/v1', 'generate' => TRUE],
+            'resource'      => ['path' => 'Http/Resources', 'generate' => TRUE],
         ],
     ],
     /*

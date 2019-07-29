@@ -1,0 +1,25 @@
+{
+    "name": "z1lab/employee",
+    "description": "",
+    "authors": [
+        {
+            "name": "Z1Lab Soluções Digitais",
+            "email": "webmaster@z1lab.com.br"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Employee\\Providers\\EmployeeServiceProvider"
+            ],
+            "aliases": {
+                
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Employee\\": ""
+        }
+    }
+}

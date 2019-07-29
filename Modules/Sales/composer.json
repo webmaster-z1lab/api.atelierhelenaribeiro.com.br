@@ -1,0 +1,25 @@
+{
+    "name": "z1lab/sales",
+    "description": "",
+    "authors": [
+        {
+            "name": "Z1Lab Soluções Digitais",
+            "email": "webmaster@z1lab.com.br"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Sales\\Providers\\SalesServiceProvider"
+            ],
+            "aliases": {
+                
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Sales\\": ""
+        }
+    }
+}
