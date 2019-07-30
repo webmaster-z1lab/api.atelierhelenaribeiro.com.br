@@ -2,9 +2,11 @@
 
 namespace Modules\User\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
+use Illuminate\Http\Request;
 use Modules\User\Http\Requests\ChangePasswordRequest;
 use Modules\User\Http\Resources\UserResource;
+use Modules\User\Models\User;
 use Modules\User\Repositories\UserRepository;
 
 /**
@@ -14,7 +16,7 @@ use Modules\User\Repositories\UserRepository;
  *
  * @property-read \Modules\User\Repositories\UserRepository $repository
  */
-class UserController extends Controller
+class UserController extends ApiController
 {
     protected $repository;
 
@@ -27,6 +29,37 @@ class UserController extends Controller
     {
         $this->repository = $repository;
     }
+
+    /**
+     *
+     */
+    public function index() { }
+
+    /**
+     * @param  \Modules\User\Models\User  $user
+     *
+     * @return \Modules\User\Http\Resources\UserResource
+     */
+    public function show(User $user): UserResource
+    {
+        return UserResource::make($user);
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function store(Request $request) { }
+
+    /**
+     * @param  \Illuminate\Http\Request   $request
+     * @param  \Modules\User\Models\User  $user
+     */
+    public function update(Request $request, User $user) { }
+
+    /**
+     * @param  \Modules\User\Models\User  $user
+     */
+    public function destroy(User $user) { }
 
     /**
      * @param  \Modules\User\Http\Requests\ChangePasswordRequest  $request
