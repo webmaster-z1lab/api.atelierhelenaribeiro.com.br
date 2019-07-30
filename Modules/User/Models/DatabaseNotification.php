@@ -21,7 +21,6 @@ use Jenssegers\Mongodb\Eloquent\Model;
  * @property-read string type
  * @property-read \Carbon\Carbon created_at
  * @property-read \Carbon\Carbon read_at
- * @property-read mixed $id
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $notifiable
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\DatabaseNotification newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\DatabaseNotification newQuery()

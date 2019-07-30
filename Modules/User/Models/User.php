@@ -15,7 +15,7 @@ use Modules\User\Notifications\ResetPasswordNotification;
  * Class User
  *
  * @package Modules\User\Models
- * @property-read string                              id
+ * @property-read string                               id
  * @property string                                    type
  * @property string                                    name
  * @property string                                    first_name

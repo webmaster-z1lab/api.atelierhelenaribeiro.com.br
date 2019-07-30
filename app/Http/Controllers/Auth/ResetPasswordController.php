@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Traits\LoginTrait;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -23,7 +25,7 @@ class ResetPasswordController extends Controller
     |
     */
 
-    use ResetsPasswords;
+    use ResetsPasswords, LoginTrait;
 
     /**
      * Where to redirect users after resetting their password.
@@ -43,6 +45,26 @@ class ResetPasswordController extends Controller
     }
 
     /**
+     * Reset the given user's password.
+     *
+     * @param  \Modules\User\Models\User  $user
+     * @param  string  $password
+     * @return void
+     */
+    protected function resetPassword($user, $password)
+    {
+        $user->password = \Hash::make($password);
+
+        $user->setRememberToken(\Str::random(60));
+
+        $user->save();
+
+        event(new PasswordReset($user));
+
+        $this->loginWithUser($user, Request::capture());
+    }
+
+    /**
      * Get the response for a successful password reset.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -51,10 +73,7 @@ class ResetPasswordController extends Controller
      */
     protected function sendResetResponse(Request $request, $response)
     {
-        /** @var \Modules\User\Models\User $user */
         $user = $this->guard()->user();
-
-        $request->headers->add(['Authorization' => 'Bearer ' . $user->api_token]);
 
         return UserResource::make($user);
     }
@@ -70,15 +89,5 @@ class ResetPasswordController extends Controller
         $errors = new ErrorObject(['email' => trans($response)], Response::HTTP_UNPROCESSABLE_ENTITY);
 
         throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
-    }
-
-    /**
-     * Get the guard to be used during password reset.
-     *
-     * @return \Illuminate\Contracts\Auth\StatefulGuard
-     */
-    protected function guard()
-    {
-        return \Auth::guard('web');
     }
 }
