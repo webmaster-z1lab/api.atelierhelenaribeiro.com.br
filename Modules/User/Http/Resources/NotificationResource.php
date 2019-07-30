@@ -7,11 +7,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * Class Notification
  *
- * @package App\Http\Resources\v1
+ * @package App\Http\Resources
  *
  * @property-read \Modules\User\Models\DatabaseNotification resource
  */
-class Notification extends JsonResource
+class NotificationResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

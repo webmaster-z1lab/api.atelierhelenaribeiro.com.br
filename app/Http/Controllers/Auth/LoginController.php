@@ -9,7 +9,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
-use Modules\User\Http\Resources\User;
+use Modules\User\Http\Resources\UserResource;
 use App\Exceptions\ErrorObject;
 
 class LoginController extends Controller
@@ -106,7 +106,7 @@ class LoginController extends Controller
 
         $request->headers->add(['Authorization' => 'Bearer ' . $user->api_token]);
 
-        return User::make($user);
+        return UserResource::make($user);
     }
 
     /**

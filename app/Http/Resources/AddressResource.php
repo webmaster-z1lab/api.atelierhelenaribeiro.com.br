@@ -7,11 +7,11 @@ use Illuminate\Http\Resources\Json\Resource;
 /**
  * Class Address
  *
- * @package Modules\User\Http\Resources\v1
+ * @package Modules\User\Http\Resources
  *
  * @property-read \App\Models\Address $resource
  */
-class Address extends Resource
+class AddressResource extends Resource
 {
     /**
      * Transform the resource into an array.

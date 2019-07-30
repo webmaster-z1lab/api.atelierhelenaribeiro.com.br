@@ -4,9 +4,10 @@ namespace App\Providers;
 
 use App\Listeners\CreateApiToken;
 use App\Listeners\DeleteApiToken;
+use App\Models\Price;
+use App\Observers\PriceObserver;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -24,12 +25,12 @@ class EventServiceProvider extends ServiceProvider
         ],
 
         Login::class => [
-            CreateApiToken::class
+            CreateApiToken::class,
         ],
 
         Logout::class => [
-            DeleteApiToken::class
-        ]
+            DeleteApiToken::class,
+        ],
     ];
 
     /**
@@ -41,6 +42,6 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
 
-        //
+        Price::observe(PriceObserver::class);
     }
 }

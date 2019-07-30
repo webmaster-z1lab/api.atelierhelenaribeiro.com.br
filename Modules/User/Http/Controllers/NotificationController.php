@@ -9,7 +9,7 @@
 namespace Modules\User\Http\Controllers;
 
 
-use Modules\User\Http\Resources\Notification;
+use Modules\User\Http\Resources\NotificationResource;
 use Modules\User\Models\DatabaseNotification;
 
 class NotificationController
@@ -32,7 +32,7 @@ class NotificationController
      */
     public function index()
     {
-        return Notification::collection($this->user->notifications);
+        return NotificationResource::collection($this->user->notifications);
     }
 
     /**
@@ -40,7 +40,7 @@ class NotificationController
      */
     public function latest()
     {
-        return Notification::collection($this->user->latestNotifications);
+        return NotificationResource::collection($this->user->latestNotifications);
     }
 
     /**
@@ -52,6 +52,6 @@ class NotificationController
     {
         $notification->markAsRead();
 
-        return response()->json([], 204);
+        return response()->json(NULL, 204);
     }
 }

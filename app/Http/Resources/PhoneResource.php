@@ -11,7 +11,7 @@ use Illuminate\Http\Resources\Json\Resource;
  *
  * @property-read \App\Models\Phone $resource
  */
-class Phone extends Resource
+class PhoneResource extends Resource
 {
     /**
      * Transform the resource into an array.

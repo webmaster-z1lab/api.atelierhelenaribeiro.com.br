@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\User\Http\Resources\User;
+use Modules\User\Http\Resources\UserResource;
 use App\Exceptions\ErrorObject;
 
 class ResetPasswordController extends Controller
@@ -56,7 +56,7 @@ class ResetPasswordController extends Controller
 
         $request->headers->add(['Authorization' => 'Bearer ' . $user->api_token]);
 
-        return User::make($user);
+        return UserResource::make($user);
     }
 
     /**

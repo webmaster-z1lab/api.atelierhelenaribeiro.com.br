@@ -23,6 +23,7 @@ class ApiHandler extends BaseHandler
     public function render($request, Exception $e)
     {
         $e = $this->prepareException($e);
+
         return parent::render($request, $e);
     }
 }

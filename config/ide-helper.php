@@ -81,8 +81,12 @@ return array(
 
     'model_locations' => array(
         "App\Models",
-        "Modules\Model\Models",
-        "Modules\Dress\Models",
+        "Modules\User\Models",
+        "Modules\Catalog\Models",
+        "Modules\Customer\Models",
+        "Modules\Employee\Models",
+        "Modules\Sales\Models",
+        "Modules\Stock\Models",
     ),
 
 
@@ -205,6 +209,6 @@ return array(
     | magic methods and properties.
     |
     */
-    'include_class_docblocks' => false,
+    'include_class_docblocks' => TRUE,
 
 );

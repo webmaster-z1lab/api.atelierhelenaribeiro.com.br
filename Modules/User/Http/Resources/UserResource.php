@@ -11,7 +11,7 @@ use Illuminate\Http\Resources\Json\Resource;
  *
  * @property-read \Modules\User\Models\User $resource
  */
-class User extends Resource
+class UserResource extends Resource
 {
     /**
      * Transform the resource into an array.

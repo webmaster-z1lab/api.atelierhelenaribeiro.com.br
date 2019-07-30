@@ -3,8 +3,6 @@
 
 namespace Modules\User\Repositories;
 
-use Modules\User\Models\User;
-
 /**
  * Class UserRepository
  *

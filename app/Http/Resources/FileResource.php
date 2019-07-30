@@ -7,11 +7,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * Class File
  *
- * @package App\Http\Resources\v1
+ * @package App\Http\Resources
  *
  * @property-read \App\Models\File resource
  */
-class File extends JsonResource
+class FileResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -30,5 +30,14 @@ class File extends JsonResource
             'url'           => $this->resource->url,
             'icon'          => $this->resource->icon,
         ];
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request       $request
+     * @param  \Illuminate\Http\JsonResponse  $response
+     */
+    public function withResponse($request, $response)
+    {
+        $response->header('ETag', md5($this->resource->updated_at));
     }
 }

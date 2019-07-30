@@ -163,7 +163,7 @@ return [
     |
     */
     'cache'    => [
-        'enabled'  => FALSE,
+        'enabled'  => true,
         'key'      => 'laravel-modules',
         'lifetime' => 60,
     ],

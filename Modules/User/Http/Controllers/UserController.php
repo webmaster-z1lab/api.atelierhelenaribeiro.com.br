@@ -4,7 +4,7 @@ namespace Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Modules\User\Http\Requests\ChangePasswordRequest;
-use Modules\User\Http\Resources\User;
+use Modules\User\Http\Resources\UserResource;
 use Modules\User\Repositories\UserRepository;
 
 /**
@@ -35,6 +35,6 @@ class UserController extends Controller
      */
     public function changePassword(ChangePasswordRequest $request)
     {
-        return User::make($this->repository->changePassword($request->get('password')));
+        return UserResource::make($this->repository->changePassword($request->get('password')));
     }
 }
