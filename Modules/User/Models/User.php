@@ -165,7 +165,7 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
         $query->getQuery()->projections = ['score' => ['$meta' => 'textScore']];
         $query->orderBy('score', ['$meta' => 'textScore']);
 
-        return $query->whereRaw(['$text' => ['$search' => $search]]);
+        return $query->whereRaw(['$text' => ['$search' => "/^" . $search . "/"]]);
     }
 
     /**
@@ -189,6 +189,6 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
 
         if(NULL === $search) return $query;
 
-        return $query->whereRaw(['$text' => ['$search' => $search]]);
+        return $query->whereRaw(['$text' => ['$search' => "/^" . $search . "/"]]);
     }
 }
