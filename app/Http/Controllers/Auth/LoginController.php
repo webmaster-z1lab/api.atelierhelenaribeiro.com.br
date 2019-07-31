@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\Logout;
+use App\Traits\LoginTrait;
+use Illuminate\Auth\Events\Attempting;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Modules\User\Http\Resources\UserResource;
 use App\Exceptions\ErrorObject;
+use Modules\User\Models\User;
 
 class LoginController extends Controller
 {
@@ -25,7 +27,7 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    use AuthenticatesUsers, LoginTrait;
 
     /**
      * Where to redirect users after login.
@@ -45,6 +47,53 @@ class LoginController extends Controller
     }
 
     /**
+     * Attempt to log the user into the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function attemptLogin(Request $request)
+    {
+        event(new Attempting('api', $this->credentials($request), $request->filled('remember')));
+
+        /** @var \Modules\User\Models\User $user */
+        if (ctype_digit($request->get($this->username()), $this->username())) {
+            $user = User::where('document', $request->get($this->username()))->first();
+        } else {
+            $user = User::where('email', $request->get($this->username()))->first();
+        }
+
+        if (!is_null($user) && \Hash::check($request->get('password'), $user->password)) {
+            $this->loginWithUser($user, $request);
+
+            return  TRUE;
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * Validate the user login request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
+    protected function validateLogin(Request $request)
+    {
+        if (ctype_digit($request->get($this->username()), $this->username())) {
+            $request->validate([
+                $this->username() => 'required|cpf',
+                'password'        => 'required|string',
+            ]);
+        } else {
+            $request->validate([
+                $this->username() => 'required|email',
+                'password'        => 'required|string',
+            ]);
+        }
+    }
+
+    /**
      * Log the user out of the application.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -53,23 +102,10 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         /** @var \Modules\User\Models\User $user */
-        $user = \Auth::guard('api')->user();
+        $user = $this->guard()->user();
+
         if (! is_null($user)) {
-            if (!empty($user->getRememberToken())) {
-                $user->setRememberToken($token = \Str::random(60));
-
-                $timestamps = $user->timestamps;
-
-                $user->timestamps = FALSE;
-
-                $user->save();
-
-                $user->timestamps = $timestamps;
-
-                $user->save();
-            }
-
-            event(new Logout('web', $user));
+            $this->logoutWithUser($user);
         }
 
         return response()->json(NULL, Response::HTTP_NO_CONTENT);
@@ -101,21 +137,10 @@ class LoginController extends Controller
     {
         $this->clearLoginAttempts($request);
 
-        /** @var \Modules\User\Models\User $user */
         $user = $this->guard()->user();
-
-        $request->headers->add(['Authorization' => 'Bearer ' . $user->api_token]);
 
         return UserResource::make($user);
     }
 
-    /**
-     * Get the guard to be used during authentication.
-     *
-     * @return \Illuminate\Contracts\Auth\StatefulGuard
-     */
-    protected function guard()
-    {
-        return \Auth::guard('web');
-    }
+
 }
