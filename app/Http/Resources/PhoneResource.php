@@ -28,6 +28,7 @@ class PhoneResource extends Resource
             'phone'         => $this->resource->phone,
             'international' => $this->resource->international,
             'full_number'   => $this->resource->full_number,
+            'is_whatsapp'   => $this->resource->is_whatsapp,
             'formatted'     => $this->resource->formatted,
         ];
     }

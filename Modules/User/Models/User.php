@@ -9,13 +9,14 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 use Jenssegers\Mongodb\Auth\User as Authenticatable;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
+use Modules\Employee\Models\EmployeeTypes;
 use Modules\User\Notifications\ResetPasswordNotification;
 
 /**
  * Class User
  *
  * @package Modules\User\Models
- * @property-read string                              id
+ * @property-read string                               id
  * @property string                                    type
  * @property string                                    name
  * @property string                                    first_name
@@ -34,9 +35,11 @@ use Modules\User\Notifications\ResetPasswordNotification;
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            query()
+ * @method static \Illuminate\Database\Eloquent\Builder search(string $search)
+ * @method static \Illuminate\Database\Eloquent\Builder searchPaginated(string $search, int $page = 1, int $limit = 10)
  * @mixin \Eloquent
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
 {
     use Notifiable, SoftDeletes, VerifyEmail;
 
@@ -145,5 +148,47 @@ class User extends Authenticatable implements MustVerifyEmail
     public function countUnreadNotifications()
     {
         return $this->morphMany(DatabaseNotification::class, 'notifiable')->count();
+    }
+
+    /**
+     * Scope a query to only include users of a given type.
+     *
+     * @param  \Jenssegers\Mongodb\Query\Builder  $query
+     * @param  string                             $search
+     *
+     * @return \Jenssegers\Mongodb\Query\Builder
+     */
+    public function scopeSearch($query, string $search = NULL)
+    {
+        if(NULL === $search) return $query;
+
+        $query->getQuery()->projections = ['score' => ['$meta' => 'textScore']];
+        $query->orderBy('score', ['$meta' => 'textScore']);
+
+        return $query->whereRaw(['$text' => ['$search' => $search]]);
+    }
+
+    /**
+     * Scope a query to only include users of a given type.
+     *
+     * @param  \Jenssegers\Mongodb\Query\Builder  $query
+     * @param  string                             $search
+     * @param  int                                $page
+     * @param  int                                $limit
+     *
+     * @return \Jenssegers\Mongodb\Query\Builder
+     */
+    public function scopeSearchPaginated($query, string $search = NULL, int $page = 1, int $limit = 10)
+    {
+
+
+        $query->getQuery()->projections = ['score' => ['$meta' => 'textScore']];
+        $query->orderBy('score', ['$meta' => 'textScore']);
+        $query->skip(($page - 1) * $limit);
+        $query->take($limit);
+
+        if(NULL === $search) return $query;
+
+        return $query->whereRaw(['$text' => ['$search' => $search]]);
     }
 }

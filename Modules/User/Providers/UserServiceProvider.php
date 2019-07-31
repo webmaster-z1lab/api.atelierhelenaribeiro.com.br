@@ -3,6 +3,8 @@
 namespace Modules\User\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\User\Models\User;
+use Modules\User\Observers\UserObserver;
 
 class UserServiceProvider extends ServiceProvider
 {
@@ -14,6 +16,8 @@ class UserServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerConfig();
+
+        User::observe(UserObserver::class);
     }
 
     /**

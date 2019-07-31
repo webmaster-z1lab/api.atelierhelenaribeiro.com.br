@@ -22,7 +22,7 @@ class UserRepository
      */
     public function __construct()
     {
-        $this->model = \Auth::guard('api')->user();;
+        $this->model = \Auth::guard('api')->user();
     }
 
     /**

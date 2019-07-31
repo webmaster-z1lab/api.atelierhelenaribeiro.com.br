@@ -2,78 +2,82 @@
 
 namespace Modules\Employee\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\ApiController;
+use Illuminate\Http\JsonResponse;
+use Modules\Employee\Http\Requests\EmployeeRequest;
+use Modules\Employee\Http\Requests\EmployeeUpdateRequest;
+use Modules\Employee\Http\Resources\EmployeeResource;
+use Modules\Employee\Repositories\EmployeeRepository;
+use Modules\User\Models\User;
 
-class EmployeeController extends Controller
+class EmployeeController extends ApiController
 {
     /**
-     * Display a listing of the resource.
-     * @return Response
+     * @var \Modules\Employee\Repositories\EmployeeRepository
+     */
+    protected $repository;
+
+    /**
+     * EmployeeController constructor.
+     *
+     * @param  \Modules\Employee\Repositories\EmployeeRepository  $repository
+     */
+    public function __construct(EmployeeRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        return view('employee::index');
+        return EmployeeResource::collection($this->repository->all());
     }
 
     /**
-     * Show the form for creating a new resource.
-     * @return Response
+     * @param  \Modules\Employee\Http\Requests\EmployeeRequest  $request
+     *
+     * @return \Modules\Employee\Http\Resources\EmployeeResource
      */
-    public function create()
+    public function store(EmployeeRequest $request): EmployeeResource
     {
-        return view('employee::create');
+        return EmployeeResource::make($this->repository->create($request->validated()));
     }
 
     /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Response
+     * @param  \Modules\User\Models\User  $employee
+     *
+     * @return \Illuminate\Http\JsonResponse|\Modules\Employee\Http\Resources\EmployeeResource
      */
-    public function store(Request $request)
+    public function show(User $employee)
     {
-        //
+        if ($this->ETagNotChanged($employee)) return $this->notModifiedResponse();
+
+        return EmployeeResource::make($employee);
     }
 
     /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
+     * @param  \Modules\Employee\Http\Requests\EmployeeUpdateRequest  $request
+     * @param  \Modules\User\Models\User                              $employee
+     *
+     * @return \Modules\Employee\Http\Resources\EmployeeResource
      */
-    public function show($id)
+    public function update(EmployeeUpdateRequest $request, User $employee): EmployeeResource
     {
-        return view('employee::show');
+        return EmployeeResource::make($this->repository->update($request->validated(), $employee));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Response
+     * @param  \Modules\User\Models\User  $employee
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
-    public function edit($id)
+    public function destroy(User $employee): JsonResponse
     {
-        return view('employee::edit');
-    }
+        $this->repository->delete($employee);
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
+        return $this->noContentResponse();
     }
 }

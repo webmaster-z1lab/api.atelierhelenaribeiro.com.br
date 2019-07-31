@@ -10,12 +10,12 @@ namespace App\Validator;
 
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator as BaseValidator;
-use Respect\Validation\Validator as v;
+use Respect\Validation\Validator as Respect;
 
 class Validator extends BaseValidator
 {
     /**
-     * Valida o formato do celular junto com o ddd
+     * Valida se o campo é booleano ou algum pseudo tipo de bool
      * @param string $attribute
      * @param string $value
      * @return boolean
@@ -46,7 +46,7 @@ class Validator extends BaseValidator
      */
     protected function validateCpf($attribute, $value)
     {
-        return v::cpf()->validate($value);
+        return Respect::cpf()->validate($value);
     }
 
     /**
@@ -57,7 +57,7 @@ class Validator extends BaseValidator
      */
     protected function validateCnpj($attribute, $value)
     {
-        return v::cnpj()->validate($value);
+        return Respect::cnpj()->validate($value);
     }
 
     /**
@@ -70,9 +70,9 @@ class Validator extends BaseValidator
     {
         $doc = strlen($value);
 
-        if ($doc === 11) return v::cpf()->validate($value);
+        if ($doc === 11) return Respect::cpf()->validate($value);
 
-        if ($doc === 14) return v::cnpj()->validate($value);
+        if ($doc === 14) return Respect::cnpj()->validate($value);
 
         return false;
     }
