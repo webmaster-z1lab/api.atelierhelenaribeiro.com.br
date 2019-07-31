@@ -1,19 +1,20 @@
 <?php
 
-namespace Modules\Catalog\Http\Resources;
+namespace Modules\Stock\Http\Resources;
 
 use App\Http\Resources\ImageResource;
 use App\Http\Resources\PriceResource;
 use Illuminate\Http\Resources\Json\Resource;
+use Modules\Catalog\Http\Resources\TemplateResource;
 
 /**
- * Class TemplateResource
+ * Class ProductResource
  *
- * @package Modules\Catalog\Http\Resources
+ * @package Modules\Stock\Http\Resources
  *
- * @property-read \Modules\Catalog\Models\Template resource
+ * @property-read \Modules\Stock\Models\Product $resource
  */
-class TemplateResource extends Resource
+class ProductResource extends Resource
 {
     /**
      * Transform the resource into an array.
@@ -26,12 +27,15 @@ class TemplateResource extends Resource
     {
         return [
             'id'         => $this->resource->id,
-            'reference'  => $this->resource->reference,
-            'created_at' => $this->resource->created_at->toW3cString(),
-            'updated_at' => $this->resource->updated_at->toW3cString(),
+            'serial'     => $this->resource->serial,
+            'color'      => $this->resource->color,
+            'size'       => $this->resource->size,
+            'template'   => TemplateResource::make($this->resource->template),
+            'price'      => PriceResource::make($this->resource->price),
             'images'     => ImageResource::collection($this->resource->images),
             'prices'     => PriceResource::collection($this->resource->prices),
-            'price'      => PriceResource::make($this->resource->price),
+            'created_at' => $this->resource->created_at->toW3cString(),
+            'updated_at' => $this->resource->updated_at->toW3cString(),
         ];
     }
 

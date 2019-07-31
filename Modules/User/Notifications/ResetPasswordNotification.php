@@ -27,34 +27,40 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
     /**
      * ResetPasswordNotification constructor.
      *
-     * @param array $user
-     * @param       $token
+     * @param  array  $user
+     * @param         $token
      */
     public function __construct(array $user, $token)
     {
         $this->token = $token;
         $this->user = $user;
     }
+
     /**
      * Get the notification's delivery channels.
      *
-     * @param  mixed $notifiable
+     * @param  mixed  $notifiable
+     *
      * @return array
      */
     public function via($notifiable)
     {
         return ['mail'];
     }
+
     /**
      * @param $notifiable
+     *
      * @return \Modules\User\Emails\ResetPassword
      */
     public function toMail($notifiable)
     {
         return (new ResetPassword($this->user, $this->resetUrl()))->to($this->user['email']);
     }
+
     /**
      * @param $notifiable
+     *
      * @return array
      */
     public function toArray($notifiable)
@@ -63,11 +69,12 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
             'user' => $this->user,
         ];
     }
+
     /**
      * @return string
      */
     private function resetUrl()
     {
-        return route('password.reset', $this->token) . '?' . http_build_query(['email' => $this->user['email']]);
+        return route('password.reset', $this->token).'?'.http_build_query(['email' => $this->user['email']]);
     }
 }

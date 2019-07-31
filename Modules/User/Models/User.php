@@ -16,22 +16,22 @@ use Modules\User\Notifications\ResetPasswordNotification;
  * Class User
  *
  * @package Modules\User\Models
- * @property-read string                               id
- * @property string                                    type
- * @property string                                    name
- * @property string                                    first_name
- * @property string                                    email
- * @property string                                    password
- * @property string                                    api_token
- * @property string                                    document
- * @property string                                    identity
- * @property \Modules\User\Models\DatabaseNotification notifications
- * @property \Modules\User\Models\DatabaseNotification latestNotifications
- * @property \App\Models\Address                       address
- * @property \App\Models\Phone                         phone
- * @property \Carbon\Carbon                            created_at
- * @property \Carbon\Carbon                            updated_at
- * @property \Carbon\Carbon                            deleted_at
+ * @property-read string                               $id
+ * @property string                                    $type
+ * @property string                                    $name
+ * @property string                                    $first_name
+ * @property string                                    $email
+ * @property string                                    $password
+ * @property string                                    $api_token
+ * @property string                                    $document
+ * @property string                                    $identity
+ * @property \Modules\User\Models\DatabaseNotification $notifications
+ * @property \Modules\User\Models\DatabaseNotification $latestNotifications
+ * @property \App\Models\Address                       $address
+ * @property \App\Models\Phone                         $phone
+ * @property \Carbon\Carbon                            $created_at
+ * @property \Carbon\Carbon                            $updated_at
+ * @property \Carbon\Carbon                            $deleted_at
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            query()
@@ -160,12 +160,12 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
      */
     public function scopeSearch($query, string $search = NULL)
     {
-        if(NULL === $search) return $query;
+        if (NULL === $search) return $query;
 
         $query->getQuery()->projections = ['score' => ['$meta' => 'textScore']];
         $query->orderBy('score', ['$meta' => 'textScore']);
 
-        return $query->whereRaw(['$text' => ['$search' => "/^" . $search . "/"]]);
+        return $query->whereRaw(['$text' => ['$search' => "/^".$search."/"]]);
     }
 
     /**
@@ -187,8 +187,8 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
         $query->skip(($page - 1) * $limit);
         $query->take($limit);
 
-        if(NULL === $search) return $query;
+        if (NULL === $search) return $query;
 
-        return $query->whereRaw(['$text' => ['$search' => "/^" . $search . "/"]]);
+        return $query->whereRaw(['$text' => ['$search' => "/^".$search."/"]]);
     }
 }

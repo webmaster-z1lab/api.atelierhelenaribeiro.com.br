@@ -5,6 +5,7 @@ namespace Modules\Catalog\Http\Controllers;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
 use Modules\Catalog\Http\Requests\TemplateRequest;
+use Modules\Catalog\Http\Requests\TemplateUpdateRequest;
 use Modules\Catalog\Http\Resources\TemplateResource;
 use Modules\Catalog\Models\Template;
 use Modules\Catalog\Repositories\TemplateRepository;
@@ -57,12 +58,12 @@ class TemplateController extends ApiController
     }
 
     /**
-     * @param  \Modules\Catalog\Http\Requests\TemplateRequest  $request
-     * @param  \Modules\Catalog\Models\Template                $template
+     * @param  \Modules\Catalog\Http\Requests\TemplateUpdateRequest  $request
+     * @param  \Modules\Catalog\Models\Template                      $template
      *
      * @return \Modules\Catalog\Http\Resources\TemplateResource
      */
-    public function update(TemplateRequest $request, Template $template): TemplateResource
+    public function update(TemplateUpdateRequest $request, Template $template): TemplateResource
     {
         return TemplateResource::make($this->repository->update($request->validated(), $template));
     }

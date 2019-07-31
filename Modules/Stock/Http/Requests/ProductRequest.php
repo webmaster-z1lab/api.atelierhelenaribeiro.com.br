@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Catalog\Http\Requests;
+namespace Modules\Stock\Http\Requests;
 
 use App\Http\Requests\ApiFormRequest;
 use Illuminate\Validation\Rule;
 
-class TemplateRequest extends ApiFormRequest
+class ProductRequest extends ApiFormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -15,10 +15,13 @@ class TemplateRequest extends ApiFormRequest
     public function rules()
     {
         return [
-            'reference' => $this->getReferenceRules(),
-            'images'    => 'bail|required|array|min:1',
-            'images.*'  => 'bail|required|image',
-            'price'     => 'bail|required|integer|min:0',
+            'serial'   => $this->getSerialRules(),
+            'size'     => 'bail|required|string',
+            'color'    => 'bail|required|string',
+            'template' => 'bail|required|exists:templates,_id',
+            'images'   => 'bail|required|array|min:1',
+            'images.*' => 'bail|required|image',
+            'price'    => 'bail|nullable|integer|min:0',
         ];
     }
 
@@ -38,10 +41,13 @@ class TemplateRequest extends ApiFormRequest
     public function attributes()
     {
         return [
-            'reference' => 'referência',
-            'images'    => 'imagens',
-            'images.*'  => 'imagem',
-            'price'     => 'preço',
+            'serial'   => 'número de série',
+            'size'     => 'tamanho',
+            'color'    => 'cor',
+            'template' => 'modelo',
+            'images'   => 'imagens',
+            'images.*' => 'imagem',
+            'price'    => 'preço',
         ];
     }
 
@@ -50,7 +56,7 @@ class TemplateRequest extends ApiFormRequest
      *
      * @return array
      */
-    protected function getReferenceRules($ignore = NULL): array
+    protected function getSerialRules($ignore = NULL): array
     {
         return [
             'bail',

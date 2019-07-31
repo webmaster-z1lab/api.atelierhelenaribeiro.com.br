@@ -8,7 +8,6 @@
 
 namespace Modules\User\Http\Controllers;
 
-
 use Modules\User\Http\Resources\NotificationResource;
 use Modules\User\Models\DatabaseNotification;
 

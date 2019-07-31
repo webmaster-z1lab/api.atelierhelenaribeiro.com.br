@@ -2,78 +2,81 @@
 
 namespace Modules\Customer\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\ApiController;
+use Modules\Customer\Http\Requests\CustomerRequest;
+use Modules\Customer\Http\Requests\CustomerUpdateRequest;
+use Modules\Customer\Http\Resources\CustomerResource;
+use Modules\Customer\Models\Customer;
+use Modules\Customer\Repositories\CustomerRepository;
 
-class CustomerController extends Controller
+class CustomerController extends ApiController
 {
     /**
-     * Display a listing of the resource.
-     * @return Response
+     * @var \Modules\Customer\Repositories\CustomerRepository
+     */
+    private $repository;
+
+    /**
+     * CustomerController constructor.
+     *
+     * @param  \Modules\Customer\Repositories\CustomerRepository  $repository
+     */
+    public function __construct(CustomerRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        return view('customer::index');
+        return CustomerResource::collection($this->repository->all());
     }
 
     /**
-     * Show the form for creating a new resource.
-     * @return Response
+     * @param  \Modules\Customer\Http\Requests\CustomerRequest  $request
+     *
+     * @return \Modules\Customer\Http\Resources\CustomerResource
      */
-    public function create()
+    public function store(CustomerRequest $request)
     {
-        return view('customer::create');
+        return CustomerResource::make($this->repository->create($request->validated()));
     }
 
     /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Response
+     * @param  \Modules\Customer\Models\Customer  $customer
+     *
+     * @return \Illuminate\Http\JsonResponse|\Modules\Customer\Http\Resources\CustomerResource
      */
-    public function store(Request $request)
+    public function show(Customer $customer)
     {
-        //
+        if ($this->ETagNotChanged($customer)) return $this->notModifiedResponse();
+
+        return CustomerResource::make($customer);
     }
 
     /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
+     * @param  \Modules\Customer\Http\Requests\CustomerUpdateRequest  $request
+     * @param  \Modules\Customer\Models\Customer                      $customer
+     *
+     * @return \Modules\Customer\Http\Resources\CustomerResource
      */
-    public function show($id)
+    public function update(CustomerUpdateRequest $request, Customer $customer)
     {
-        return view('customer::show');
+        return CustomerResource::make($this->repository->update($request->validated(), $customer));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Response
+     * @param  \Modules\Customer\Models\Customer  $customer
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
-    public function edit($id)
+    public function delete(Customer $customer)
     {
-        return view('customer::edit');
-    }
+        $this->repository->delete($customer);
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
+        return $this->noContentResponse();
     }
 }

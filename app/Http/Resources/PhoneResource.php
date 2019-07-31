@@ -5,9 +5,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\Resource;
 
 /**
- * Class Phone
+ * Class PhoneResource
  *
- * @package Modules\User\Http\Resources\v1
+ * @package App\Http\Resources
  *
  * @property-read \App\Models\Phone $resource
  */

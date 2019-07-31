@@ -15,12 +15,11 @@ use Jenssegers\Mongodb\Eloquent\Model;
  * Class DatabaseNotification
  *
  * @package App\Models
- * @property-read string _id
- * @property-read string id
- * @property-read array data
- * @property-read string type
- * @property-read \Carbon\Carbon created_at
- * @property-read \Carbon\Carbon read_at
+ * @property-read string                                        $id
+ * @property-read array                                         $data
+ * @property-read string                                        $type
+ * @property-read \Carbon\Carbon                                $created_at
+ * @property-read \Carbon\Carbon                                $read_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $notifiable
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\DatabaseNotification newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\DatabaseNotification newQuery()
@@ -49,7 +48,7 @@ class DatabaseNotification extends Model
      * @var array
      */
     protected $casts = [
-        'data' => 'array',
+        'data'    => 'array',
         'read_at' => 'datetime',
     ];
 
@@ -80,8 +79,8 @@ class DatabaseNotification extends Model
      */
     public function markAsUnread()
     {
-        if (! is_null($this->read_at)) {
-            $this->forceFill(['read_at' => null])->save();
+        if (!is_null($this->read_at)) {
+            $this->forceFill(['read_at' => NULL])->save();
         }
     }
 
@@ -92,7 +91,7 @@ class DatabaseNotification extends Model
      */
     public function read()
     {
-        return $this->read_at !== null;
+        return $this->read_at !== NULL;
     }
 
     /**
@@ -102,13 +101,14 @@ class DatabaseNotification extends Model
      */
     public function unread()
     {
-        return $this->read_at === null;
+        return $this->read_at === NULL;
     }
 
     /**
      * Create a new database notification collection instance.
      *
      * @param  array  $models
+     *
      * @return \Illuminate\Notifications\DatabaseNotificationCollection
      */
     public function newCollection(array $models = [])

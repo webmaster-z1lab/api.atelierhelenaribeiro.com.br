@@ -20,6 +20,8 @@ namespace App\Models;
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\File newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\File newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\File query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
  * @mixin \Eloquent
  */
 class File extends BaseModel

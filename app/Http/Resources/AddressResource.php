@@ -5,9 +5,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\Resource;
 
 /**
- * Class Address
+ * Class AddressResource
  *
- * @package Modules\User\Http\Resources
+ * @package App\Http\Resources
  *
  * @property-read \App\Models\Address $resource
  */

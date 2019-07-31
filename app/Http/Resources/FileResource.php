@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Class File
+ * Class FileResource
  *
  * @package App\Http\Resources
  *

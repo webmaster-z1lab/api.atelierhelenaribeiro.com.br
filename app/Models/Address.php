@@ -17,6 +17,8 @@ namespace App\Models;
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Address newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Address newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Address query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
  * @mixin \Eloquent
  */
 class Address extends BaseModel
