@@ -19,6 +19,7 @@ $factory->define(User::class, function (Faker $faker) {
     return [
         'name' => 'João das Neves',
         'email' => 'chr@z1lab.com.br',
+        'document' => '32489294059',
         'email_verified_at' => now(),
         'password' => Hash::make('12345678'),
         'remember_token' => Str::random(10),
