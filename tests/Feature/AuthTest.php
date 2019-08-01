@@ -11,7 +11,7 @@ class AuthTest extends TestCase
     /**
      * @test
      */
-    public function login_no_get()
+    public function login_is_post()
     {
         $response = $this->get('login');
 
@@ -28,6 +28,48 @@ class AuthTest extends TestCase
         $response = $this->patch('login');
 
         $response->assertStatus(405);
+
+        $response = $this->post('login');
+
+        $this->assertTrue($response->getStatusCode() !== 405);
+    }
+
+    /**
+     * @param  array  $data
+     *
+     * @return \Illuminate\Foundation\Testing\TestResponse
+     */
+    private function loginSuccess(array $data)
+    {
+        $response = $this->post('login', $data);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'id',
+                'type',
+                'name',
+                'email',
+                'avatar',
+                'api_token',
+                'created_at',
+                'updated_at',
+            ]);
+
+        return $response;
+    }
+
+    /**
+     * @param  array  $data
+     *
+     * @return \Illuminate\Foundation\Testing\TestResponse
+     */
+    private function loginFail(array $data)
+    {
+        $response = $this->post('login', $data);
+
+        $response->assertStatus(422);
+
+        return $response;
     }
 
     /**
@@ -35,19 +77,7 @@ class AuthTest extends TestCase
      */
     public function login_with_document()
     {
-        $response = $this->post('login', ['email' => '32489294059', 'password' => '12345678']);
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'id',
-                'type',
-                'name',
-                'email',
-                'avatar',
-                'api_token',
-                'created_at',
-                'updated_at',
-            ]);
+        $this->loginSuccess(['email' => '32489294059', 'password' => '12345678']);
     }
 
     /**
@@ -55,9 +85,7 @@ class AuthTest extends TestCase
      */
     public function login_with_document_not_registered()
     {
-        $response = $this->post('login', ['email' => '06771783600', 'password' => '12345678']);
-
-        $response->assertStatus(422);
+       $this->loginFail(['email' => '06771783600', 'password' => '12345678']);
     }
 
     /**
@@ -65,9 +93,7 @@ class AuthTest extends TestCase
      */
     public function login_with_invalid_document()
     {
-        $response = $this->post('login', ['email' => '1111111111', 'password' => '12345678']);
-
-        $response->assertStatus(422);
+        $this->loginFail(['email' => '1111111111', 'password' => '12345678']);
     }
 
     /**
@@ -75,19 +101,7 @@ class AuthTest extends TestCase
      */
     public function login_with_email()
     {
-        $response = $this->post('login', ['email' => 'chr@z1lab.com.br', 'password' => '12345678']);
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'id',
-                'type',
-                'name',
-                'email',
-                'avatar',
-                'api_token',
-                'created_at',
-                'updated_at',
-            ]);
+        $this->loginSuccess(['email' => 'chr@z1lab.com.br', 'password' => '12345678']);
     }
 
     /**
@@ -95,9 +109,7 @@ class AuthTest extends TestCase
      */
     public function login_with_email_not_registered()
     {
-        $response = $this->post('login', ['email' => 'z1lab@z1lab.com.br', 'password' => '12345678']);
-
-        $response->assertStatus(422);
+        $this->loginFail(['email' => 'z1lab@z1lab.com.br', 'password' => '12345678']);
     }
 
     /**
@@ -105,9 +117,7 @@ class AuthTest extends TestCase
      */
     public function login_with_invalid_email()
     {
-        $response = $this->post('login', ['email' => 'tdsshshah', 'password' => '12345678']);
-
-        $response->assertStatus(422);
+        $this->loginFail(['email' => 'tdsshshah', 'password' => '12345678']);
     }
 
     /**
@@ -115,12 +125,8 @@ class AuthTest extends TestCase
      */
     public function login_with_invalid_password()
     {
-        $response = $this->post('login', ['email' => '32489294059', 'password' => '123456789']);
+        $this->loginFail(['email' => '32489294059', 'password' => '123456789']);
 
-        $response->assertStatus(422);
-
-        $response = $this->post('login', ['email' => 'chr@z1lab.com.br', 'password' => '123456789']);
-
-        $response->assertStatus(422);
+        $this->loginFail(['email' => 'chr@z1lab.com.br', 'password' => '123456789']);
     }
 }
