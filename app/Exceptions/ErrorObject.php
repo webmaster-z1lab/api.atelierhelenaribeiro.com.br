@@ -58,15 +58,13 @@ class ErrorObject
     public function toArray()
     {
         return [
-            'errors' => [
-                'id'     => $this->id,
-                'status' => $this->getStatus(),
-                'code'   => $this->getCode(),
-                'title'  => $this->getTitle(),
-                'detail' => $this->getDetail(),
-                'links'  => $this->links,
-                'meta'   => $this->getMeta(),
-            ],
+            'id'     => $this->id,
+            'status' => $this->getStatus(),
+            'code'   => $this->getCode(),
+            'title'  => $this->getTitle(),
+            'message' => $this->getDetail() === '' ? $this->getTitle() : $this->getDetail(),
+            'links'  => $this->links,
+            'meta'   => $this->getMeta(),
         ];
     }
 
@@ -95,7 +93,7 @@ class ErrorObject
      */
     public function getTitle()
     {
-        return __("json_api::http.{$this->getCode()}");
+        return __("http.{$this->getCode()}");
     }
 
     /**
