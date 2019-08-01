@@ -1,6 +1,7 @@
 <?php
 
-use Optimus\Heimdal\Formatters;
+use Optimus\Heimdal\Formatters\UnprocessableEntityHttpExceptionFormatter;
+use \App\Exceptions\Formatters;
 use Symfony\Component\HttpKernel\Exception as SymfonyException;
 
 return [
@@ -8,7 +9,7 @@ return [
 
     // Has to be in prioritized order, e.g. highest priority first.
     'formatters' => [
-        SymfonyException\UnprocessableEntityHttpException::class => Formatters\UnprocessableEntityHttpExceptionFormatter::class,
+        SymfonyException\UnprocessableEntityHttpException::class => UnprocessableEntityHttpExceptionFormatter::class,
         SymfonyException\HttpException::class => Formatters\HttpExceptionFormatter::class,
         Exception::class => Formatters\ExceptionFormatter::class,
     ],
