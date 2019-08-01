@@ -22,3 +22,4 @@ public/img/*
 /laravel-echo-server.lock
 /laravel-echo-server.json
 /package-lock.json
+/.env.testing
