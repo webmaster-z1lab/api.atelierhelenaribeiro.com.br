@@ -95,7 +95,7 @@ class ErrorObject
      */
     public function getTitle()
     {
-        return __("json_api::http.{$this->getCode()}");
+        return __("http.{$this->getCode()}");
     }
 
     /**

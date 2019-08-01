@@ -1,10 +1,10 @@
 <?php
 
-use Symfony\Component\HttpKernel\Exception as SymfonyException;
 use Optimus\Heimdal\Formatters;
+use Symfony\Component\HttpKernel\Exception as SymfonyException;
 
 return [
-    'add_cors_headers' => false,
+    'add_cors_headers' => TRUE,
 
     // Has to be in prioritized order, e.g. highest priority first.
     'formatters' => [
@@ -27,5 +27,5 @@ return [
         ]*/
     ],
 
-    'server_error_production' => 'An error occurred.'
+    'server_error_production' => 'An error occurred.',
 ];
