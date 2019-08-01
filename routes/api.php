@@ -18,3 +18,7 @@ Route::namespace('Auth')
 //                Route::name('resend')->get('resend', 'VerificationController@resend');
 //            });
     });
+
+Route::get('test', function () {
+    abort(403);
+});

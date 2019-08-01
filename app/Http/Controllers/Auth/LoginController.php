@@ -118,13 +118,13 @@ class LoginController extends Controller
      */
     protected function sendFailedLoginResponse(Request $request)
     {
-        $validation =  ValidationException::withMessages([
+        throw  ValidationException::withMessages([
             $this->username() => [trans('auth.failed')],
         ]);
 
-        $errors = new ErrorObject($validation->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
+//        $errors = new ErrorObject($validation->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+//
+//        throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 
     /**

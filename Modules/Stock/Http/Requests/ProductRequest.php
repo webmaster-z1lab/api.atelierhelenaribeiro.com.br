@@ -2,10 +2,10 @@
 
 namespace Modules\Stock\Http\Requests;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ProductRequest extends ApiFormRequest
+class ProductRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

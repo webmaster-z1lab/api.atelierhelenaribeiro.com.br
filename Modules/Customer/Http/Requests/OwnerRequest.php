@@ -2,9 +2,9 @@
 
 namespace Modules\Customer\Http\Requests;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 
-class OwnerRequest extends ApiFormRequest
+class OwnerRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

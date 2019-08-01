@@ -2,11 +2,11 @@
 
 namespace Modules\Employee\Http\Requests;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Employee\Models\EmployeeTypes;
 
-class EmployeeRequest extends ApiFormRequest
+class EmployeeRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
