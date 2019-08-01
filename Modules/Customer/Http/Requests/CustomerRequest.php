@@ -23,6 +23,7 @@ class CustomerRequest extends ApiFormRequest
             'email'                  => $this->getEmailRules(),
             $this->getAddressRules(),
             $this->getPhonesRules(),
+            $this->getContactsRules(),
         ];
     }
 
@@ -50,6 +51,7 @@ class CustomerRequest extends ApiFormRequest
             'email'                  => 'e-mail',
             $this->getAddressAttributes(),
             $this->getPhonesAttributes(),
+            $this->getContactsAttributes(),
         ];
     }
 
@@ -142,6 +144,28 @@ class CustomerRequest extends ApiFormRequest
             'phones'               => 'telefones',
             'phones.*.phone'       => 'telefone',
             'phones.*.is_whatsapp' => 'whatsapp',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getContactsRules(): array
+    {
+        return [
+            'contacts'   => 'bail|required|array|min:1',
+            'contacts.*' => 'bail|required|string|min:3',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getContactsAttributes(): array
+    {
+        return [
+            'contacts'   => 'contatos',
+            'contacts.*' => 'contato',
         ];
     }
 }

@@ -11,7 +11,6 @@ namespace App\Traits;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
-
 trait FileUpload
 {
     /**
