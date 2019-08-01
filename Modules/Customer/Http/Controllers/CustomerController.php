@@ -73,7 +73,7 @@ class CustomerController extends ApiController
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function delete(Customer $customer)
+    public function destroy(Customer $customer)
     {
         $this->repository->delete($customer);
 

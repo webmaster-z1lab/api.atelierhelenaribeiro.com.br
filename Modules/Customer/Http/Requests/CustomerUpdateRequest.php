@@ -22,6 +22,7 @@ class CustomerUpdateRequest extends CustomerRequest
             'email'                  => $this->getEmailRules($customer),
             $this->getAddressRules(),
             $this->getPhonesRules(),
+            $this->getContactsRules(),
         ];
     }
 
@@ -44,6 +45,17 @@ class CustomerUpdateRequest extends CustomerRequest
             'phones'               => 'bail|nullable|array',
             'phones.*.phone'       => 'bail|required|cell_phone',
             'phones.*.is_whatsapp' => 'bail|required|bool_custom',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getContactsRules(): array
+    {
+        return [
+            'contacts'   => 'bail|nullable|array',
+            'contacts.*' => 'bail|required|string|min:3',
         ];
     }
 }

@@ -2,17 +2,16 @@
 
 namespace Modules\Customer\Http\Resources;
 
-use App\Http\Resources\PhoneResource;
 use Illuminate\Http\Resources\Json\Resource;
 
 /**
- * Class PersonResource
+ * Class ContactResource
  *
  * @package Modules\Customer\Http\Resources
  *
- * @property-read \Modules\Customer\Models\Person $resource
+ * @property-read \Modules\Customer\Models\Contact $resource
  */
-class PersonResource extends Resource
+class ContactResource extends Resource
 {
     /**
      * Transform the resource into an array.
@@ -26,9 +25,6 @@ class PersonResource extends Resource
         return [
             'id'         => $this->resource->id,
             'name'       => $this->resource->name,
-            'email'      => $this->resource->email,
-            'birth_date' => $this->resource->birth_date->toW3cString(),
-            'phones'     => PhoneResource::collection($this->resource->phones),
             'created_at' => $this->resource->created_at->toW3cString(),
             'updated_at' => $this->resource->updated_at->toW3cString(),
         ];
