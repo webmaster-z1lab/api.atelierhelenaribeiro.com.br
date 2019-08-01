@@ -1,7 +1,7 @@
 <?php
 namespace Deployer;
 
-require 'recipe/laravel.php';
+require 'recipe/common.php';
 
 // Project name
 set('application', 'my_project');
@@ -10,30 +10,40 @@ set('application', 'my_project');
 set('repository', 'https://github.com/webmaster-z1lab/api.atelierhelenaribeiro.com.br.git');
 
 // [Optional] Allocate tty for git clone. Default value is false.
-set('git_tty', true);
+set('git_tty', true); 
 
-// Shared files/dirs between deploys
-add('shared_files', []);
-add('shared_dirs', []);
+// Shared files/dirs between deploys 
+set('shared_files', []);
+set('shared_dirs', []);
 
-// Writable dirs by web server
-add('writable_dirs', []);
+// Writable dirs by web server 
+set('writable_dirs', []);
+
 
 // Hosts
 
 host('project.com')
-    ->set('deploy_path', '~/{{application}}');
+    ->set('deploy_path', '~/{{application}}');    
+    
 
 // Tasks
 
-task('build', function () {
-    run('cd {{release_path}} && build');
-});
+desc('Deploy your project');
+task('deploy', [
+    'deploy:info',
+    'deploy:prepare',
+    'deploy:lock',
+    'deploy:release',
+    'deploy:update_code',
+    'deploy:shared',
+    'deploy:writable',
+    'deploy:vendors',
+    'deploy:clear_paths',
+    'deploy:symlink',
+    'deploy:unlock',
+    'cleanup',
+    'success'
+]);
 
-// [Optional] if deploy fails automatically unlock.
+// [Optional] If deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
-
-// Migrate database before symlink new release.
-
-before('deploy:symlink', 'artisan:migrate');
-

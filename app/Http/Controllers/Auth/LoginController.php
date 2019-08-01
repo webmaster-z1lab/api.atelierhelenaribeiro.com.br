@@ -57,7 +57,7 @@ class LoginController extends Controller
         event(new Attempting('api', $this->credentials($request), $request->filled('remember')));
 
         /** @var \Modules\User\Models\User $user */
-        if (ctype_digit($request->get($this->username()), $this->username())) {
+        if (ctype_digit($request->get($this->username()))) {
             $user = User::where('document', $request->get($this->username()))->first();
         } else {
             $user = User::where('email', $request->get($this->username()))->first();
@@ -80,7 +80,7 @@ class LoginController extends Controller
      */
     protected function validateLogin(Request $request)
     {
-        if (ctype_digit($request->get($this->username()), $this->username())) {
+        if (ctype_digit($request->get($this->username()))) {
             $request->validate([
                 $this->username() => 'required|cpf',
                 'password'        => 'required|string',
