@@ -3,7 +3,7 @@
 namespace Modules\Employee\Http\Resources;
 
 use App\Http\Resources\AddressResource;
-use App\Http\Resources\PhoneResource;
+use App\Traits\ResourceResponseHeaders;
 use Illuminate\Http\Resources\Json\Resource;
 
 /**
@@ -15,6 +15,7 @@ use Illuminate\Http\Resources\Json\Resource;
  */
 class EmployeeResource extends Resource
 {
+    use ResourceResponseHeaders;
     /**
      * Transform the resource into an array.
      *
@@ -25,24 +26,16 @@ class EmployeeResource extends Resource
     public function toArray($request)
     {
         return [
-            'id'         => $this->resource->id,
-            'name'       => $this->resource->name,
-            'document'   => $this->resource->document,
-            'email'      => $this->resource->email,
-            'type'       => $this->resource->type,
-            'created_at' => $this->resource->created_at->toW3cString(),
-            'updated_at' => $this->resource->updated_at->toW3cString(),
-            'address'    => NULL !== $this->resource->address ? AddressResource::make($this->resource->address) : [],
-            'phone'      => NULL !== $this->resource->phone ? PhoneResource::make($this->resource->phone) : [],
+            'id'          => $this->resource->id,
+            'name'        => $this->resource->name,
+            'document'    => $this->resource->document,
+            'email'       => $this->resource->email,
+            'type'        => $this->resource->type,
+            'created_at'  => $this->resource->created_at->toW3cString(),
+            'updated_at'  => $this->resource->updated_at->toW3cString(),
+            'address'     => $this->mergeWhen(NULL !== $this->resource->address, AddressResource::make($this->resource->address)),
+            'phone'       => NULL !== $this->resource->phone ? $this->resource->phone->full_number : NULL,
+            'is_whatsapp' => NULL !== $this->resource->phone ? $this->resource->phone->is_whatsapp : NULL,
         ];
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request       $request
-     * @param  \Illuminate\Http\JsonResponse  $response
-     */
-    public function withResponse($request, $response)
-    {
-        $response->header('ETag', md5($this->resource->updated_at));
     }
 }

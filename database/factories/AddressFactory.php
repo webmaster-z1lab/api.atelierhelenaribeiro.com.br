@@ -15,7 +15,7 @@ $factory->define(Address::class, function (Faker $faker) {
         'number'      => $faker->buildingNumber,
         'complement'  => $faker->secondaryAddress,
         'district'    => $faker->citySuffix,
-        'postal_code' => $faker->postcode,
+        'postal_code' => '36520000',
         'city'        => $faker->city,
         'state'       => $faker->stateAbbr,
     ];

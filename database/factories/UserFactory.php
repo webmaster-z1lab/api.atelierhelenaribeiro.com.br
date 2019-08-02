@@ -2,8 +2,12 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use Modules\User\Models\User;
 use Faker\Generator as Faker;
+use Illuminate\Support\Arr;
+use Modules\Employee\Models\EmployeeTypes;
+use Modules\User\Models\User;
+use App\Models\Address;
+use App\Models\Phone;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,23 +20,33 @@ use Faker\Generator as Faker;
 |
 */
 
+$types = [
+    EmployeeTypes::TYPE_ADMIN,
+    EmployeeTypes::TYPE_DRESSMAKER,
+    EmployeeTypes::TYPE_SELLER,
+];
+
 $factory->define(User::class, function (Faker $faker) {
     return [
-        'name' => 'João das Neves',
-        'email' => 'chr@z1lab.com.br',
+        'name'     => 'João das Neves',
+        'email'    => 'chr@z1lab.com.br',
         'document' => '32489294059',
-        'email_verified_at' => now(),
         'password' => Hash::make('12345678'),
-        'type' => 'admin'
+        'type'     => 'admin',
     ];
 });
 
-$factory->state(User::class, 'fake', function (Faker $faker) {
+$factory->afterMaking(User::class, function ($user, $faker) {
+    $user->address()->associate(factory(Address::class)->make());
+    $user->phone()->associate(factory(Phone::class)->make());
+});
+
+$factory->state(User::class, 'fake', function (Faker $faker) use ($types) {
     return [
-        'name' => $faker->name,
-        'email' => $faker->email,
-        'document' => $faker->cpf(false),
+        'name'              => $faker->name,
+        'email'             => $faker->email,
+        'document'          => $faker->cpf(FALSE),
         'email_verified_at' => $faker->dateTime,
-        'type' => 'admin',
+        'type'              => Arr::random($types),
     ];
 });
