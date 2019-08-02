@@ -1,7 +1,8 @@
 <?php
 
+/** @var \Illuminate\Database\Eloquent\Factory $factory */
+
 use Modules\User\Models\User;
-use Illuminate\Support\Str;
 use Faker\Generator as Faker;
 
 /*
@@ -22,7 +23,16 @@ $factory->define(User::class, function (Faker $faker) {
         'document' => '32489294059',
         'email_verified_at' => now(),
         'password' => Hash::make('12345678'),
-        'remember_token' => Str::random(10),
         'type' => 'admin'
+    ];
+});
+
+$factory->state(User::class, 'fake', function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->email,
+        'document' => $faker->cpf(false),
+        'email_verified_at' => $faker->dateTime,
+        'type' => 'admin',
     ];
 });
