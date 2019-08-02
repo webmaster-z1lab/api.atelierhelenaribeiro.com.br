@@ -32,8 +32,8 @@ class EmployeeResource extends Resource
             'type'       => $this->resource->type,
             'created_at' => $this->resource->created_at->toW3cString(),
             'updated_at' => $this->resource->updated_at->toW3cString(),
-            'address'    => AddressResource::make($this->resource->address),
-            'phone'      => PhoneResource::make($this->resource->phone),
+            'address'    => NULL !== $this->resource->address ? AddressResource::make($this->resource->address) : [],
+            'phone'      => NULL !== $this->resource->phone ? PhoneResource::make($this->resource->phone) : [],
         ];
     }
 

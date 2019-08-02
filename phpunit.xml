@@ -33,5 +33,6 @@
         <server name="SESSION_DRIVER" value="array"/>
         <server name="TELESCOPE_ENABLED" value="false"/>
         <server name="DB_DATABASE" value="unit-tests"/>
+        <server name="TELESCOPE_DB_DATABASE" value="unit-tests"/>
     </php>
 </phpunit>
