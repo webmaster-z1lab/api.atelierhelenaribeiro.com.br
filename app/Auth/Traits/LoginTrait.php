@@ -54,22 +54,15 @@ trait LoginTrait
      */
     protected function createToken(Request $request, string $user_id): string
     {
-        if ($request->filled('remember')) {
-            $token = Token::create([
-                'user_id'    => $user_id,
-                'ip'         => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'asked_by' => $request->getHttpHost(),
-            ]);
-        } else {
-            $token = Token::create([
-                'user_id'    => $user_id,
-                'ip'         => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'asked_by'   => $request->getHttpHost(),
-                'expires_at' => now()->addMinutes(intval(config('session.lifetime'))),
-            ]);
-        }
+        $token = Token::create([
+            'user_id'    => $user_id,
+            'ip'         => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'asked_by'   => $request->getHttpHost(),
+            'expires_at' => $request->filled('remember')
+                ? now()->addDecade()
+                : now()->addMinutes(intval(config('session.lifetime'))),
+        ]);
 
         $jwt = (new Builder())
             ->issuedBy(\Str::finish(config('app.url'), '/'))
@@ -77,9 +70,9 @@ trait LoginTrait
             ->identifiedBy($token->id, TRUE)
             ->issuedAt($token->created_at->timestamp)
             ->canOnlyBeUsedAfter($token->created_at->timestamp)
-            ->expiresAt(optional($token->expires_at)->timestamp)
+            ->expiresAt($token->expires_at->timestamp)
             ->relatedTo($user_id)
-            ->getToken(new Sha256(), new Key('file://' . storage_path('private.key')));
+            ->getToken(new Sha256(), new Key('file://'.storage_path('private.key')));
 
         return (string) $jwt;
     }
