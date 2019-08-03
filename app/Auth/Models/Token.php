@@ -3,7 +3,7 @@
 namespace App\Auth\Models;
 
 use App\Models\BaseModel;
-use Jenssegers\Mongodb\Query\Builder;
+use GeneaLabs\LaravelModelCaching\CachedBuilder;
 
 /**
  * App\Auth\Models\Token
@@ -18,9 +18,9 @@ use Jenssegers\Mongodb\Query\Builder;
  * @property-read \Carbon\Carbon  $created_at
  * @property-read \Carbon\Carbon  $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\App\Models\BaseModel newModelQuery()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\App\Models\BaseModel newQuery()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\App\Models\BaseModel query()
+ * @method static CachedBuilder|\App\Models\BaseModel newModelQuery()
+ * @method static CachedBuilder|\App\Models\BaseModel newQuery()
+ * @method static CachedBuilder|\App\Models\BaseModel query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
  * @mixin \Eloquent
  */
@@ -34,7 +34,7 @@ class Token extends BaseModel
     {
         parent::boot();
 
-        static::addGlobalScope('not_expired', function (Builder $builder) {
+        static::addGlobalScope('not_expired', function (CachedBuilder $builder) {
             $builder->where(function ($query) {
                 /** @var \Jenssegers\Mongodb\Query\Builder $query */
                 $query->where('expires_at', 'exists', FALSE)
@@ -43,7 +43,7 @@ class Token extends BaseModel
             });
         });
 
-        static::addGlobalScope('not_revoked', function (Builder $builder) {
+        static::addGlobalScope('not_revoked', function (CachedBuilder $builder) {
             $builder->where(function ($query) {
                 /** @var \Jenssegers\Mongodb\Query\Builder $query */
                 $query->where('revoked_at', 'exists', FALSE)
