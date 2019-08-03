@@ -19,6 +19,6 @@ Route::namespace('Auth')
 //            });
     });
 
-Route::get('test', function () {
-    abort(403);
+Route::get('test', function (\Illuminate\Http\Request $request) {
+    dd($request->user());
 });

@@ -28,8 +28,8 @@ class UserResource extends Resource
             'name'       => $this->resource->name,
             'email'      => $this->resource->email,
             'avatar'     => NULL,
-            $this->mergeWhen($this->resource->id === \Auth::id(), function () {
-                return ['api_token' => $this->resource->api_token];
+            $this->mergeWhen($this->resource->id === \Auth::id(), function () use ($request) {
+                return ['api_token' => $request->bearerToken()];
             }),
             'created_at' => $this->resource->created_at->toW3cString(),
             'updated_at' => $this->resource->updated_at->toW3cString(),

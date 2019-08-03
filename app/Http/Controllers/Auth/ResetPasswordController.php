@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Traits\LoginTrait;
+use App\Auth\Traits\LoginTrait;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Auth\ResetsPasswords;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use Modules\User\Http\Resources\UserResource;
-use App\Exceptions\ErrorObject;
 
 class ResetPasswordController extends Controller
 {
@@ -86,8 +84,6 @@ class ResetPasswordController extends Controller
      */
     protected function sendResetFailedResponse(Request $request, $response)
     {
-        $errors = new ErrorObject(['email' => trans($response)], Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
+        throw ValidationException::withMessages(['email' => [trans($response)]]);
     }
 }

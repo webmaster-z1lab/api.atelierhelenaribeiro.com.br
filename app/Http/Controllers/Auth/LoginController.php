@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Traits\LoginTrait;
+use App\Auth\Traits\LoginTrait;
 use Illuminate\Auth\Events\Attempting;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Validation\ValidationException;
 use Modules\User\Http\Resources\UserResource;
-use App\Exceptions\ErrorObject;
 use Modules\User\Models\User;
 
 class LoginController extends Controller
@@ -105,26 +102,10 @@ class LoginController extends Controller
         $user = $this->guard()->user();
 
         if (! is_null($user)) {
-            $this->logoutWithUser($user);
+            $this->logoutWithUser($request, $user);
         }
 
         return response()->json(NULL, Response::HTTP_NO_CONTENT);
-    }
-
-    /**
-     * Get the failed login response instance.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     */
-    protected function sendFailedLoginResponse(Request $request)
-    {
-        throw  ValidationException::withMessages([
-            $this->username() => [trans('auth.failed')],
-        ]);
-
-//        $errors = new ErrorObject($validation->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
-//
-//        throw new HttpResponseException(response()->json($errors->toArray(), Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 
     /**
@@ -141,6 +122,4 @@ class LoginController extends Controller
 
         return UserResource::make($user);
     }
-
-
 }
