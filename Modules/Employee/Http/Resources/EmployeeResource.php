@@ -16,6 +16,7 @@ use Illuminate\Http\Resources\Json\Resource;
 class EmployeeResource extends Resource
 {
     use ResourceResponseHeaders;
+
     /**
      * Transform the resource into an array.
      *
@@ -33,7 +34,7 @@ class EmployeeResource extends Resource
             'type'        => $this->resource->type,
             'created_at'  => $this->resource->created_at->toW3cString(),
             'updated_at'  => $this->resource->updated_at->toW3cString(),
-            'address'     => $this->mergeWhen(NULL !== $this->resource->address, AddressResource::make($this->resource->address)),
+            'address'     => $this->when(NULL !== $this->resource->address, AddressResource::make($this->resource->address)),
             'phone'       => NULL !== $this->resource->phone ? $this->resource->phone->full_number : NULL,
             'is_whatsapp' => NULL !== $this->resource->phone ? $this->resource->phone->is_whatsapp : NULL,
         ];
