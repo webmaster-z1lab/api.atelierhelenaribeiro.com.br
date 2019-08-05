@@ -19,6 +19,4 @@ Route::namespace('Auth')
 //            });
     });
 
-Route::get('test', function (\Illuminate\Http\Request $request) {
-    dd($request->user());
-});
+Route::get('test/{employee}', '\Modules\Employee\Http\Controllers\EmployeeController@show');

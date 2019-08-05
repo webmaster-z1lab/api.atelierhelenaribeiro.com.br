@@ -13,6 +13,10 @@ class EmployeeControllerTest extends TestCase
     use WithFaker, RefreshDatabase;
 
     /**
+     * @var string
+     */
+    private $uri = '/employees/';
+    /**
      * @var \Modules\User\Models\User
      */
     private $employee;
@@ -31,6 +35,17 @@ class EmployeeControllerTest extends TestCase
         'phone',
         'is_whatsapp',
     ];
+    /**
+     * @var array
+     */
+    private $errorStructure = [
+        'id',
+        'status',
+        'title',
+        'message',
+        'links',
+        'meta',
+    ];
 
     public function setUp(): void
     {
@@ -47,9 +62,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $response = $this->json('GET', '/employees');
-
-        $response->assertOk()->assertJsonStructure([]);
+        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([]);
     }
 
     /**
@@ -57,7 +70,7 @@ class EmployeeControllerTest extends TestCase
      */
     public function create_employee()
     {
-        $response = $this->json('POST', '/employees', [
+        $response = $this->json('POST', $this->uri, [
             'name'        => $this->employee->name,
             'email'       => $this->employee->email,
             'document'    => $this->employee->document,
@@ -80,7 +93,7 @@ class EmployeeControllerTest extends TestCase
      */
     public function create_employee_fails()
     {
-        $this->json('POST', '/employees', [])->assertStatus(422);
+        $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -90,14 +103,26 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $response = $this->json('GET', '/employees/'.$this->employee->id);
-
-        $response
+        $this
+            ->json('GET', $this->uri.$this->employee->id)
             ->assertOk()
             ->assertHeader('ETag')
             ->assertHeader('Content-Length')
             ->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
+    }
+
+    /**
+     * @test
+     */
+    public function get_employee_fails()
+    {
+        $this->persist();
+
+        $this
+            ->json('GET', $this->uri.$this->employee->id.'a')
+            ->assertNotFound()
+            ->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -107,20 +132,19 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $employee = $this->json('GET', '/employees/'.$this->employee->id);
+        $response = $this->json('GET', $this->uri.$this->employee->id);
 
-        $employee
+        $response
             ->assertOk()
             ->assertHeader('ETag')
             ->assertHeader('Content-Length')
             ->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
 
-        $response = $this
-            ->withHeaders(['If-None-Match' => $employee->getEtag()])
-            ->json('GET', '/employees/'.$this->employee->id);
-
-        $response->assertStatus(304);
+        $this
+            ->withHeaders(['If-None-Match' => $response->getEtag()])
+            ->json('GET', $this->uri.$this->employee->id)
+            ->assertStatus(304);
     }
 
     /**
@@ -130,9 +154,9 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $employee = $this->json('GET', '/employees/'.$this->employee->id);
+        $response = $this->json('GET', $this->uri.$this->employee->id);
 
-        $employee
+        $response
             ->assertOk()
             ->assertHeader('ETag')
             ->assertHeader('Content-Length')
@@ -143,11 +167,10 @@ class EmployeeControllerTest extends TestCase
 
         $this->update();
 
-        $response = $this
-            ->withHeaders(['If-None-Match' => $employee->getEtag()])
-            ->json('GET', '/employees/'.$this->employee->id);
-
-        $response->assertOk()->assertOk()
+        $this
+            ->withHeaders(['If-None-Match' => $response->getEtag()])
+            ->json('GET', $this->uri.$this->employee->id)
+            ->assertOk()
             ->assertHeader('ETag')
             ->assertHeader('Content-Length')
             ->assertHeader('Cache-Control')
@@ -174,13 +197,42 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
+    public function update_employee_fails()
+    {
+        $this->persist();
+
+        $this->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+
+        $this->json('PATCH', $this->uri.$this->employee->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+
+        $this
+            ->json('PATCH', $this->uri.$this->employee->id, [
+                'document' => '00000000000',
+            ])
+            ->assertStatus(422)
+            ->assertJsonStructure($this->errorStructure);
+    }
+
+    /**
+     * @test
+     */
     public function delete_employee()
     {
         $this->persist();
 
-        $response = $this->json('DELETE', '/employees/'.$this->employee->id);
+        $this->json('DELETE', $this->uri.$this->employee->id)->assertStatus(204);
+    }
 
-        $response->assertStatus(204);
+    /**
+     * @test
+     */
+    public function delete_employee_fails()
+    {
+        $this->persist();
+
+        $this->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+
+        $this->json('DELETE', $this->uri.$this->employee->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -189,7 +241,6 @@ class EmployeeControllerTest extends TestCase
     public function tearDown(): void
     {
         User::truncate();
-
         parent::tearDown();
     }
 
@@ -198,7 +249,7 @@ class EmployeeControllerTest extends TestCase
      */
     private function update()
     {
-        return $this->json('PATCH', '/employees/'.$this->employee->id, [
+        return $this->json('PATCH', $this->uri.$this->employee->id, [
             'name'        => $this->faker->name,
             'email'       => $this->faker->safeEmail,
             'document'    => $this->employee->document,

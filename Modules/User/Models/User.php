@@ -58,6 +58,17 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
     ];
 
     /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value)
+    {
+        return $this->find($value) ?? abort(404);
+    }
+
+    /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
@@ -180,8 +191,6 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
      */
     public function scopeSearchPaginated($query, string $search = NULL, int $page = 1, int $limit = 10)
     {
-
-
         $query->getQuery()->projections = ['score' => ['$meta' => 'textScore']];
         $query->orderBy('score', ['$meta' => 'textScore']);
         $query->skip(($page - 1) * $limit);
