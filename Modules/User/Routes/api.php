@@ -1,9 +1,10 @@
 <?php
 
-Route::group([],function () {
-        Route::apiResource('users', 'UserController');
+Route::prefix('users')
+    ->as('users.')
+    ->group(function () {
+        Route::put('password', 'UserController@changePassword')->name('change-password');
 
-        Route::put('users/password', 'UserController@changePassword')->name('users.password');
+        Route::get('notifications', 'NotificationController@index')->name('notifications.index');
+        Route::patch('notifications/{notification}', 'NotificationController@update')->name('notifications.update');
     });
-
-Route::get('notifications/{user}', 'NotificationController@index');

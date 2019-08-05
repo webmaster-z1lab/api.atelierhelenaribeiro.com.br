@@ -16,6 +16,7 @@ use Jenssegers\Mongodb\Eloquent\Model;
  *
  * @package App\Models
  * @property-read string                                        $id
+ * @property-read string                                        $notifiable_id
  * @property-read array                                         $data
  * @property-read string                                        $type
  * @property-read \Carbon\Carbon                                $created_at
@@ -58,6 +59,17 @@ class DatabaseNotification extends Model
     public function notifiable()
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value)
+    {
+        return $this->find($value) ?? abort(404);
     }
 
     /**

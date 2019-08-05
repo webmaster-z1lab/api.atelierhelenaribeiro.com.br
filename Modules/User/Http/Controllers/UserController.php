@@ -18,6 +18,9 @@ use Modules\User\Repositories\UserRepository;
  */
 class UserController extends ApiController
 {
+    /**
+     * @var \Modules\User\Repositories\UserRepository
+     */
     protected $repository;
 
     /**
@@ -29,37 +32,6 @@ class UserController extends ApiController
     {
         $this->repository = $repository;
     }
-
-    /**
-     *
-     */
-    public function index() { }
-
-    /**
-     * @param  \Modules\User\Models\User  $user
-     *
-     * @return \Modules\User\Http\Resources\UserResource
-     */
-    public function show(User $user): UserResource
-    {
-        return UserResource::make($user);
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     */
-    public function store(Request $request) { }
-
-    /**
-     * @param  \Illuminate\Http\Request   $request
-     * @param  \Modules\User\Models\User  $user
-     */
-    public function update(Request $request, User $user) { }
-
-    /**
-     * @param  \Modules\User\Models\User  $user
-     */
-    public function destroy(User $user) { }
 
     /**
      * @param  \Modules\User\Http\Requests\ChangePasswordRequest  $request

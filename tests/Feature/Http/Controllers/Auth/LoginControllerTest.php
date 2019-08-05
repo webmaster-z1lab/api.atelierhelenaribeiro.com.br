@@ -14,7 +14,6 @@ class LoginControllerTest extends parentAlias
      * @var \Modules\User\Models\User
      */
     private $user;
-
     /**
      * @var string
      */

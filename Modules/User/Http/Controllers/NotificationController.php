@@ -8,6 +8,7 @@
 
 namespace Modules\User\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Modules\User\Http\Resources\NotificationResource;
 use Modules\User\Models\DatabaseNotification;
 
@@ -31,6 +32,8 @@ class NotificationController
      */
     public function index()
     {
+        if (!empty(\Request::query()) && NULL !== \Request::query()['filter']) return $this->latest();
+
         return NotificationResource::collection($this->user->notifications);
     }
 
@@ -47,10 +50,12 @@ class NotificationController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function markAsRead(DatabaseNotification $notification)
+    public function update(DatabaseNotification $notification): JsonResponse
     {
+        if($notification->notifiable_id !== $this->user->id) abort(403);
+
         $notification->markAsRead();
 
-        return response()->json(NULL, 204);
+        return new JsonResponse(NULL, 204);
     }
 }
