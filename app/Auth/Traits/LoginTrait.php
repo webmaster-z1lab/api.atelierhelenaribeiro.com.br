@@ -6,14 +6,13 @@ use App\Auth\Models\Token;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Http\Request;
-use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Key;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Modules\User\Models\User;
 
 trait LoginTrait
 {
+    use TokenTrait;
+
     /**
      * @param  \Modules\User\Models\User  $user
      * @param  \Illuminate\Http\Request   $request
@@ -44,37 +43,6 @@ trait LoginTrait
         }
 
         event(new Logout('api', $user));
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string                    $user_id
-     *
-     * @return string
-     */
-    protected function createToken(Request $request, string $user_id): string
-    {
-        $token = Token::create([
-            'user_id'    => $user_id,
-            'ip'         => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'asked_by'   => $request->getHttpHost(),
-            'expires_at' => $request->filled('remember')
-                ? now()->addDecade()
-                : now()->addMinutes(intval(config('session.lifetime'))),
-        ]);
-
-        $jwt = (new Builder())
-            ->issuedBy(\Str::finish(config('app.url'), '/'))
-            ->permittedFor($token->asked_by)
-            ->identifiedBy($token->id, TRUE)
-            ->issuedAt($token->created_at->timestamp)
-            ->canOnlyBeUsedAfter($token->created_at->timestamp)
-            ->expiresAt($token->expires_at->timestamp)
-            ->relatedTo($user_id)
-            ->getToken(new Sha256(), new Key('file://'.storage_path('private.key')));
-
-        return (string) $jwt;
     }
 
     /**
