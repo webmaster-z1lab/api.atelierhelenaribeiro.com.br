@@ -249,7 +249,7 @@ class EmployeeControllerTest extends TestCase
      */
     private function update()
     {
-        return $this->json('PATCH', $this->uri.$this->employee->id, [
+        return $this->json('PUT', $this->uri.$this->employee->id, [
             'name'        => $this->faker->name,
             'email'       => $this->faker->safeEmail,
             'document'    => $this->employee->document,

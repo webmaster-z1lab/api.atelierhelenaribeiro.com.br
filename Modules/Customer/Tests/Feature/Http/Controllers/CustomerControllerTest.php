@@ -151,43 +151,11 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    /*public function get_customer_modified()
-    {
-        $this->persist();
-
-        $response = $this->json('GET', $this->uri.$this->customer->id);
-
-        $response
-            ->assertOk()
-            ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
-
-        sleep(1);
-
-        $this->update();
-
-        $this
-            ->withHeaders(['If-None-Match' => $response->getEtag()])
-            ->json('GET', $this->uri.$this->customer->id)
-            ->assertOk()
-            ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
-    }*/
-
-    /**
-     * @test
-     */
     public function update_customer()
     {
         $this->persist();
 
         $response = $this->update();
-
-        $response->dump();
 
         $response
             ->assertOk()
@@ -252,7 +220,7 @@ class CustomerControllerTest extends TestCase
      */
     private function update()
     {
-        return $this->json('PATCH', $this->uri.$this->customer->id, [
+        return $this->json('PUT', $this->uri.$this->customer->id, [
             'company_name'           => $this->faker->company,
             'trading_name'           => $this->faker->companySuffix,
             'state_registration'     => $this->customer->state_registration,
