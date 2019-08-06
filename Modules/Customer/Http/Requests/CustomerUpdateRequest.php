@@ -13,17 +13,24 @@ class CustomerUpdateRequest extends CustomerRequest
     {
         $customer = \Route::current()->parameter('customer');
 
-        return [
+        $rules = [
             'company_name'           => 'bail|required|string|between:3,60',
             'trading_name'           => 'bail|required|string|between:3,60',
-            'document'               => $this->getDocumentRules($customer),
             'state_registration'     => 'bail|required|string|between:3,30',
             'municipal_registration' => 'bail|required|string|between:3,30',
+            'annotation'             => 'bail|nullable|string',
+            'contact'                => 'bail|required|string|min:3',
+            'document'               => $this->getDocumentRules($customer),
             'email'                  => $this->getEmailRules($customer),
-            $this->getAddressRules(),
-            $this->getPhonesRules(),
-            $this->getContactsRules(),
+            'seller'                 => $this->getSellerRules(),
+            'status'                 => $this->getStatusRules(),
         ];
+
+        $address = $this->getAddressRules();
+        $phones = $this->getPhonesRules();
+        $owners = $this->getOwnersRules();
+
+        return $rules + $address + $phones + $owners;
     }
 
     /**
@@ -34,28 +41,5 @@ class CustomerUpdateRequest extends CustomerRequest
     public function authorize()
     {
         return TRUE;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getPhonesRules(): array
-    {
-        return [
-            'phones'               => 'bail|nullable|array',
-            'phones.*.phone'       => 'bail|required|cell_phone',
-            'phones.*.is_whatsapp' => 'bail|required|bool_custom',
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    protected function getContactsRules(): array
-    {
-        return [
-            'contacts'   => 'bail|nullable|array',
-            'contacts.*' => 'bail|required|string|min:3',
-        ];
     }
 }

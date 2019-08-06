@@ -36,7 +36,7 @@ $factory->define(User::class, function (Faker $faker) {
     ];
 });
 
-$factory->afterMaking(User::class, function ($user, $faker) {
+$factory->afterMaking(User::class, function (User $user) {
     $user->address()->associate(factory(Address::class)->make());
     $user->phone()->associate(factory(Phone::class)->make());
 });

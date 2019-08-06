@@ -35,6 +35,7 @@ use Modules\User\Notifications\ResetPasswordNotification;
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\User\Models\User                                            query()
+ * @method static \Illuminate\Database\Eloquent\Builder seller()
  * @method static \Illuminate\Database\Eloquent\Builder search(string $search)
  * @method static \Illuminate\Database\Eloquent\Builder searchPaginated(string $search, int $page = 1, int $limit = 10)
  * @mixin \Eloquent
@@ -159,6 +160,18 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
     public function countUnreadNotifications()
     {
         return $this->morphMany(DatabaseNotification::class, 'notifiable')->count();
+    }
+
+    /**
+     * Scope a query to only include users of a given type.
+     *
+     * @param  \Jenssegers\Mongodb\Query\Builder  $query
+     *
+     * @return \Jenssegers\Mongodb\Query\Builder
+     */
+    public function scopeSeller($query)
+    {
+        return $query->whereIn('type', [self::TYPE_ADMIN, self::TYPE_SELLER]);
     }
 
     /**

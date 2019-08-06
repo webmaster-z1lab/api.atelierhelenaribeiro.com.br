@@ -28,10 +28,8 @@ class OwnerResource extends Resource
             'name'       => $this->resource->name,
             'document'   => $this->resource->document,
             'email'      => $this->resource->email,
-            'birth_date' => $this->resource->birth_date->toW3cString(),
-            'phones'     => PhoneResource::collection($this->resource->phones),
-            'created_at' => $this->resource->created_at->toW3cString(),
-            'updated_at' => $this->resource->updated_at->toW3cString(),
+            'birth_date' => $this->resource->birth_date->format('d/m/Y'),
+            'phones'     => PhoneResource::make($this->resource->phone),
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace Modules\Customer\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Customer\Models\CustomerInterface;
 
 class CustomerRequest extends FormRequest
 {
@@ -14,17 +15,24 @@ class CustomerRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'company_name'           => 'bail|required|string|between:3,60',
-            'trading_name'           => 'bail|required|string|between:3,60',
+            'trading_name'           => 'bail|nullable|string|between:3,60',
+            'state_registration'     => 'bail|nullable|string|between:3,30',
+            'municipal_registration' => 'bail|nullable|string|between:3,30',
+            'annotation'             => 'bail|nullable|string',
+            'contact'                => 'bail|required|string|min:3',
             'document'               => $this->getDocumentRules(),
-            'state_registration'     => 'bail|required|string|between:3,30',
-            'municipal_registration' => 'bail|required|string|between:3,30',
             'email'                  => $this->getEmailRules(),
-            $this->getAddressRules(),
-            $this->getPhonesRules(),
-            $this->getContactsRules(),
+            'seller'                 => $this->getSellerRules(),
+            'status'                 => $this->getStatusRules(),
         ];
+
+        $address = $this->getAddressRules();
+        $phones = $this->getPhonesRules();
+        $owners = $this->getOwnersRules();
+
+        return $rules + $address + $phones + $owners;
     }
 
     /**
@@ -42,16 +50,52 @@ class CustomerRequest extends FormRequest
      */
     public function attributes()
     {
-        return [
+        $rules = [
             'company_name'           => 'razão social',
             'trading_name'           => 'nome fantasia',
             'document'               => 'CNPJ',
             'state_registration'     => 'inscrição estadual',
             'municipal_registration' => 'inscrição municipal',
             'email'                  => 'e-mail',
-            $this->getAddressAttributes(),
-            $this->getPhonesAttributes(),
-            $this->getContactsAttributes(),
+            'contact'                => 'contato',
+            'annotation'             => 'observações',
+            'status'                 => 'situação',
+            'seller'                 => 'representante',
+        ];
+
+        $address = $this->getAddressAttributes();
+        $phones = $this->getPhonesAttributes();
+        $owners = $this->getOwnersAttributes();
+
+        return $rules + $address + $phones + $owners;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getStatusRules(): string
+    {
+        $status = [
+            CustomerInterface::STATUS_ACTIVE,
+            CustomerInterface::STATUS_INACTIVE,
+            CustomerInterface::STATUS_STANDBY,
+        ];
+
+        return 'bail|required|string|in:'.implode(',', $status);
+    }
+
+    /**
+     * @return array
+     */
+    protected function getSellerRules(): array
+    {
+        return [
+            'bail',
+            'required',
+            'string',
+            Rule::exists('users', '_id')->where(function ($query) {
+                return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
+            }),
         ];
     }
 
@@ -65,7 +109,7 @@ class CustomerRequest extends FormRequest
         return [
             'bail',
             'required',
-            'cnpj',
+            'document',
             Rule::unique('customers', 'document')->ignore($ignore)->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
@@ -147,25 +191,29 @@ class CustomerRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array
-     */
-    protected function getContactsRules(): array
+    protected function getOwnersRules(): array
     {
         return [
-            'contacts'   => 'bail|required|array|min:1',
-            'contacts.*' => 'bail|required|string|min:3',
+            'owners'               => 'bail|required|array|min:1',
+            'owners.*.name'        => 'bail|required|string|min:3',
+            'owners.*.document'    => 'bail|required|cpf',
+            'owners.*.email'       => 'bail|required|email',
+            'owners.*.birth_date'  => 'bail|required|date|date_format:d/m/Y|before_or_equal:today',
+            'owners.*.phone'       => 'bail|required|cell_phone',
+            'owners.*.is_whatsapp' => 'bail|required|bool_custom',
         ];
     }
 
-    /**
-     * @return array
-     */
-    protected function getContactsAttributes(): array
+    public function getOwnersAttributes(): array
     {
         return [
-            'contacts'   => 'contatos',
-            'contacts.*' => 'contato',
+            'owners'               => 'proprietários',
+            'owners.*.name'        => 'nome do proprietário',
+            'owners.*.document'    => 'CPF do proprietário',
+            'owners.*.email'       => 'e-mail do proprietário',
+            'owners.*.birth_date'  => 'data de nascimento do proprietário',
+            'owners.*.phone'       => 'telefone do proprietário',
+            'owners.*.is_whatsapp' => 'whatsapp do proprietário',
         ];
     }
 }

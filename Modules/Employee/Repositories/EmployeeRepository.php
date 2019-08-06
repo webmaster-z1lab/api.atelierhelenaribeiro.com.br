@@ -30,7 +30,11 @@ class EmployeeRepository
      */
     public function search()
     {
-        return User::search(\Request::query()['search'])->get();
+        $query = \Request::query()['search'];
+
+        if($query === 'seller') return User::seller()->get();
+
+        return User::search($query)->get();
     }
 
     /**

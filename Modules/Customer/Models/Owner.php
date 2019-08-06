@@ -4,19 +4,19 @@ namespace Modules\Customer\Models;
 
 use App\Models\BaseModel;
 use App\Models\Phone;
+use Carbon\Carbon;
 
 /**
  * Modules\Customer\Models\Owner
  *
- * @property-read string                                                       $id
- * @property string                                                            $name
- * @property string                                                            $document
- * @property string                                                            $email
- * @property \Carbon\Carbon                                                    $birth_date
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Phone[] $phones
- * @property-read \Modules\Customer\Models\Customer                            $customer
- * @property-read \Carbon\Carbon                                               $created_at
- * @property-read \Carbon\Carbon                                               $updated_at
+ * @property-read string                            $id
+ * @property string                                 $name
+ * @property string                                 $document
+ * @property string                                 $email
+ * @property \Carbon\Carbon                         $birth_date
+ * @property-read \App\Models\Phone                 $phone
+ * @property-read \Carbon\Carbon                    $created_at
+ * @property-read \Carbon\Carbon                    $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Customer\Models\Owner newModelQuery()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Customer\Models\Owner newQuery()
@@ -36,18 +36,10 @@ class Owner extends BaseModel
     protected $dates = ['birth_date'];
 
     /**
-     * @return \Jenssegers\Mongodb\Relations\EmbedsMany
+     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
      */
-    public function phones()
+    public function phone()
     {
-        return $this->embedsMany(Phone::class);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
+        return $this->embedsOne(Phone::class);
     }
 }

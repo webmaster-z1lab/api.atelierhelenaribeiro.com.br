@@ -19,7 +19,9 @@ use Jenssegers\Mongodb\Eloquent\Model;
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\App\Models\BaseModel newModelQuery()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\App\Models\BaseModel newQuery()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\App\Models\BaseModel query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
+ * @method static \Illuminate\Database\Eloquent\Builder search(string $search)
+ * @method static \Illuminate\Database\Eloquent\Builder searchPaginated(string $search, int $page = 1, int $limit = 10)
  * @mixin \Eloquent
  */
 class BaseModel extends Model
@@ -30,6 +32,7 @@ class BaseModel extends Model
      * Retrieve the model for a bound value.
      *
      * @param  mixed  $value
+     *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
     public function resolveRouteBinding($value)

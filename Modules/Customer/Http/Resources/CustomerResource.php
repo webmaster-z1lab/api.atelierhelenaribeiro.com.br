@@ -4,6 +4,7 @@ namespace Modules\Customer\Http\Resources;
 
 use App\Http\Resources\AddressResource;
 use App\Http\Resources\PhoneResource;
+use App\Traits\ResourceResponseHeaders;
 use Illuminate\Http\Resources\Json\Resource;
 
 /**
@@ -15,6 +16,7 @@ use Illuminate\Http\Resources\Json\Resource;
  */
 class CustomerResource extends Resource
 {
+    use ResourceResponseHeaders;
     /**
      * Transform the resource into an array.
      *
@@ -34,21 +36,11 @@ class CustomerResource extends Resource
             'email'                  => $this->resource->email,
             'address'                => AddressResource::make($this->resource->address),
             'phones'                 => PhoneResource::collection($this->resource->phones),
-            'contacts'               => ContactResource::collection($this->resource->contacts),
             'owners'                 => $this->when($this->resource->owners()->exists(), function () {
                 return OwnerResource::collection($this->resource->owners);
             }),
             'created_at'             => $this->resource->created_at->toW3cString(),
             'updated_at'             => $this->resource->updated_at->toW3cString(),
         ];
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request       $request
-     * @param  \Illuminate\Http\JsonResponse  $response
-     */
-    public function withResponse($request, $response)
-    {
-        $response->header('ETag', md5($this->resource->updated_at));
     }
 }

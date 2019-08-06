@@ -4,22 +4,31 @@ namespace Modules\Customer\Repositories;
 
 use App\Models\Address;
 use App\Models\Phone;
-use Modules\Customer\Models\Contact;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Modules\Customer\Models\Customer;
+use Modules\Customer\Models\Owner;
 
 class CustomerRepository
 {
     /**
-     * @param  int   $items
-     * @param  bool  $paginate
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection|\Modules\Customer\Models\Customer[]
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Modules\Customer\Models\Customer[]
      */
-    public function all(int $items = 10, bool $paginate = TRUE)
+    public function all()
     {
-        if ($paginate) return Customer::paginate($items);
+        if (!empty(\Request::query()) && NULL !== \Request::query()['search']) return $this->search();
 
-        return Customer::all();
+        return Customer::all()->take(30);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function search()
+    {
+        $query = \Request::query()['search'];
+
+        return Customer::search($query)->get();
     }
 
     /**
@@ -31,13 +40,10 @@ class CustomerRepository
     {
         $customer = new Customer($data);
 
-        $customer->address()->associate($this->createAddress($data['address']));
-        foreach ($data['phones'] as $phone) {
-            $customer->phones()->save($this->createPhone($phone));
-        }
-        foreach ($data['contacts'] as $contact) {
-            $customer->contacts()->save($this->createContact($contact));
-        }
+        $customer->seller()->associate($data['seller']);
+        $customer->address()->associate($this->createAddress($data));
+        $this->createPhones($data, $customer);
+        $this->createOwners($data, $customer);
 
         $customer->save();
 
@@ -52,17 +58,14 @@ class CustomerRepository
      */
     public function update(array $data, Customer $customer): Customer
     {
-        $customer->address()->associate($this->createAddress($data['address']));
-        if (array_key_exists('phones', $data) && filled($data['phones'])) {
-            foreach ($data['phones'] as $phone) {
-                $customer->phones()->save($this->createPhone($phone));
-            }
-        }
-        if (array_key_exists('contacts', $data) && filled($data['contacts'])) {
-            foreach ($data['contacts'] as $contact) {
-                $customer->contacts()->save($this->createContact($contact));
-            }
-        }
+        $customer->seller()->associate($data['seller']);
+        $customer->address()->associate($this->createAddress($data));
+
+        $customer->owners()->delete();
+        $customer->phones()->delete();
+
+        $this->createPhones($data, $customer);
+        $this->createOwners($data, $customer);
 
         $customer->update($data);
 
@@ -81,13 +84,48 @@ class CustomerRepository
     }
 
     /**
+     * @param  array                              $data
+     * @param  \Modules\Customer\Models\Customer  $customer
+     *
+     * @return $this
+     */
+    private function createPhones(array $data, Customer &$customer)
+    {
+        foreach ($data['phones'] as $phone) {
+            $customer->phones()->associate($this->createPhone($phone));
+        }
+
+        return $this;
+    }
+
+    /**
      * @param  array  $data
      *
      * @return \App\Models\Phone
      */
     private function createPhone(array $data): Phone
     {
-        return new Phone($data);
+        return new Phone(Arr::only($data, ['phone', 'is_whatsapp']));
+    }
+
+    /**
+     * @param  array                              $data
+     * @param  \Modules\Customer\Models\Customer  $customer
+     *
+     * @return $this
+     */
+    private function createOwners(array $data, Customer &$customer)
+    {
+        foreach ($data['owners'] as $owner) {
+            $owner['birth_date'] = Carbon::createFromFormat('d/m/Y', $owner['birth_date']);
+
+            $aux = new Owner($owner);
+            $aux->phone()->associate($this->createPhone($owner));
+
+            $customer->owners()->associate($aux);
+        }
+
+        return $this;
     }
 
     /**
@@ -97,16 +135,6 @@ class CustomerRepository
      */
     private function createAddress(array $data): Address
     {
-        return new Address($data);
-    }
-
-    /**
-     * @param  string  $name
-     *
-     * @return \Modules\Customer\Models\Contact
-     */
-    private function createContact(string $name): Contact
-    {
-        return new Contact(compact('name'));
+        return new Address($data['address']);
     }
 }
