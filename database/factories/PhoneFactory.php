@@ -10,7 +10,7 @@ $faker->addProvider(new PhoneNumber($faker));
 
 $factory->define(Phone::class, function ($faker) {
     return [
-        'phone'       => $faker->phoneNumberCleared,
+        'number'      => $faker->phoneNumberCleared,
         'is_whatsapp' => $faker->boolean(50),
     ];
 });

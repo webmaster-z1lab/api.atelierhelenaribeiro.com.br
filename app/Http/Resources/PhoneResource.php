@@ -25,9 +25,9 @@ class PhoneResource extends Resource
         return [
             'id'            => $this->resource->id,
             'area_code'     => $this->resource->area_code,
-            'phone'         => $this->resource->phone,
+            'phone'         => $this->resource->number,
             'international' => $this->resource->international,
-            'full_number'   => $this->resource->full_number,
+            'number'        => $this->resource->full_number,
             'is_whatsapp'   => $this->resource->is_whatsapp,
             'formatted'     => $this->resource->formatted,
         ];

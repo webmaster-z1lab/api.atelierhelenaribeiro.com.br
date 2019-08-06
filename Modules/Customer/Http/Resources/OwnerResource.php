@@ -29,7 +29,7 @@ class OwnerResource extends Resource
             'document'   => $this->resource->document,
             'email'      => $this->resource->email,
             'birth_date' => $this->resource->birth_date->format('d/m/Y'),
-            'phones'     => PhoneResource::make($this->resource->phone),
+            'phone'      => $this->when(NULL !== $this->resource->phone, PhoneResource::make($this->resource->phone)),
         ];
     }
 }

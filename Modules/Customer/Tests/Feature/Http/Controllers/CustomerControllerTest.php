@@ -268,8 +268,10 @@ class CustomerControllerTest extends TestCase
             $owners[$key] = $owner->toArray();
 
             $owners[$key]['birth_date'] = $owner->birth_date->format('d/m/Y');
-            $owners[$key]['phone'] = $update ? $this->faker->phoneNumberCleared : $owner->phone->full_number;
-            $owners[$key]['is_whatsapp'] = $owner->phone->is_whatsapp;
+            $owners[$key]['phone'] = [
+                'number'      => $update ? $this->faker->phoneNumberCleared : $owner->phone->full_number,
+                'is_whatsapp' => $owner->phone->is_whatsapp,
+            ];
         }
 
         return $owners;
@@ -285,7 +287,7 @@ class CustomerControllerTest extends TestCase
         $phones = [];
 
         foreach ($this->customer->phones as $key => $phone) {
-            $phones[$key]['phone'] = $update ? $this->faker->phoneNumberCleared : $phone->full_number;
+            $phones[$key]['number'] = $update ? $this->faker->phoneNumberCleared : $phone->full_number;
             $phones[$key]['is_whatsapp'] = $phone->is_whatsapp;
         }
 

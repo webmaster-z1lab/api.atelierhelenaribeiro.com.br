@@ -174,7 +174,7 @@ class CustomerRequest extends FormRequest
     {
         return [
             'phones'               => 'bail|required|array|min:1',
-            'phones.*.phone'       => 'bail|required|cell_phone',
+            'phones.*.number'      => 'bail|required|cell_phone',
             'phones.*.is_whatsapp' => 'bail|required|bool_custom',
         ];
     }
@@ -186,7 +186,7 @@ class CustomerRequest extends FormRequest
     {
         return [
             'phones'               => 'telefones',
-            'phones.*.phone'       => 'telefone',
+            'phones.*.number'      => 'número',
             'phones.*.is_whatsapp' => 'whatsapp',
         ];
     }
@@ -194,13 +194,14 @@ class CustomerRequest extends FormRequest
     protected function getOwnersRules(): array
     {
         return [
-            'owners'               => 'bail|required|array|min:1',
-            'owners.*.name'        => 'bail|required|string|min:3',
-            'owners.*.document'    => 'bail|required|cpf',
-            'owners.*.email'       => 'bail|required|email',
-            'owners.*.birth_date'  => 'bail|required|date|date_format:d/m/Y|before_or_equal:today',
-            'owners.*.phone'       => 'bail|required|cell_phone',
-            'owners.*.is_whatsapp' => 'bail|required|bool_custom',
+            'owners'                     => 'bail|required|array|min:1',
+            'owners.*.name'              => 'bail|required|string|min:3',
+            'owners.*.document'          => 'bail|required|cpf',
+            'owners.*.email'             => 'bail|required|email',
+            'owners.*.birth_date'        => 'bail|required|date|date_format:d/m/Y|before_or_equal:today',
+            'owners.*.phone'             => 'bail|array|required',
+            'owners.*.phone.number'      => 'bail|required|cell_phone',
+            'owners.*.phone.is_whatsapp' => 'bail|required|bool_custom',
         ];
     }
 

@@ -33,7 +33,6 @@ class EmployeeControllerTest extends TestCase
         'updated_at',
         'address',
         'phone',
-        'is_whatsapp',
     ];
     /**
      * @var array
@@ -71,13 +70,15 @@ class EmployeeControllerTest extends TestCase
     public function create_employee()
     {
         $response = $this->json('POST', $this->uri, [
-            'name'        => $this->employee->name,
-            'email'       => $this->employee->email,
-            'document'    => $this->employee->document,
-            'type'        => $this->employee->type,
-            'phone'       => $this->employee->phone->full_number,
-            'is_whatsapp' => $this->employee->phone->is_whatsapp,
-            'address'     => $this->employee->address->toArray(),
+            'name'     => $this->employee->name,
+            'email'    => $this->employee->email,
+            'document' => $this->employee->document,
+            'type'     => $this->employee->type,
+            'phone'    => [
+                'number'      => $this->employee->phone->full_number,
+                'is_whatsapp' => $this->employee->phone->is_whatsapp,
+            ],
+            'address'  => $this->employee->address->toArray(),
         ]);
 
         $response
@@ -250,13 +251,15 @@ class EmployeeControllerTest extends TestCase
     private function update()
     {
         return $this->json('PUT', $this->uri.$this->employee->id, [
-            'name'        => $this->faker->name,
-            'email'       => $this->faker->safeEmail,
-            'document'    => $this->employee->document,
-            'type'        => $this->employee->type,
-            'phone'       => $this->faker->phoneNumberCleared,
-            'is_whatsapp' => $this->employee->phone->is_whatsapp,
-            'address'     => [
+            'name'     => $this->faker->name,
+            'email'    => $this->faker->safeEmail,
+            'document' => $this->employee->document,
+            'type'     => $this->employee->type,
+            'phone'    => [
+                'number'      => $this->faker->phoneNumberCleared,
+                'is_whatsapp' => $this->employee->phone->is_whatsapp,
+            ],
+            'address'  => [
                 'street'      => $this->faker->streetName,
                 'number'      => $this->employee->address->number,
                 'complement'  => $this->employee->address->complement,

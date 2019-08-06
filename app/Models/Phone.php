@@ -7,7 +7,7 @@ namespace App\Models;
  *
  * @property-read string $id
  * @property string      $area_code
- * @property string      $phone
+ * @property string      $number
  * @property string      $formatted
  * @property string      $international
  * @property string      $full_number
@@ -25,7 +25,7 @@ class Phone extends BaseModel
 
     protected $fillable = [
         'area_code',
-        'phone',
+        'number',
         'is_whatsapp',
     ];
 
@@ -40,10 +40,10 @@ class Phone extends BaseModel
     /**
      * @param  string  $value
      */
-    public function setPhoneAttribute(string $value)
+    public function setNumberAttribute(string $value)
     {
         $this->attributes['area_code'] = substr($value, 0, 2);
-        $this->attributes['phone'] = substr($value, 2);
+        $this->attributes['number'] = substr($value, 2);
     }
 
     /**
@@ -64,8 +64,8 @@ class Phone extends BaseModel
     public function getFormattedAttribute()
     {
         $string = "(".$this->attributes['area_code'].") ";
-        $string .= substr($this->attributes['phone'], 0, 5)."-";
-        $string .= substr($this->attributes['phone'], 5);
+        $string .= substr($this->attributes['number'], 0, 5)."-";
+        $string .= substr($this->attributes['number'], 5);
 
         return $string;
     }
@@ -75,7 +75,7 @@ class Phone extends BaseModel
      */
     public function getInternationalAttribute()
     {
-        return "55".$this->attributes['area_code'].$this->attributes['phone'];
+        return "55".$this->attributes['area_code'].$this->attributes['number'];
     }
 
     /**
@@ -83,6 +83,6 @@ class Phone extends BaseModel
      */
     public function getFullNumberAttribute()
     {
-        return $this->attributes['area_code'].$this->attributes['phone'];
+        return $this->attributes['area_code'].$this->attributes['number'];
     }
 }

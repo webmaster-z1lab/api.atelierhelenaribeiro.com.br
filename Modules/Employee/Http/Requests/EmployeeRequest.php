@@ -88,8 +88,9 @@ class EmployeeRequest extends FormRequest
     protected function getPhoneRules(): array
     {
         return [
-            'phone'       => 'bail|required|cell_phone',
-            'is_whatsapp' => 'bail|required|bool_custom',
+            'phone'       => 'bail|required|array',
+            'phone.number'      => 'bail|required|cell_phone',
+            'phone.is_whatsapp' => 'bail|required|bool_custom',
         ];
     }
 

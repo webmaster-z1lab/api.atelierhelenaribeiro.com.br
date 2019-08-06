@@ -88,7 +88,7 @@ class EmployeeRepository
      */
     private function createPhone(array $data): Phone
     {
-        return new Phone(Arr::only($data, ['phone', 'is_whatsapp']));
+        return new Phone($data['phone']);
     }
 
     /**
