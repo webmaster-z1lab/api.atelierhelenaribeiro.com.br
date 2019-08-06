@@ -10,23 +10,21 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 
 trait TokenTrait
 {
-    public function createToken(Request $request, string $user_id)
+    use AskedByTrait;
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string                    $user_id
+     *
+     * @return string
+     */
+    public function createToken(Request $request, string $user_id): string
     {
-        $url = \Str::finish($request->server('HTTP_REFERER'), '/');
-        $data = parse_url($url);
-        if (config('app.env') !== 'testing') {
-            $asked_by = "{$data['scheme']}://{$data['host']}";
-
-            if (isset($data['port']) && $data['port'] !== 80) $asked_by .= ":{$data['port']}";
-        } else {
-            $asked_by = 'testing';
-        }
-
         $token = Token::create([
             'user_id'    => $user_id,
             'ip'         => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'asked_by'   => \Str::finish($asked_by, '/'),
+            'asked_by'   => $this->getAskedBy($request->server('HTTP_REFERER', '/')),
             'expires_at' => $request->filled('remember')
                 ? now()->addDecade()
                 : now()->addMinutes(intval(config('session.lifetime'))),
