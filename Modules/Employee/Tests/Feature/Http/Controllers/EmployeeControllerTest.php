@@ -67,6 +67,16 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
+    public function get_sellers()
+    {
+        $this->persist();
+
+        $this->json('GET', $this->uri.'?search=seller')->assertOk()->assertJsonStructure([]);
+    }
+
+    /**
+     * @test
+     */
     public function create_employee()
     {
         $response = $this->json('POST', $this->uri, [
