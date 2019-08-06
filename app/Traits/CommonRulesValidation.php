@@ -18,20 +18,31 @@ trait CommonRulesValidation
      *
      * @return array
      */
-    public function mergeRules(array ...$args)
+    public function mergeRules(...$args)
     {
-        $rules = [];
+        $rules = NULL;
 
         foreach ($args as $rule) {
-            array_merge($rules, $rule);
+            $rules = (NULL !== $rules) ? $rules + $rule : $rule;
         }
 
         return $rules;
     }
 
-    public function getAttributes(...$args)
+    /**
+     * @param  mixed  ...$args
+     *
+     * @return mixed|null
+     */
+    public function mergeAttributes(...$args)
     {
+        $attributes = NULL;
 
+        foreach ($args as $rule) {
+            $attributes = (NULL !== $attributes) ? $attributes + $rule : $rule;
+        }
+
+        return $attributes;
     }
 
     /**
@@ -61,7 +72,7 @@ trait CommonRulesValidation
      *
      * @return array
      */
-    public function getEmailRules(string $ignore = NULL): array
+    public function getEmailRules($ignore = NULL): array
     {
         return [
             'bail',
@@ -79,7 +90,7 @@ trait CommonRulesValidation
      *
      * @return array
      */
-    public function getDocumentRules(string $type = 'cpf', string $ignore = NULL): array
+    public function getDocumentRules(string $type = 'cpf', $ignore = NULL): array
     {
         return [
             'bail',
@@ -96,7 +107,7 @@ trait CommonRulesValidation
      *
      * @return array
      */
-    public function getIdentityRules(string $ignore = NULL): array
+    public function getIdentityRules($ignore = NULL): array
     {
         return [
             'bail',
@@ -163,5 +174,4 @@ trait CommonRulesValidation
             'phone.is_whatsapp' => 'whatsapp',
         ];
     }
-
 }

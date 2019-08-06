@@ -10,6 +10,7 @@ use Modules\Customer\Models\CustomerInterface;
 class CustomerRequest extends FormRequest
 {
     use CommonRulesValidation;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -30,13 +31,12 @@ class CustomerRequest extends FormRequest
             'status'                 => $this->getStatusRules(),
         ];
 
-        return $this->mergeRules($rules, $this->getAddressRules(), $this->getPhoneRules(), $this->getOwnersRules());
-
-        /*$address = $this->getAddressRules();
-        $phones = $this->getPhoneRules();
-        $owners = $this->getOwnersRules();
-
-        return $rules + $address + $phones + $owners;*/
+        return $this->mergeRules(
+            $rules,
+            $this->getAddressRules(),
+            $this->getPhoneRules(FALSE),
+            $this->getOwnersRules()
+        );
     }
 
     /**
@@ -67,11 +67,12 @@ class CustomerRequest extends FormRequest
             'seller'                 => 'representante',
         ];
 
-        $address = $this->getAddressAttributes();
-        $phones = $this->getPhoneAttributes();
-        $owners = $this->getOwnersAttributes();
-
-        return $attr + $address + $phones + $owners;
+        return $this->mergeAttributes(
+            $attr,
+            $this->getAddressAttributes(),
+            $this->getPhoneAttributes(FALSE),
+            $this->getOwnersAttributes()
+        );
     }
 
     /**

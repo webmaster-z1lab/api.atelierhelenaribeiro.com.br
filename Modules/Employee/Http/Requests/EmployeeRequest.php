@@ -2,12 +2,14 @@
 
 namespace Modules\Employee\Http\Requests;
 
+use App\Traits\CommonRulesValidation;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Modules\Employee\Models\EmployeeTypes;
 
 class EmployeeRequest extends FormRequest
 {
+    use CommonRulesValidation;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -22,10 +24,11 @@ class EmployeeRequest extends FormRequest
             'type'     => $this->getTypeRules(),
         ];
 
-        $address = $this->getAddressRules();
-        $phone = $this->getPhoneRules();
-
-        return $rules + $address + $phone;
+        return $this->mergeRules(
+            $rules,
+            $this->getAddressRules(),
+            $this->getPhoneRules()
+        );
     }
 
     /**
@@ -38,37 +41,23 @@ class EmployeeRequest extends FormRequest
         return TRUE;
     }
 
+    /**
+     * @return array|mixed|null
+     */
     public function attributes()
     {
-        return [
-            'name'                => 'nome',
-            'email'               => 'email',
-            'document'            => 'CPF',
-            'type'                => 'tipo',
-            'address'             => 'endereço',
-            'address.street'      => 'rua',
-            'address.number'      => 'número',
-            'address.district'    => 'bairro',
-            'address.postal_code' => 'CEP',
-            'address.city'        => 'cidade',
-            'address.state'       => 'estado',
-            'phone'               => 'telefone',
-            'is_whatsapp'         => 'whatsapp',
+        $attr = [
+            'name'     => 'nome',
+            'email'    => 'email',
+            'document' => 'CPF',
+            'type'     => 'tipo',
         ];
-    }
 
-    protected function getAddressRules()
-    {
-        return [
-            'address'             => 'bail|required|array',
-            'address.street'      => 'bail|required|string|min:3',
-            'address.number'      => 'bail|required|integer|min:1',
-            'address.complement'  => 'bail|nullable|string',
-            'address.district'    => 'bail|required|string|min:3',
-            'address.postal_code' => 'bail|required|digits:8',
-            'address.city'        => 'bail|required|string|min:3',
-            'address.state'       => 'bail|required|string|size:2',
-        ];
+        return $this->mergeAttributes(
+            $attr,
+            $this->getAddressAttributes(),
+            $this->getPhoneAttributes()
+        );
     }
 
     /**
@@ -83,66 +72,5 @@ class EmployeeRequest extends FormRequest
         ];
 
         return 'bail|required|string|in:'.implode(',', $types);
-    }
-
-    protected function getPhoneRules(): array
-    {
-        return [
-            'phone'             => 'bail|required|array',
-            'phone.number'      => 'bail|required|cell_phone',
-            'phone.is_whatsapp' => 'bail|required|bool_custom',
-        ];
-    }
-
-    /**
-     * @param  $ignore
-     *
-     * @return array
-     */
-    protected function getEmailRules($ignore = NULL): array
-    {
-        return [
-            'bail',
-            'required',
-            'email',
-            Rule::unique('users', 'email')->ignore($ignore)->where(function ($query) {
-                return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
-            }),
-        ];
-    }
-
-    /**
-     * @param  string  $type  [cpf|cnpj|document]
-     * @param          $ignore
-     *
-     * @return array
-     */
-    protected function getDocumentRules(string $type = 'cpf', $ignore = NULL): array
-    {
-        return [
-            'bail',
-            'required',
-            $type,
-            Rule::unique('users', 'document')->ignore($ignore)->where(function ($query) {
-                return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
-            }),
-        ];
-    }
-
-    /**
-     * @param  string|NULL  $ignore
-     *
-     * @return array
-     */
-    protected function getIdentityRules($ignore = NULL): array
-    {
-        return [
-            'bail',
-            'nullable',
-            'string',
-            Rule::unique('users', 'identity')->ignore($ignore)->where(function ($query) {
-                return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
-            }),
-        ];
     }
 }

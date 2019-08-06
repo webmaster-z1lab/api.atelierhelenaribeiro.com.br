@@ -21,9 +21,10 @@ class EmployeeUpdateRequest extends EmployeeRequest
             'type'     => $this->getTypeRules(),
         ];
 
-        $address = $this->getAddressRules();
-        $phone = $this->getPhoneRules();
-
-        return $rules + $address + $phone;
+        return $this->mergeRules(
+            $rules,
+            $this->getAddressRules(),
+            $this->getPhoneRules()
+        );
     }
 }
