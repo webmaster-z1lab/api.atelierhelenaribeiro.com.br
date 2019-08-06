@@ -198,7 +198,7 @@ class CustomerRequest extends FormRequest
             'owners.*.name'              => 'bail|required|string|min:3',
             'owners.*.document'          => 'bail|required|cpf',
             'owners.*.email'             => 'bail|required|email',
-            'owners.*.birth_date'        => 'bail|required|date|date_format:d/m/Y|before_or_equal:today',
+            'owners.*.birth_date'        => 'bail|required|date_format:"d/m/Y"|before:today',
             'owners.*.phone'             => 'bail|array|required',
             'owners.*.phone.number'      => 'bail|required|cell_phone',
             'owners.*.phone.is_whatsapp' => 'bail|required|bool_custom',

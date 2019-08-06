@@ -81,6 +81,8 @@ class CustomerControllerTest extends TestCase
             'phones'                 => $this->getPhones(),
         ]);
 
+        $response->dump();
+
         $response
             ->assertStatus(201)
             ->assertHeader('ETag')
