@@ -2,12 +2,14 @@
 
 namespace Modules\Customer\Http\Requests;
 
+use App\Traits\CommonRulesValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Customer\Models\CustomerInterface;
 
 class CustomerRequest extends FormRequest
 {
+    use CommonRulesValidation;
     /**
      * Get the validation rules that apply to the request.
      *
@@ -22,17 +24,19 @@ class CustomerRequest extends FormRequest
             'municipal_registration' => 'bail|nullable|string|between:3,30',
             'annotation'             => 'bail|nullable|string',
             'contact'                => 'bail|required|string|min:3',
-            'document'               => $this->getDocumentRules(),
+            'document'               => $this->getDocumentRules('document'),
             'email'                  => $this->getEmailRules(),
             'seller'                 => $this->getSellerRules(),
             'status'                 => $this->getStatusRules(),
         ];
 
-        $address = $this->getAddressRules();
-        $phones = $this->getPhonesRules();
+        return $this->mergeRules($rules, $this->getAddressRules(), $this->getPhoneRules(), $this->getOwnersRules());
+
+        /*$address = $this->getAddressRules();
+        $phones = $this->getPhoneRules();
         $owners = $this->getOwnersRules();
 
-        return $rules + $address + $phones + $owners;
+        return $rules + $address + $phones + $owners;*/
     }
 
     /**
@@ -50,7 +54,7 @@ class CustomerRequest extends FormRequest
      */
     public function attributes()
     {
-        $rules = [
+        $attr = [
             'company_name'           => 'razão social',
             'trading_name'           => 'nome fantasia',
             'document'               => 'CNPJ',
@@ -64,10 +68,10 @@ class CustomerRequest extends FormRequest
         ];
 
         $address = $this->getAddressAttributes();
-        $phones = $this->getPhonesAttributes();
+        $phones = $this->getPhoneAttributes();
         $owners = $this->getOwnersAttributes();
 
-        return $rules + $address + $phones + $owners;
+        return $attr + $address + $phones + $owners;
     }
 
     /**
@@ -100,96 +104,8 @@ class CustomerRequest extends FormRequest
     }
 
     /**
-     * @param  $ignore
-     *
      * @return array
      */
-    protected function getDocumentRules($ignore = NULL): array
-    {
-        return [
-            'bail',
-            'required',
-            'document',
-            Rule::unique('customers', 'document')->ignore($ignore)->where(function ($query) {
-                return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
-            }),
-        ];
-    }
-
-    /**
-     * @param  $ignore
-     *
-     * @return array
-     */
-    protected function getEmailRules($ignore = NULL): array
-    {
-        return [
-            'bail',
-            'required',
-            'email',
-            Rule::unique('customers', 'email')->ignore($ignore)->where(function ($query) {
-                return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
-            }),
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    protected function getAddressRules()
-    {
-        return [
-            'address'             => 'bail|required|array',
-            'address.street'      => 'bail|required|string|min:3',
-            'address.number'      => 'bail|required|integer|min:1',
-            'address.complement'  => 'bail|nullable|string',
-            'address.district'    => 'bail|required|string|min:3',
-            'address.postal_code' => 'bail|required|digits:8',
-            'address.city'        => 'bail|required|string|min:3',
-            'address.state'       => 'bail|required|string|size:2',
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    protected function getAddressAttributes()
-    {
-        return [
-            'address'             => 'endereço',
-            'address.street'      => 'logradouro',
-            'address.number'      => 'número',
-            'address.complement'  => 'complemento',
-            'address.district'    => 'bairro',
-            'address.postal_code' => 'CEP',
-            'address.city'        => 'cidade',
-            'address.state'       => 'estado',
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    protected function getPhonesRules(): array
-    {
-        return [
-            'phones'               => 'bail|required|array|min:1',
-            'phones.*.number'      => 'bail|required|cell_phone',
-            'phones.*.is_whatsapp' => 'bail|required|bool_custom',
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    protected function getPhonesAttributes(): array
-    {
-        return [
-            'phones'               => 'telefones',
-            'phones.*.number'      => 'número',
-            'phones.*.is_whatsapp' => 'whatsapp',
-        ];
-    }
 
     protected function getOwnersRules(): array
     {
@@ -198,7 +114,7 @@ class CustomerRequest extends FormRequest
             'owners.*.name'              => 'bail|required|string|min:3',
             'owners.*.document'          => 'bail|required|cpf',
             'owners.*.email'             => 'bail|required|email',
-            'owners.*.birth_date'        => 'bail|required|date_format:"d/m/Y"|before:today',
+            'owners.*.birth_date'        => 'bail|required|date_format:"d/m/Y"|before_or_equal:- 18 years',
             'owners.*.phone'             => 'bail|array|required',
             'owners.*.phone.number'      => 'bail|required|cell_phone',
             'owners.*.phone.is_whatsapp' => 'bail|required|bool_custom',
