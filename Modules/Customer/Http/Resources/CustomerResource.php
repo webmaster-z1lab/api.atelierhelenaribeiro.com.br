@@ -36,9 +36,7 @@ class CustomerResource extends Resource
             'email'                  => $this->resource->email,
             'address'                => AddressResource::make($this->resource->address),
             'phones'                 => PhoneResource::collection($this->resource->phones),
-            'owners'                 => $this->when($this->resource->owners()->exists(), function () {
-                return OwnerResource::collection($this->resource->owners);
-            }),
+            'owners'                 => $this->when(NULL !== $this->resource->owners, OwnerResource::collection($this->resource->owners)),
             'created_at'             => $this->resource->created_at->toW3cString(),
             'updated_at'             => $this->resource->updated_at->toW3cString(),
         ];

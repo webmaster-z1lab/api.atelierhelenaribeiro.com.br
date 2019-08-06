@@ -7,7 +7,7 @@ use Modules\User\Models\User;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
 
-class NotificationController extends TestCase
+class NotificationControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 

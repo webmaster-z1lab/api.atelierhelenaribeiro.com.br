@@ -3,7 +3,6 @@
 namespace Modules\User\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
-use Illuminate\Http\Request;
 use Modules\User\Http\Requests\ChangePasswordRequest;
 use Modules\User\Http\Resources\UserResource;
 use Modules\User\Models\User;
@@ -31,6 +30,16 @@ class UserController extends ApiController
     public function __construct(UserRepository $repository)
     {
         $this->repository = $repository;
+    }
+
+    /**
+     * @param  \Modules\User\Models\User  $user
+     *
+     * @return \Modules\User\Http\Resources\UserResource
+     */
+    public function show(User $user): UserResource
+    {
+        return UserResource::make($user);
     }
 
     /**
