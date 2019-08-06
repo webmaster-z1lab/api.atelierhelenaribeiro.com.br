@@ -11,7 +11,7 @@ class NotificationControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    private $uri = '/users/notifications';
+    private $uri = '/notifications/';
     /**
      * @var \Modules\User\Models\User
      */
@@ -38,15 +38,11 @@ class NotificationControllerTest extends TestCase
      */
     public function get_notifications()
     {
-        $this->assertTrue(TRUE);
-    }
-
-    /**
-     * @test
-     */
-    public function notifications_methods_not_accepted()
-    {
-        $this->assertTrue(TRUE);
+        $this
+            ->withHeaders(['Authorization' => "Bearer {$this->login()}"])
+            ->json('GET', $this->uri)
+            ->assertOk()
+            ->assertJsonStructure([]);
     }
 
     /**
@@ -54,7 +50,11 @@ class NotificationControllerTest extends TestCase
      */
     public function get_latest_notifications()
     {
-        $this->assertTrue(TRUE);
+        $this
+            ->withHeaders(['Authorization' => "Bearer {$this->login()}"])
+            ->json('GET', $this->uri."?filter=latest")
+            ->assertOk()
+            ->assertJsonStructure([]);
     }
 
     /**
@@ -66,19 +66,24 @@ class NotificationControllerTest extends TestCase
     }
 
     /**
-     * @test
-     */
-    public function update_notification_from_another_user()
-    {
-        $this->assertTrue(TRUE);
-    }
-
-    /**
      * @throws \Throwable
      */
     public function tearDown(): void
     {
         User::truncate();
         parent::tearDown();
+    }
+
+    /**
+     * @return string
+     */
+    private function login()
+    {
+        $response = $this->json('POST', '/login', [
+            'email'    => $this->user->email,
+            'password' => $this->password,
+        ]);
+
+        return json_decode($response->getContent())->api_token;
     }
 }
