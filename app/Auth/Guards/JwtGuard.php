@@ -3,6 +3,7 @@
 namespace App\Auth\Guards;
 
 use App\Auth\Models\Token;
+use App\Auth\Traits\AskedByTrait;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
@@ -13,7 +14,7 @@ use Lcobucci\JWT\ValidationData;
 
 class JwtGuard implements Guard
 {
-    use GuardHelpers;
+    use GuardHelpers, AskedByTrait;
 
     /**
      * @var \Illuminate\Http\Request
@@ -24,13 +25,14 @@ class JwtGuard implements Guard
      * Create a new authentication guard.
      *
      * @param  \Illuminate\Contracts\Auth\UserProvider  $provider
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request                 $request
+     *
      * @return void
      */
     public function __construct(
         UserProvider $provider,
-        Request $request)
-    {
+        Request $request
+    ) {
         $this->provider = $provider;
         $this->request = $request;
     }
@@ -45,19 +47,19 @@ class JwtGuard implements Guard
         // If we've already retrieved the user for the current request we can just
         // return it back immediately. We do not want to fetch the user data on
         // every call to this method because that would be tremendously slow.
-        if (! is_null($this->user)) {
+        if (!is_null($this->user)) {
             return $this->user;
         }
 
-        $user = null;
+        $user = NULL;
 
         $token = $this->request->bearerToken();
 
-        if (! empty($token)) {
+        if (!empty($token)) {
             $jwt = $this->validateToken($token);
 
             if (is_null($jwt) || $jwt->isExpired() || !$jwt->hasClaim('sub') || empty($jwt->getClaim('sub'))) {
-                return  NULL;
+                return NULL;
             }
 
             $user = $this->provider->retrieveById($jwt->getClaim('sub'));
@@ -70,17 +72,19 @@ class JwtGuard implements Guard
      * Validate a user's credentials.
      *
      * @param  array  $credentials
+     *
      * @return bool
      */
     public function validate(array $credentials = [])
     {
-        return false;
+        return FALSE;
     }
 
     /**
      * Set the current request instance.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return $this
      */
     public function setRequest(Request $request)
@@ -91,7 +95,7 @@ class JwtGuard implements Guard
     }
 
     /**
-     * @param string  $token
+     * @param  string  $token
      *
      * @return \Lcobucci\JWT\Token|null
      */
@@ -99,13 +103,18 @@ class JwtGuard implements Guard
     {
         $jwt = (new Parser())->parse($token);
 
-        $token = Token::find($jwt->getClaim('jti'));
+        $token = Token::whereKey($jwt->getClaim('jti'))
+            ->where('asked_by', $this->getAskedBy($this->request->server('HTTP_REFERER', '/')))
+            ->first();
+
+        if (is_null($token)) return NULL;
 
         $data = new ValidationData();
         $data->setCurrentTime(now()->timestamp);
         $data->setIssuer(\Str::finish(config('app.url'), '/'));
+        $data->setAudience($token->asked_by);
         $data->setSubject($token->user_id);
 
-        return $jwt->validate($data) && $jwt->verify(new Sha256(), 'file://' . storage_path('public.key')) ? $jwt : NULL;
+        return $jwt->validate($data) && $jwt->verify(new Sha256(), 'file://'.storage_path('public.key')) ? $jwt : NULL;
     }
 }
