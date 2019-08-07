@@ -10,6 +10,8 @@ namespace Modules\Catalog\Repositories;
 
 use App\Models\Image;
 use App\Models\Price;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Modules\Catalog\Models\Template;
 
 class TemplateRepository
@@ -22,9 +24,19 @@ class TemplateRepository
      */
     public function all(bool $paginate = TRUE, int $items = 10)
     {
-        if ($paginate) return Template::paginate($items);
+        if (!empty(\Request::query()) && NULL !== \Request::query()['search']) return $this->search();
 
-        return Template::all();
+        return Template::all()->take(30);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function search()
+    {
+        $query = \Request::query()['search'];
+
+        return Template::where('reference', $query)->get();
     }
 
     /**
@@ -36,7 +48,7 @@ class TemplateRepository
     {
         $template = new Template($data);
 
-        $template->prices()->save($this->createPrice($data));
+        $template->prices()->associate($this->createPrice($data));
 
         $template->save();
 
@@ -51,7 +63,7 @@ class TemplateRepository
      */
     public function update(array $data, Template $template): Template
     {
-        $template->prices()->save($this->createPrice($data));
+        $template->prices()->associate($this->createPrice($data));
 
         $template->update($data);
 
@@ -67,6 +79,18 @@ class TemplateRepository
     public function delete(Template $template)
     {
         return $template->delete();
+    }
+
+    /**
+     * @return string
+     */
+    public function getNewReference(): string
+    {
+        do {
+            $reference = strtoupper(Str::random(Template::REFERENCE_LENGTH));
+        } while (Template::where('reference', $reference)->count() > 0);
+
+        return $reference;
     }
 
     /**
@@ -86,7 +110,12 @@ class TemplateRepository
      */
     private function createPrice(array $data): Price
     {
-        return new Price($data);
+        $price = new Price();
+
+        $price->price = $data['price'];
+        $price->started_at = Carbon::now();
+
+        return $price;
     }
 
 }

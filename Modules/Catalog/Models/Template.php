@@ -11,7 +11,7 @@ use Jenssegers\Mongodb\Eloquent\SoftDeletes;
  * Class Template
  *
  * @package Modules\Catalog\Models
- * @property-read mixed                               $id
+ * @property-read string                              $id
  * @property string                                   $reference
  * @property \Illuminate\Database\Eloquent\Collection $images
  * @property \Illuminate\Database\Eloquent\Collection $prices
@@ -29,6 +29,8 @@ use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 class Template extends BaseModel
 {
     use SoftDeletes;
+
+    public const REFERENCE_LENGTH = 8;
 
     protected $fillable = [
         'reference',

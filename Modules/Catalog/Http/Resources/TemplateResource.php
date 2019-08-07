@@ -4,6 +4,7 @@ namespace Modules\Catalog\Http\Resources;
 
 use App\Http\Resources\ImageResource;
 use App\Http\Resources\PriceResource;
+use App\Traits\ResourceResponseHeaders;
 use Illuminate\Http\Resources\Json\Resource;
 
 /**
@@ -15,6 +16,8 @@ use Illuminate\Http\Resources\Json\Resource;
  */
 class TemplateResource extends Resource
 {
+    use ResourceResponseHeaders;
+
     /**
      * Transform the resource into an array.
      *
@@ -27,20 +30,12 @@ class TemplateResource extends Resource
         return [
             'id'         => $this->resource->id,
             'reference'  => $this->resource->reference,
+            'price'      => $this->resource->price->price,
             'created_at' => $this->resource->created_at->toW3cString(),
             'updated_at' => $this->resource->updated_at->toW3cString(),
             'images'     => ImageResource::collection($this->resource->images),
             'prices'     => PriceResource::collection($this->resource->prices),
-            'price'      => PriceResource::make($this->resource->price),
-        ];
-    }
 
-    /**
-     * @param  \Illuminate\Http\Request       $request
-     * @param  \Illuminate\Http\JsonResponse  $response
-     */
-    public function withResponse($request, $response)
-    {
-        $response->header('ETag', md5($this->resource->updated_at));
+        ];
     }
 }

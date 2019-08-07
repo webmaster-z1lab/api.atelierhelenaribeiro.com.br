@@ -80,4 +80,12 @@ class TemplateController extends ApiController
 
         return $this->noContentResponse();
     }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reference(): JsonResponse
+    {
+        return new JsonResponse(['reference' => $this->repository->getNewReference()], 200);
+    }
 }
