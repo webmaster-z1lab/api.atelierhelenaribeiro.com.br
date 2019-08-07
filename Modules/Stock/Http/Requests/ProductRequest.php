@@ -15,13 +15,13 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'serial'   => $this->getSerialRules(),
+            'barcode'  => $this->getBarcodeRules(),
             'size'     => 'bail|required|string',
             'color'    => 'bail|required|string',
             'template' => 'bail|required|exists:templates,_id',
-            'images'   => 'bail|required|array|min:1',
-            'images.*' => 'bail|required|image',
-            'price'    => 'bail|nullable|integer|min:0',
+            //            'images'   => 'bail|required|array|min:1',
+            //            'images.*' => 'bail|required|image',
+            'price'    => 'bail|nullable|integer|min:1',
         ];
     }
 
@@ -56,7 +56,7 @@ class ProductRequest extends FormRequest
      *
      * @return array
      */
-    protected function getSerialRules($ignore = NULL): array
+    protected function getBarcodeRules($ignore = NULL): array
     {
         return [
             'bail',

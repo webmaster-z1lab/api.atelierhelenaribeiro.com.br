@@ -12,11 +12,11 @@ use Modules\Catalog\Models\Template;
  * Modules\Stock\Models\Product
  *
  * @property-read mixed                                                        $id
- * @property string                                                            $serial
- * @property string                                                            $color
+ * @property string                                                            $barcode
  * @property string                                                            $size
  * @property-read \Modules\Catalog\Models\Template                             $template
  * @property \App\Models\Price                                                 $price
+ * @property \Modules\Stock\Models\Color                                       $color
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Image[] $images
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Price[] $prices
  * @property-read \Carbon\Carbon                                               $created_at
@@ -34,7 +34,7 @@ class Product extends BaseModel
     use SoftDeletes;
 
     protected $fillable = [
-        'serial', 'color', 'size',
+        'barcode', 'size',
     ];
 
     /**
@@ -43,6 +43,14 @@ class Product extends BaseModel
     public function template()
     {
         return $this->belongsTo(Template::class);
+    }
+
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
+     */
+    public function color()
+    {
+        return $this->embedsOne(Color::class);
     }
 
     public function images()
