@@ -178,8 +178,15 @@ class JwtGuard implements Guard
     {
         $user = $this->user();
 
-        if (! is_null($this->user) && ! empty($user->getRememberToken())) {
-            $this->cycleRememberToken($user);
+        if (! is_null($this->user)) {
+            if (! empty($user->getRememberToken())) {
+                $this->cycleRememberToken($user);
+            }
+
+            $jwt = $this->validateToken($this->request->bearerToken());
+
+            $token = Token::whereKey($jwt->getClaim('jti'))->first();
+            $token->update(['revoked_at' => now()]);
         }
 
         event(new Logout('api', $user));
