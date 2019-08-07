@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Auth\Traits\LoginTrait;
-use Illuminate\Auth\Events\Attempting;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\User\Http\Resources\UserResource;
-use Modules\User\Models\User;
 
 class LoginController extends Controller
 {
@@ -24,7 +21,7 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers, LoginTrait;
+    use AuthenticatesUsers;
 
     /**
      * Where to redirect users after login.
@@ -41,32 +38,6 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-    }
-
-    /**
-     * Attempt to log the user into the application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
-     */
-    protected function attemptLogin(Request $request)
-    {
-        event(new Attempting('api', $this->credentials($request), $request->filled('remember')));
-
-        /** @var \Modules\User\Models\User $user */
-        if (ctype_digit($request->get($this->username()))) {
-            $user = User::where('document', $request->get($this->username()))->first();
-        } else {
-            $user = User::where('email', $request->get($this->username()))->first();
-        }
-
-        if (!is_null($user) && \Hash::check($request->get('password'), $user->password)) {
-            $this->loginWithUser($user, $request);
-
-            return  TRUE;
-        }
-
-        return FALSE;
     }
 
     /**
@@ -98,14 +69,24 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
-        /** @var \Modules\User\Models\User $user */
-        $user = $this->guard()->user();
-
-        if (! is_null($user)) {
-            $this->logoutWithUser($request, $user);
-        }
+        $this->guard()->logout();
 
         return response()->json(NULL, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Get the needed authorization credentials from the request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    protected function credentials(Request $request)
+    {
+        if (ctype_digit($request->get($this->username()))) {
+            return ['document' => $request->get($this->username()), 'password' => $request->get('password')];
+        } else {
+            return $request->only($this->username(), 'password');
+        }
     }
 
     /**
@@ -118,8 +99,6 @@ class LoginController extends Controller
     {
         $this->clearLoginAttempts($request);
 
-        $user = $this->guard()->user();
-
-        return UserResource::make($user);
+        return UserResource::make($this->guard()->user());
     }
 }

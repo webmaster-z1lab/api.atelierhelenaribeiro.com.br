@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Auth\Traits\LoginTrait;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -23,7 +21,7 @@ class ResetPasswordController extends Controller
     |
     */
 
-    use ResetsPasswords, LoginTrait;
+    use ResetsPasswords;
 
     /**
      * Where to redirect users after resetting their password.
@@ -40,26 +38,6 @@ class ResetPasswordController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
-    }
-
-    /**
-     * Reset the given user's password.
-     *
-     * @param  \Modules\User\Models\User  $user
-     * @param  string  $password
-     * @return void
-     */
-    protected function resetPassword($user, $password)
-    {
-        $user->password = \Hash::make($password);
-
-        $user->setRememberToken(\Str::random(60));
-
-        $user->save();
-
-        event(new PasswordReset($user));
-
-        $this->loginWithUser($user, Request::capture());
     }
 
     /**

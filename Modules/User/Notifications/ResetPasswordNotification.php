@@ -17,7 +17,7 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
      *
      * @var string
      */
-    private $token;
+    public $token;
 
     /**
      * @var array

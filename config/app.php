@@ -167,6 +167,8 @@ return [
          * Package Service Providers...
          */
         Optimus\Heimdal\Provider\LaravelServiceProvider::class,
+        Jenssegers\Mongodb\Auth\PasswordResetServiceProvider::class,
+
         /*
          * Application Service Providers...
          */
