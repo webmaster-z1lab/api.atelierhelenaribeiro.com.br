@@ -20,17 +20,18 @@ class CustomerUpdateRequest extends CustomerRequest
             'municipal_registration' => 'bail|required|string|between:3,30',
             'annotation'             => 'bail|nullable|string',
             'contact'                => 'bail|required|string|min:3',
-            'document'               => $this->getDocumentRules($customer),
+            'document'               => $this->getDocumentRules('document', $customer),
             'email'                  => $this->getEmailRules($customer),
             'seller'                 => $this->getSellerRules(),
             'status'                 => $this->getStatusRules(),
         ];
 
-        $address = $this->getAddressRules();
-        $phones = $this->getPhonesRules();
-        $owners = $this->getOwnersRules();
-
-        return $rules + $address + $phones + $owners;
+        return $this->mergeRules(
+            $rules,
+            $this->getAddressRules(),
+            $this->getPhoneRules(FALSE),
+            $this->getOwnersRules()
+        );
     }
 
     /**

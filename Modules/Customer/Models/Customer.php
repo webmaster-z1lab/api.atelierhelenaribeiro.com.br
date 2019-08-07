@@ -12,6 +12,7 @@ use Modules\User\Models\User;
  * Modules\Customer\Models\Customer
  *
  * @property-read string                                                                    $id
+ * @property-read string                                                                    $seller_id
  * @property string                                                                         $company_name
  * @property string                                                                         $trading_name
  * @property string                                                                         $document

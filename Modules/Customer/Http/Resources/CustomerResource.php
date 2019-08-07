@@ -17,6 +17,7 @@ use Illuminate\Http\Resources\Json\Resource;
 class CustomerResource extends Resource
 {
     use ResourceResponseHeaders;
+
     /**
      * Transform the resource into an array.
      *
@@ -34,6 +35,10 @@ class CustomerResource extends Resource
             'state_registration'     => $this->resource->state_registration,
             'municipal_registration' => $this->resource->municipal_registration,
             'email'                  => $this->resource->email,
+            'annotation'             => $this->resource->annotation,
+            'status'                 => $this->resource->status,
+            'contact'                => $this->resource->contact,
+            'seller'                 => $this->resource->seller_id,
             'address'                => AddressResource::make($this->resource->address),
             'phones'                 => PhoneResource::collection($this->resource->phones),
             'owners'                 => $this->when(NULL !== $this->resource->owners, OwnerResource::collection($this->resource->owners)),

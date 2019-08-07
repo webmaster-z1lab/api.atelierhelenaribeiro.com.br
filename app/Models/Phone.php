@@ -63,9 +63,11 @@ class Phone extends BaseModel
      */
     public function getFormattedAttribute()
     {
+        $divider = (strlen($this->attributes['number']) === 9) ? 5 : 4;
+
         $string = "(".$this->attributes['area_code'].") ";
-        $string .= substr($this->attributes['number'], 0, 5)."-";
-        $string .= substr($this->attributes['number'], 5);
+        $string .= substr($this->attributes['number'], 0, $divider)."-";
+        $string .= substr($this->attributes['number'], $divider);
 
         return $string;
     }

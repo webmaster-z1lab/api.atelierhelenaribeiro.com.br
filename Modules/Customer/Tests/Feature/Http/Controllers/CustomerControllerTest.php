@@ -2,6 +2,7 @@
 
 namespace Modules\Customer\Tests\Feature\Http\Controllers;
 
+use Carbon\Carbon;
 use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Customer\Models\Customer;
