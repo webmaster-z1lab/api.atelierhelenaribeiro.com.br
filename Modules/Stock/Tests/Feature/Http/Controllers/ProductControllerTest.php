@@ -2,14 +2,16 @@
 
 namespace Modules\Stock\Tests\Feature\Http\Controllers;
 
+use App\Models\Image;
 use Modules\Stock\Models\Product;
+use Tests\Base64Files;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 
 class ProductControllerTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase, WithFaker, Base64Files;
 
     private $uri = 'products/';
     /**
@@ -88,6 +90,7 @@ class ProductControllerTest extends TestCase
             'color'    => $this->product->color->name,
             'template' => $this->product->template_id,
             'price'    => $this->product->price->price,
+            'images'   => $this->getBase64Images(),
         ]);
 
         $response
@@ -218,6 +221,7 @@ class ProductControllerTest extends TestCase
     public function tearDown(): void
     {
         Product::truncate();
+        Image::truncate();
 
         parent::tearDown();
     }
@@ -238,10 +242,11 @@ class ProductControllerTest extends TestCase
     private function update()
     {
         return $this->json('PUT', $this->uri.$this->product->id, [
-            'price' => $this->faker->numberBetween(899, 1299),
-            'size' => $this->product->size,
-            'color' => $this->product->color->name,
-            'template' => $this->product->template_id
+            'price'    => $this->faker->numberBetween(899, 1299),
+            'size'     => $this->product->size,
+            'color'    => $this->product->color->name,
+            'template' => $this->product->template_id,
+            'images'   => $this->getBase64Images(),
         ]);
     }
 }

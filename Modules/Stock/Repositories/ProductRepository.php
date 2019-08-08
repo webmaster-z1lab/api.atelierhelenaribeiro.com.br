@@ -4,12 +4,16 @@ namespace Modules\Stock\Repositories;
 
 use App\Models\Image;
 use App\Models\Price;
+use App\Repositories\ImageRepository;
+use App\Traits\FileUpload;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
 
 class ProductRepository
 {
+    use FileUpload;
+
     /**
      * @param  int   $items
      * @param  bool  $paginate
@@ -53,6 +57,7 @@ class ProductRepository
         } else {
             $product->prices()->associate($this->createPrice($template->price->price));
         }
+        $product->images()->saveMany($this->createImages($data['images']));
 
         $product->save();
 
@@ -74,6 +79,9 @@ class ProductRepository
         if ($product->color->name !== $data['color']) {
             $product->color()->associate($this->createColor($data['color']));
         }
+        if (array_key_exists('images', $data) && filled($data['images'])) {
+            $product->images()->saveMany($this->createImages($data['images']));
+        }
 
         $product->update($data);
 
@@ -94,11 +102,11 @@ class ProductRepository
     /**
      * @param  array  $data
      *
-     * @return \App\Models\Image
+     * @return array
      */
-    private function createImage(array $data): Image
+    private function createImages(array $data): array
     {
-        return new Image($data);
+        return (new ImageRepository())->createMany($data);
     }
 
     /**

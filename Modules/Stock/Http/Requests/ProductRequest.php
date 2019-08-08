@@ -18,8 +18,8 @@ class ProductRequest extends FormRequest
             'size'     => 'bail|required|string',
             'color'    => 'bail|required|string',
             'template' => 'bail|required|exists:templates,_id',
-            //            'images'   => 'bail|required|array|min:1',
-            //            'images.*' => 'bail|required|image',
+            'images'   => 'bail|required|array|min:1',
+            'images.*' => 'bail|required|array',
             'price'    => 'bail|nullable|integer|min:1',
         ];
     }
@@ -40,7 +40,6 @@ class ProductRequest extends FormRequest
     public function attributes()
     {
         return [
-            'serial'   => 'número de série',
             'size'     => 'tamanho',
             'color'    => 'cor',
             'template' => 'modelo',
