@@ -73,7 +73,9 @@ class ProductControllerTest extends TestCase
      */
     public function get_products()
     {
-        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([]);
+        $this->persist();
+
+        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([$this->jsonStructure]);
     }
 
     /**

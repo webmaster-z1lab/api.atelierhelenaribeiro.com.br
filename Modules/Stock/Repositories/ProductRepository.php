@@ -47,9 +47,9 @@ class ProductRepository
         $product->template()->associate($template);
         $product->color()->associate($this->createColor($data['color']));
         if (array_key_exists('price', $data) && filled($data['price'])) {
-            $product->prices()->save($this->createPrice(intval($data['price'])));
+            $product->prices()->associate($this->createPrice(intval($data['price'])));
         } else {
-            $product->prices()->save($this->createPrice($template->price->price));
+            $product->prices()->associate($this->createPrice($template->price->price));
         }
 
         $product->save();
@@ -67,7 +67,7 @@ class ProductRepository
     {
         $product->template()->associate($data['template']);
         if (array_key_exists('price', $data) && filled($data['price']) && $product->price->price !== intval($data['price'])) {
-            $product->prices()->save($this->createPrice(intval($data['price'])));
+            $product->prices()->associate($this->createPrice(intval($data['price'])));
         }
         if ($product->color->name !== $data['color']) {
             $product->color()->associate($this->createColor($data['color']));

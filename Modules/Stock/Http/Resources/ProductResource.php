@@ -41,13 +41,4 @@ class ProductResource extends Resource
             'updated_at' => $this->resource->updated_at->toW3cString(),
         ];
     }
-
-    /**
-     * @param  \Illuminate\Http\Request       $request
-     * @param  \Illuminate\Http\JsonResponse  $response
-     */
-    public function withResponse($request, $response)
-    {
-        $response->header('ETag', md5($this->resource->updated_at));
-    }
 }

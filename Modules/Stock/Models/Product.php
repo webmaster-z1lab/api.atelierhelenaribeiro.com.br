@@ -64,7 +64,7 @@ class Product extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Model|\Jenssegers\Mongodb\Relations\EmbedsMany|object|null
+     * @return \App\Models\Price |null
      */
     public function getPriceAttribute()
     {
