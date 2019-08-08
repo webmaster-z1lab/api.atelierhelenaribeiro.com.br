@@ -10,12 +10,16 @@ namespace Modules\Catalog\Repositories;
 
 use App\Models\Image;
 use App\Models\Price;
+use App\Repositories\ImageRepository;
+use App\Traits\FileUpload;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Modules\Catalog\Models\Template;
 
 class TemplateRepository
 {
+    use FileUpload;
+
     /**
      * @param  bool  $paginate
      * @param  int   $items
@@ -48,9 +52,8 @@ class TemplateRepository
     {
         $template = new Template($data);
 
-        $template->prices()->associate($this->createPrice($data));
-
-        $template->save();
+        $template->prices()->associate($this->createPrice($data))->save();
+        $template->images()->saveMany($this->createImages($data));
 
         return $template;
     }
@@ -96,16 +99,6 @@ class TemplateRepository
     /**
      * @param  array  $data
      *
-     * @return \App\Models\Image
-     */
-    private function createImage(array $data): Image
-    {
-        return new Image($data);
-    }
-
-    /**
-     * @param  array  $data
-     *
      * @return \App\Models\Price
      */
     private function createPrice(array $data): Price
@@ -118,4 +111,13 @@ class TemplateRepository
         return $price;
     }
 
+    /**
+     * @param  array  $data
+     *
+     * @return array
+     */
+    public function createImages(array $data)
+    {
+        return (new ImageRepository)->createMany($data['images']);
+    }
 }

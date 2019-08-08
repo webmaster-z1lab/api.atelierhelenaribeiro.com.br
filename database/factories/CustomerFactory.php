@@ -8,7 +8,7 @@ use Faker\Generator as Faker;
 use Faker\Provider\pt_BR\Company;
 use Illuminate\Support\Arr;
 use Modules\Customer\Models\Customer;
-use Modules\Customer\Models\CustomerInterface;
+use Modules\Customer\Models\CustomerStatus;
 use Modules\Customer\Models\Owner;
 use Modules\User\Models\User;
 
@@ -16,9 +16,9 @@ $faker = new Faker();
 $faker->addProvider(new Company($faker));
 
 $status = [
-    CustomerInterface::STATUS_ACTIVE,
-    CustomerInterface::STATUS_INACTIVE,
-    CustomerInterface::STATUS_STANDBY,
+    CustomerStatus::ACTIVE,
+    CustomerStatus::INACTIVE,
+    CustomerStatus::STANDBY,
 ];
 
 $factory->define(Customer::class, function (Faker $faker) use ($status) {

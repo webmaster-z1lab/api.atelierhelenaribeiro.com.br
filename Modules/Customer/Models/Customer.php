@@ -36,7 +36,7 @@ use Modules\User\Models\User;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
  * @mixin \Eloquent
  */
-class Customer extends BaseModel implements CustomerInterface
+class Customer extends BaseModel
 {
     use SoftDeletes;
 
@@ -53,7 +53,7 @@ class Customer extends BaseModel implements CustomerInterface
     ];
 
     protected $attributes = [
-        'status' => self::STATUS_ACTIVE,
+        'status' => CustomerStatus::ACTIVE,
     ];
 
     /**
