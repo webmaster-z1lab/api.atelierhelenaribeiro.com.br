@@ -20,9 +20,9 @@ class ImageRepository
      *
      * @return \App\Models\Image
      */
-    public function create($data)
+    public function create($data): Image
     {
-        $file = $this->upload($data, 'images');
+        $file = $this->uploadBase64($data, 'images');
 
         return new Image($file);
     }
@@ -32,7 +32,7 @@ class ImageRepository
      *
      * @return array
      */
-    public function createMany(array $data)
+    public function createMany(array $data): array
     {
         $images = [];
 

@@ -18,7 +18,7 @@ class TemplateRequest extends FormRequest
             'reference' => $this->getReferenceRules(),
             'price'     => 'bail|required|integer|min:1',
             'images'    => 'bail|required|array|min:1',
-            'images.*' => 'bail|image|required'
+            'images.*' => 'bail|required'
         ];
     }
 

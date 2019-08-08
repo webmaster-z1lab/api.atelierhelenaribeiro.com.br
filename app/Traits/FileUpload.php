@@ -10,6 +10,7 @@ namespace App\Traits;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
 
 trait FileUpload
 {
@@ -66,6 +67,30 @@ trait FileUpload
         }
 
         return FALSE;
+    }
+
+
+    /**
+     * @param  array   $file
+     * @param  string  $path
+     * @param  string  $extension
+     *
+     * @return array
+     */
+    public function uploadBase64(array $file, string $path, string $extension = 'webp')
+    {
+        $aux = [];
+
+        $data = (new ImageManager())->make($file['dataURL']);
+
+        $aux['extension'] = $extension;
+        $aux['size_in_bytes'] = $file['upload']['total'];
+        $aux['name'] = explode('.', $file['upload']['filename'])[0];
+        $aux['path'] = $path.'/'.$file['upload']['filename'];
+
+        \Storage::put($aux['path'], $data->encode($extension, 80)->getEncoded());
+
+        return $aux;
     }
 
     /**

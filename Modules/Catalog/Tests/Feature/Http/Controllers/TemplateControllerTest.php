@@ -3,8 +3,7 @@
 namespace Modules\Catalog\Tests\Feature\Http\Controllers;
 
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
 use Modules\Catalog\Models\Template;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -66,7 +65,7 @@ class TemplateControllerTest extends TestCase
             'reference' => $this->template->reference,
             'price'     => $this->template->price->price,
             'is_active' => $this->template->is_active,
-            'images'    => $this->getImages(),
+            'images'    => $this->getBase64Images(),
         ]);
 
         $response->dump();
@@ -239,15 +238,21 @@ class TemplateControllerTest extends TestCase
     /**
      * @return array
      */
-    private function getImages(): array
+    private function getBase64Images(): array
     {
-        Storage::fake('public');
-
         $images = [];
         $total = $this->faker->numberBetween(1, 5);
 
         for ($i = 0; $i < $total; $i++) {
-            $images[] = UploadedFile::fake()->image($this->faker->name.'.jpg', 1200, 720);
+            $image = (new ImageManager())->canvas(1200, 720)->encode('data-url');
+
+            $images[] = [
+                'dataURL' => $image->encoded,
+                'upload'  => [
+                    'filename' => $this->faker->name.'.webp',
+                    'total'    => $this->faker->numberBetween(1, 20000),
+                ],
+            ];
         }
 
         return $images;
