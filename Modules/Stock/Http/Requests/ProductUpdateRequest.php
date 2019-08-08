@@ -14,13 +14,13 @@ class ProductUpdateRequest extends ProductRequest
         $product = \Route::current()->parameter('product');
 
         return [
-            'serial'   => $this->getSerialRules($product),
+            'barcode'  => $this->getBarcodeRules($product),
             'size'     => 'bail|required|string',
             'color'    => 'bail|required|string',
             'template' => 'bail|required|exists:templates,_id',
-            'images'   => 'bail|nullable|array',
-            'images.*' => 'bail|required|image',
-            'price'    => 'bail|nullable|integer|min:0',
+            //            'images'   => 'bail|nullable|array',
+            //            'images.*' => 'bail|required|image',
+            'price'    => 'bail|nullable|integer|min:1',
         ];
     }
 
