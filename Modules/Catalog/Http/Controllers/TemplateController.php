@@ -3,6 +3,7 @@
 namespace Modules\Catalog\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
+use App\Models\Image;
 use Illuminate\Http\JsonResponse;
 use Modules\Catalog\Http\Requests\TemplateRequest;
 use Modules\Catalog\Http\Requests\TemplateUpdateRequest;
@@ -78,6 +79,17 @@ class TemplateController extends ApiController
     {
         $this->repository->delete($template);
 
+        return $this->noContentResponse();
+    }
+
+    /**
+     * @param  \App\Models\Image                 $image
+     * @param  \Modules\Catalog\Models\Template  $template
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroyImage(Image $image, Template $template): JsonResponse
+    {
         return $this->noContentResponse();
     }
 

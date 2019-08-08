@@ -77,7 +77,7 @@ trait FileUpload
      *
      * @return array
      */
-    public function uploadBase64(array $file, string $path, string $extension = 'webp')
+    public function uploadImageBase64(array $file, string $path, string $extension = 'webp')
     {
         $aux = [];
 
@@ -86,7 +86,7 @@ trait FileUpload
         $aux['extension'] = $extension;
         $aux['size_in_bytes'] = $file['upload']['total'];
         $aux['name'] = explode('.', $file['upload']['filename'])[0];
-        $aux['path'] = $path.'/'.$file['upload']['filename'];
+        $aux['path'] = $path.'/'.Str::slug($aux['name']).$extension;
 
         \Storage::put($aux['path'], $data->encode($extension, 80)->getEncoded());
 

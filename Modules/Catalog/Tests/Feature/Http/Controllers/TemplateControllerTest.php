@@ -2,15 +2,16 @@
 
 namespace Modules\Catalog\Tests\Feature\Http\Controllers;
 
+use App\Models\Image;
 use Illuminate\Foundation\Testing\WithFaker;
-use Intervention\Image\ImageManager;
 use Modules\Catalog\Models\Template;
+use Tests\Base64Files;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
 
 class TemplateControllerTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase, WithFaker, Base64Files;
 
     private $uri = '/templates/';
     /**
@@ -67,8 +68,6 @@ class TemplateControllerTest extends TestCase
             'is_active' => $this->template->is_active,
             'images'    => $this->getBase64Images(),
         ]);
-
-        $response->dump();
 
         $response
             ->assertStatus(201)
@@ -186,6 +185,30 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
+    public function delete_template_image()
+    {
+        $response = $this->json('POST', $this->uri, [
+            'reference' => $this->template->reference,
+            'price'     => $this->template->price->price,
+            'is_active' => $this->template->is_active,
+            'images'    => $this->getBase64Images(),
+        ]);
+
+        $response
+            ->assertStatus(201)
+            ->assertHeader('ETag')
+            ->assertHeader('Content-Length')
+            ->assertHeader('Cache-Control')
+            ->assertJsonStructure($this->jsonStructure);
+
+        $template = json_decode($response->getContent());
+
+        $this->json('DELETE', 'images/'.$template->images[0]->id.$this->uri.$template->id)->dump()->assertStatus(204);
+    }
+
+    /**
+     * @test
+     */
     public function delete_template_fails()
     {
         $this->persist();
@@ -209,6 +232,7 @@ class TemplateControllerTest extends TestCase
     public function tearDown(): void
     {
         Template::truncate();
+        Image::truncate();
 
         parent::tearDown();
     }
@@ -231,30 +255,7 @@ class TemplateControllerTest extends TestCase
         return $this->json('PUT', $this->uri.$this->template->id, [
             'price'     => $this->faker->numberBetween(899, 1299),
             'is_active' => $this->faker->boolean(80),
-            'images'    => $this->getImages(),
+            'images'    => $this->getBase64Images(),
         ]);
-    }
-
-    /**
-     * @return array
-     */
-    private function getBase64Images(): array
-    {
-        $images = [];
-        $total = $this->faker->numberBetween(1, 5);
-
-        for ($i = 0; $i < $total; $i++) {
-            $image = (new ImageManager())->canvas(1200, 720)->encode('data-url');
-
-            $images[] = [
-                'dataURL' => $image->encoded,
-                'upload'  => [
-                    'filename' => $this->faker->name.'.webp',
-                    'total'    => $this->faker->numberBetween(1, 20000),
-                ],
-            ];
-        }
-
-        return $images;
     }
 }

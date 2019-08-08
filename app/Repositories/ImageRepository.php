@@ -22,7 +22,7 @@ class ImageRepository
      */
     public function create($data): Image
     {
-        $file = $this->uploadBase64($data, 'images');
+        $file = $this->uploadImageBase64($data, 'images');
 
         return new Image($file);
     }
