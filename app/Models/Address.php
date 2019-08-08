@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Jenssegers\Mongodb\Eloquent\Model;
+
 /**
  * Modules\User\Models\Address
  *
@@ -21,7 +23,7 @@ namespace App\Models;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
  * @mixin \Eloquent
  */
-class Address extends BaseModel
+class Address extends Model
 {
     public $timestamps = FALSE;
 

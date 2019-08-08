@@ -17,8 +17,9 @@ class TemplateRequest extends FormRequest
         return [
             'reference' => $this->getReferenceRules(),
             'price'     => 'bail|required|integer|min:1',
+            'is_active' => 'bail|required|bool_custom',
             'images'    => 'bail|required|array|min:1',
-            'images.*' => 'bail|required'
+            'images.*'  => 'bail|required|array',
         ];
     }
 
@@ -39,6 +40,7 @@ class TemplateRequest extends FormRequest
     {
         return [
             'reference' => 'referência',
+            'is_active' => 'ativo',
             'images'    => 'imagens',
             'images.*'  => 'imagem',
             'price'     => 'preço',

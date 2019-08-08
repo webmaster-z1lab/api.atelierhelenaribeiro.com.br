@@ -13,6 +13,7 @@ class TemplateUpdateRequest extends TemplateRequest
     {
         return [
             'price'    => 'bail|required|integer|min:1',
+            'is_active' => 'bail|required|bool_custom',
             'images'   => 'bail|sometimes|required|array|min:1',
             'images.*' => 'bail|sometimes|required|array',
         ];

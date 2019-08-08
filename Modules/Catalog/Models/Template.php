@@ -68,6 +68,6 @@ class Template extends BaseModel
      */
     public function getPriceAttribute()
     {
-        return $this->prices()->orderBy('started_at', 'DESC')->first();
+        return $this->prices->sortByDesc('started_at')->first();
     }
 }
