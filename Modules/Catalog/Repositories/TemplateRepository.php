@@ -68,6 +68,8 @@ class TemplateRepository
     {
         $template->prices()->associate($this->createPrice($data));
 
+        if(isset($data['images'])) $template->images()->saveMany($this->createImages($data));
+
         $template->update($data);
 
         return $template;

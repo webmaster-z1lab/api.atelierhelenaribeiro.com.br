@@ -87,9 +87,12 @@ class TemplateController extends ApiController
      * @param  \Modules\Catalog\Models\Template  $template
      *
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function destroyImage(Image $image, Template $template): JsonResponse
     {
+        $image->delete();
+
         return $this->noContentResponse();
     }
 

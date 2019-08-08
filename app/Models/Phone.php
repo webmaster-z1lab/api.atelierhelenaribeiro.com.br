@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Jenssegers\Mongodb\Eloquent\Model;
+
 /**
  * Modules\User\Models\Phone
  *
@@ -19,7 +21,7 @@ namespace App\Models;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
  * @mixin \Eloquent
  */
-class Phone extends BaseModel
+class Phone extends Model
 {
     public $timestamps = FALSE;
 
