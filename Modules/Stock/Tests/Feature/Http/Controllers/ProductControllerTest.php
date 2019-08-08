@@ -84,7 +84,6 @@ class ProductControllerTest extends TestCase
     public function create_product()
     {
         $response = $this->json('POST', $this->uri, [
-            'barcode'  => $this->product->barcode,
             'size'     => $this->product->size,
             'color'    => $this->product->color->name,
             'template' => $this->product->template_id,
@@ -239,7 +238,6 @@ class ProductControllerTest extends TestCase
     private function update()
     {
         return $this->json('PUT', $this->uri.$this->product->id, [
-            'barcode' => $this->product->barcode,
             'price' => $this->faker->numberBetween(899, 1299),
             'size' => $this->product->size,
             'color' => $this->product->color->name,
