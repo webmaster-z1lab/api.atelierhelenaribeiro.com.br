@@ -40,6 +40,8 @@ class ProductRepository
      */
     public function create(array $data): Product
     {
+        $data['barcode'] = \Str::random();
+
         $product = new Product($data);
 
         $template = Template::find($data['template']);
