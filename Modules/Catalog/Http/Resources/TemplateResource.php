@@ -31,6 +31,7 @@ class TemplateResource extends Resource
             'id'         => $this->resource->id,
             'reference'  => $this->resource->reference,
             'price'      => $this->resource->price->price,
+            'is_active'      => $this->resource->is_active,
             'created_at' => $this->resource->created_at->toW3cString(),
             'updated_at' => $this->resource->updated_at->toW3cString(),
             'images'     => ImageResource::collection($this->resource->images),

@@ -5,7 +5,7 @@ namespace Modules\Customer\Http\Requests;
 use App\Traits\CommonRulesValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Modules\Customer\Models\CustomerInterface;
+use Modules\Customer\Models\CustomerStatus;
 
 class CustomerRequest extends FormRequest
 {
@@ -81,9 +81,9 @@ class CustomerRequest extends FormRequest
     protected function getStatusRules(): string
     {
         $status = [
-            CustomerInterface::STATUS_ACTIVE,
-            CustomerInterface::STATUS_INACTIVE,
-            CustomerInterface::STATUS_STANDBY,
+            CustomerStatus::ACTIVE,
+            CustomerStatus::INACTIVE,
+            CustomerStatus::STANDBY,
         ];
 
         return 'bail|required|string|in:'.implode(',', $status);

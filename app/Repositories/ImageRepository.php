@@ -9,51 +9,38 @@
 namespace App\Repositories;
 
 use App\Models\Image;
+use App\Traits\FileUpload;
 
 class ImageRepository
 {
-    /**
-     * @param  bool  $paginate
-     * @param  int   $items
-     *
-     * @return \App\Models\Image[]|\Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection
-     */
-    public function all(bool $paginate = TRUE, int $items = 10)
-    {
-        if ($paginate) return Image::paginate($items);
+    use FileUpload;
 
-        return Image::all();
+    /**
+     * @param $data
+     *
+     * @return \App\Models\Image
+     */
+    public function create($data)
+    {
+        $file = $this->upload($data, 'images');
+
+        return new Image($file);
     }
 
     /**
      * @param  array  $data
      *
-     * @return \App\Models\Image|\Illuminate\Database\Eloquent\Model
+     * @return array
      */
-    public function create(array $data)
+    public function createMany(array $data)
     {
-        return Image::create($data);
+        $images = [];
+
+        foreach ($data as $image) {
+            $images[] = $this->create($image);
+        }
+
+        return $images;
     }
 
-    /**
-     * @param  array              $data
-     * @param  \App\Models\Image  $image
-     *
-     * @return bool
-     */
-    public function update(array $data, Image $image)
-    {
-        return $image->update($data);
-    }
-
-    /**
-     * @param  \App\Models\Image  $image
-     *
-     * @return bool|null
-     * @throws \Exception
-     */
-    public function delete(Image $image)
-    {
-        return $image->delete();
-    }
 }

@@ -3,6 +3,8 @@
 namespace Modules\Catalog\Tests\Feature\Http\Controllers;
 
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Modules\Catalog\Models\Template;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -63,7 +65,11 @@ class TemplateControllerTest extends TestCase
         $response = $this->json('POST', $this->uri, [
             'reference' => $this->template->reference,
             'price'     => $this->template->price->price,
+            'is_active' => $this->template->is_active,
+            'images'    => $this->getImages(),
         ]);
+
+        $response->dump();
 
         $response
             ->assertStatus(201)
@@ -198,6 +204,9 @@ class TemplateControllerTest extends TestCase
         $this->json('GET', $this->uri.'reference')->assertOk()->assertJsonStructure(['reference']);
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function tearDown(): void
     {
         Template::truncate();
@@ -221,7 +230,26 @@ class TemplateControllerTest extends TestCase
     private function update()
     {
         return $this->json('PUT', $this->uri.$this->template->id, [
-            'price' => $this->faker->numberBetween(899, 1299),
+            'price'     => $this->faker->numberBetween(899, 1299),
+            'is_active' => $this->faker->boolean(80),
+            'images'    => $this->getImages(),
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    private function getImages(): array
+    {
+        Storage::fake('public');
+
+        $images = [];
+        $total = $this->faker->numberBetween(1, 5);
+
+        for ($i = 0; $i < $total; $i++) {
+            $images[] = UploadedFile::fake()->image($this->faker->name.'.jpg', 1200, 720);
+        }
+
+        return $images;
     }
 }
