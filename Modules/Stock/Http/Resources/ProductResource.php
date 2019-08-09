@@ -34,7 +34,7 @@ class ProductResource extends Resource
             'size'       => $this->resource->size,
             'color'      => $this->resource->color->name,
             'template'   => TemplateResource::make($this->resource->template),
-            'price'      => $this->resource->price->price,
+            'price'      => NULL !== $this->resource->price ? $this->resource->price->price : NULL,
             'images'     => ImageResource::collection($this->resource->images),
             'prices'     => PriceResource::collection($this->resource->prices),
             'created_at' => $this->resource->created_at->toW3cString(),
