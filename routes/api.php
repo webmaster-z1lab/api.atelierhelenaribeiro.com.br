@@ -11,4 +11,5 @@ Route::namespace('Auth')
         Route::name('password.update')->post('password/reset', 'ResetPasswordController@reset');
     });
 
-Route::delete('images/{image}/templates/{template}', '\Modules\Catalog\Http\Controllers\TemplateController@destroyImage')->name('images.destroy');
+Route::delete('images/{image}/templates/{template}', '\Modules\Catalog\Http\Controllers\TemplateController@destroyImage')->name('templates.images.destroy');
+Route::delete('images/{image}/products/{product}', '\Modules\Stock\Http\Controllers\ProductController@destroyImage')->name('products.images.destroy');

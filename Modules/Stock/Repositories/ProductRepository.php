@@ -2,7 +2,6 @@
 
 namespace Modules\Stock\Repositories;
 
-use App\Models\Image;
 use App\Models\Price;
 use App\Repositories\ImageRepository;
 use App\Traits\FileUpload;
@@ -52,14 +51,15 @@ class ProductRepository
 
         $product->template()->associate($template);
         $product->color()->associate($this->createColor($data['color']));
+
         if (array_key_exists('price', $data) && filled($data['price'])) {
             $product->prices()->associate($this->createPrice(intval($data['price'])));
         } else {
             $product->prices()->associate($this->createPrice($template->price->price));
         }
-        $product->images()->saveMany($this->createImages($data['images']));
 
         $product->save();
+        $product->images()->saveMany($this->createImages($data['images']));
 
         return $product;
     }
@@ -72,18 +72,19 @@ class ProductRepository
      */
     public function update(array $data, Product $product): Product
     {
-        $product->template()->associate($data['template']);
         if (array_key_exists('price', $data) && filled($data['price']) && $product->price->price !== intval($data['price'])) {
             $product->prices()->associate($this->createPrice(intval($data['price'])));
         }
+
         if ($product->color->name !== $data['color']) {
             $product->color()->associate($this->createColor($data['color']));
         }
+
+        $product->update($data);
+
         if (array_key_exists('images', $data) && filled($data['images'])) {
             $product->images()->saveMany($this->createImages($data['images']));
         }
-
-        $product->update($data);
 
         return $product;
     }
@@ -125,7 +126,7 @@ class ProductRepository
     private function createColor(string $color): Color
     {
         return new Color([
-            'name' => $color
+            'name' => $color,
         ]);
     }
 }

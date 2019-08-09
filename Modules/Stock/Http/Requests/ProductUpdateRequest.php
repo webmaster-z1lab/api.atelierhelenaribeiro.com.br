@@ -14,9 +14,8 @@ class ProductUpdateRequest extends ProductRequest
         return [
             'size'     => 'bail|required|string',
             'color'    => 'bail|required|string',
-            'template' => 'bail|required|exists:templates,_id',
-            'images'   => 'bail|sometimes|array|min:1',
-            'images.*' => 'bail|sometimes|array',
+            'images'   => 'bail|sometimes|required|array|min:1',
+            'images.*' => 'bail|sometimes|required|array',
             'price'    => 'bail|nullable|integer|min:1',
         ];
     }

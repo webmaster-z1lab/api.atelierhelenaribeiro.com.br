@@ -53,6 +53,9 @@ class Product extends BaseModel
         return $this->embedsOne(Color::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function images()
     {
         return $this->hasMany(Image::class);

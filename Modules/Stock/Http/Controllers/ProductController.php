@@ -3,6 +3,7 @@
 namespace Modules\Stock\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
+use App\Models\Image;
 use Illuminate\Http\JsonResponse;
 use Modules\Stock\Http\Requests\ProductRequest;
 use Modules\Stock\Http\Requests\ProductUpdateRequest;
@@ -77,6 +78,20 @@ class ProductController extends ApiController
     public function destroy(Product $product): JsonResponse
     {
         $this->repository->delete($product);
+
+        return $this->noContentResponse();
+    }
+
+    /**
+     * @param  \App\Models\Image              $image
+     * @param  \Modules\Stock\Models\Product  $product
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
+    public function destroyImage(Image $image, Product $product)
+    {
+        $image->delete();
 
         return $this->noContentResponse();
     }

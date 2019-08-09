@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Modules\Catalog\Models\Template;
+use Modules\Stock\Models\Product;
 
 /**
  * Class Image
@@ -89,5 +90,13 @@ class Image extends BaseModel
     public function template()
     {
         return $this->belongsTo(Template::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 }
