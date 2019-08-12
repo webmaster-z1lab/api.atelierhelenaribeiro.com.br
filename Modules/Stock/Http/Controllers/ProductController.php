@@ -39,11 +39,11 @@ class ProductController extends ApiController
     /**
      * @param  \Modules\Stock\Http\Requests\ProductRequest  $request
      *
-     * @return \Modules\Stock\Http\Resources\ProductResource
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function store(ProductRequest $request): ProductResource
+    public function store(ProductRequest $request)
     {
-        return ProductResource::make($this->repository->create($request->validated()));
+        return ProductResource::collection($this->repository->create($request->validated()));
     }
 
     /**

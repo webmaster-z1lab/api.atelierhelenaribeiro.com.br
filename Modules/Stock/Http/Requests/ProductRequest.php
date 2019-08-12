@@ -15,6 +15,7 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         return [
+            'amount'   => 'bail|required|integer|min:1',
             'size'     => 'bail|required|string',
             'color'    => 'bail|required|string',
             'template' => 'bail|required|exists:templates,_id',

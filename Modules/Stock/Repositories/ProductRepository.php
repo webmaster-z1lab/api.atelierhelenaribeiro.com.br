@@ -39,29 +39,36 @@ class ProductRepository
     /**
      * @param  array  $data
      *
-     * @return \Modules\Stock\Models\Product
+     * @return \Illuminate\Support\Collection
      */
-    public function create(array $data): Product
+    public function create(array $data)
     {
-        $data['barcode'] = \Str::random();
+        $data['amount'] = intval($data['amount']);
 
-        $product = new Product($data);
-
+        $products = collect();
         $template = Template::find($data['template']);
 
-        $product->template()->associate($template);
-        $product->color()->associate($this->createColor($data['color']));
+        for($i = 0; $i < $data['amount']; $i++) {
+            $data['barcode'] = \Str::random();
 
-        if (array_key_exists('price', $data) && filled($data['price'])) {
-            $product->prices()->associate($this->createPrice(intval($data['price'])));
-        } else {
-            $product->prices()->associate($this->createPrice($template->price->price));
+            $product = new Product($data);
+
+            $product->template()->associate($template);
+            $product->color()->associate($this->createColor($data['color']));
+
+            if (array_key_exists('price', $data) && filled($data['price'])) {
+                $product->prices()->associate($this->createPrice(intval($data['price'])));
+            } else {
+                $product->prices()->associate($this->createPrice($template->price->price));
+            }
+
+            $product->save();
+            $product->images()->saveMany($this->createImages($data['images']));
+
+            $products->add($product);
         }
 
-        $product->save();
-        $product->images()->saveMany($this->createImages($data['images']));
-
-        return $product;
+        return $products;
     }
 
     /**

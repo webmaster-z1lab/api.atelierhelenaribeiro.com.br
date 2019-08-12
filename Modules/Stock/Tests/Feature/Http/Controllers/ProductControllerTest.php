@@ -4,6 +4,7 @@ namespace Modules\Stock\Tests\Feature\Http\Controllers;
 
 use App\Models\Image;
 use Illuminate\Foundation\Testing\WithFaker;
+use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
 use Tests\Base64Files;
 use Tests\RefreshDatabase;
@@ -81,7 +82,10 @@ class ProductControllerTest extends TestCase
      */
     public function create_product()
     {
+        $amount = $this->faker->numberBetween(1, 5);
+
         $response = $this->json('POST', $this->uri, [
+            'amount'   => $amount,
             'size'     => $this->product->size,
             'color'    => $this->product->color->name,
             'template' => $this->product->template_id,
@@ -90,11 +94,12 @@ class ProductControllerTest extends TestCase
         ]);
 
         $response
-            ->assertStatus(201)
-            ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
+            ->assertStatus(200)
+            //->assertHeader('ETag')
+            //->assertHeader('Content-Length')
             ->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
+            ->assertJsonStructure([$this->jsonStructure])
+            ->assertJsonCount($amount);
     }
 
     /**
@@ -242,6 +247,7 @@ class ProductControllerTest extends TestCase
     public function tearDown(): void
     {
         Product::truncate();
+        Template::truncate();
         Image::truncate();
 
         parent::tearDown();

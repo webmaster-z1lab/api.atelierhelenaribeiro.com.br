@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Http\Controllers\Auth;
 
+use App\Auth\Models\Token;
 use Modules\User\Models\User;
 use Tests\TestCase as parentAlias;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -30,6 +31,7 @@ class LoginControllerTest extends parentAlias
     protected function tearDown(): void
     {
         User::truncate();
+        Token::truncate();
 
         parent::tearDown();
     }

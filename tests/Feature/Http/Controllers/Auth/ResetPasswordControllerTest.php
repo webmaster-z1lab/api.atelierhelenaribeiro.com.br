@@ -51,6 +51,7 @@ class ResetPasswordControllerTest extends TestCase
     protected function tearDown(): void
     {
         User::truncate();
+        \DB::collection(config('auth.passwords.users.table'))->truncate();
 
         parent::tearDown();
     }
