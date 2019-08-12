@@ -94,8 +94,8 @@ class EmployeeControllerTest extends TestCase
         $response
             ->assertStatus(201)
             ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
     }
 
@@ -118,8 +118,8 @@ class EmployeeControllerTest extends TestCase
             ->json('GET', $this->uri.$this->employee->id)
             ->assertOk()
             ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
     }
 
@@ -148,8 +148,8 @@ class EmployeeControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
 
         $this
@@ -170,8 +170,8 @@ class EmployeeControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
 
         sleep(1);
@@ -183,8 +183,8 @@ class EmployeeControllerTest extends TestCase
             ->json('GET', $this->uri.$this->employee->id)
             ->assertOk()
             ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
     }
 
@@ -200,8 +200,8 @@ class EmployeeControllerTest extends TestCase
         $response
             ->assertOk()
             ->assertHeader('ETag')
-            ->assertHeader('Content-Length')
-            ->assertHeader('Cache-Control')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
     }
 
