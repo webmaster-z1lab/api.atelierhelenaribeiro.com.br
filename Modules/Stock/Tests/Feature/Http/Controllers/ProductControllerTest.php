@@ -74,7 +74,34 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([$this->jsonStructure]);
+        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([
+            [
+                'template' => [
+                    'id',
+                    'reference',
+                    'prices' => [
+                        [
+                            'id',
+                            'price',
+                            'started_at',
+                        ],
+                    ],
+                    'price',
+                    'created_at',
+                    'updated_at',
+                    'images'
+                ],
+                'size',
+                'color',
+                'amount',
+                'products' => [
+                    [
+                        'id',
+                        'barcode',
+                    ],
+                ],
+            ],
+        ]);
     }
 
     /**

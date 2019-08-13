@@ -7,6 +7,7 @@ use App\Models\Image;
 use Illuminate\Http\JsonResponse;
 use Modules\Stock\Http\Requests\ProductRequest;
 use Modules\Stock\Http\Requests\ProductUpdateRequest;
+use Modules\Stock\Http\Resources\AggregatedProduct;
 use Modules\Stock\Http\Resources\ProductResource;
 use Modules\Stock\Models\Product;
 use Modules\Stock\Repositories\ProductRepository;
@@ -33,7 +34,7 @@ class ProductController extends ApiController
      */
     public function index()
     {
-        return ProductResource::collection($this->repository->all());
+        return AggregatedProduct::collection($this->repository->all());
     }
 
     /**

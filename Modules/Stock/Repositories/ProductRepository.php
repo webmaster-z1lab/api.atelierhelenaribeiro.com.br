@@ -17,13 +17,24 @@ class ProductRepository
      * @param  int   $items
      * @param  bool  $paginate
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection|\Modules\Stock\Models\Product[]
+     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Query\Expression|\Modules\Stock\Models\Product[]
      */
     public function all(int $items = 10, bool $paginate = TRUE)
     {
         if (!empty(\Request::query()) && NULL !== \Request::query()['search']) return $this->search();
 
-        return Product::latest()->take(30)->get();
+        return Product::raw(function ($collection) {
+            return $collection->aggregate([
+                [
+                    '$group'    => [
+                        '_id'   => ['template' => '$template_id', 'size' => '$size', 'color' => '$color.name'],
+                        'count' => [ '$sum' => 1],
+                        'products' => ['$push' => ['_id' => '$_id', 'barcode' => '$barcode']]
+                    ]
+                ],
+                [ '$limit' => 30 ]
+            ]);
+        });
     }
 
     /**

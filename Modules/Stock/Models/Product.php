@@ -2,9 +2,9 @@
 
 namespace Modules\Stock\Models;
 
-use App\Models\BaseModel;
 use App\Models\Image;
 use App\Models\Price;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 use Modules\Catalog\Models\Template;
 
@@ -22,14 +22,12 @@ use Modules\Catalog\Models\Template;
  * @property-read \Carbon\Carbon                                               $created_at
  * @property-read \Carbon\Carbon                                               $updated_at
  * @property-read \Carbon\Carbon                                               $deleted_at
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Stock\Models\Product newModelQuery()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Stock\Models\Product newQuery()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Stock\Models\Product query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
+ * @method static \Modules\Stock\Models\Product newModelQuery()
+ * @method static \Modules\Stock\Models\Product newQuery()
+ * @method static \Modules\Stock\Models\Product query()
  * @mixin \Eloquent
  */
-class Product extends BaseModel
+class Product extends Model
 {
     use SoftDeletes;
 
