@@ -10,6 +10,7 @@ namespace Modules\Employee\Repositories;
 
 use App\Models\Address;
 use App\Models\Phone;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Modules\User\Models\User;
 
@@ -44,6 +45,8 @@ class EmployeeRepository
      */
     public function create(array $data)
     {
+        $data['birth_date'] = Carbon::createFromFormat('d/m/Y', $data['birth_date']);
+        $data['admission_date'] = Carbon::createFromFormat('d/m/Y', $data['admission_date']);
         $user = new User($data);
 
         $user->phone()->associate($this->createPhone($data));
@@ -62,6 +65,9 @@ class EmployeeRepository
      */
     public function update(array $data, User $employee): User
     {
+        $data['birth_date'] = Carbon::createFromFormat('d/m/Y', $data['birth_date']);
+        $data['admission_date'] = Carbon::createFromFormat('d/m/Y', $data['admission_date']);
+
         $employee->phone()->associate($this->createPhone($data));
         $employee->address()->associate($this->createAddress($data));
 

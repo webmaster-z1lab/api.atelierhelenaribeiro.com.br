@@ -4,6 +4,7 @@ namespace Modules\Employee\Tests\Feature\Http\Controllers;
 
 use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Str;
 use Modules\User\Models\User;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -27,8 +28,12 @@ class EmployeeControllerTest extends TestCase
         'id',
         'name',
         'document',
+        'identity',
+        'work_card',
         'email',
         'type',
+        'birth_date',
+        'admission_date',
         'created_at',
         'updated_at',
         'address',
@@ -61,7 +66,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([]);
+        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([$this->jsonStructure]);
     }
 
     /**
@@ -80,15 +85,19 @@ class EmployeeControllerTest extends TestCase
     public function create_employee()
     {
         $response = $this->json('POST', $this->uri, [
-            'name'     => $this->employee->name,
-            'email'    => $this->employee->email,
-            'document' => $this->employee->document,
-            'type'     => $this->employee->type,
-            'phone'    => [
+            'name'           => $this->employee->name,
+            'email'          => $this->employee->email,
+            'document'       => $this->employee->document,
+            'identity'       => $this->employee->identity,
+            'work_card'      => $this->employee->work_card,
+            'type'           => $this->employee->type,
+            'phone'          => [
                 'number'      => $this->employee->phone->full_number,
                 'is_whatsapp' => $this->employee->phone->is_whatsapp,
             ],
-            'address'  => $this->employee->address->toArray(),
+            'address'        => $this->employee->address->toArray(),
+            'birth_date'     => $this->employee->birth_date->format('d/m/Y'),
+            'admission_date' => $this->employee->admission_date->format('d/m/Y'),
         ]);
 
         $response
@@ -261,15 +270,17 @@ class EmployeeControllerTest extends TestCase
     private function update()
     {
         return $this->json('PUT', $this->uri.$this->employee->id, [
-            'name'     => $this->faker->name,
-            'email'    => $this->faker->safeEmail,
-            'document' => $this->employee->document,
-            'type'     => $this->employee->type,
-            'phone'    => [
+            'name'           => $this->faker->name,
+            'email'          => $this->faker->safeEmail,
+            'document'       => $this->employee->document,
+            'identity'       => \Str::random(),
+            'work_card'      => \Str::random(),
+            'type'           => $this->employee->type,
+            'phone'          => [
                 'number'      => $this->faker->phoneNumberCleared,
                 'is_whatsapp' => $this->employee->phone->is_whatsapp,
             ],
-            'address'  => [
+            'address'        => [
                 'street'      => $this->faker->streetName,
                 'number'      => $this->employee->address->number,
                 'complement'  => $this->employee->address->complement,
@@ -278,6 +289,8 @@ class EmployeeControllerTest extends TestCase
                 'city'        => $this->faker->city,
                 'state'       => $this->employee->address->state,
             ],
+            'birth_date'     => $this->faker->dateTime('today - 18 years')->format('d/m/Y'),
+            'admission_date' => $this->faker->dateTime('today')->format('d/m/Y'),
         ]);
     }
 

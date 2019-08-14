@@ -111,7 +111,7 @@ trait CommonRulesValidation
     {
         return [
             'bail',
-            'nullable',
+            'required',
             'string',
             Rule::unique('users', 'identity')->ignore($ignore)->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');

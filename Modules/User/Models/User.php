@@ -25,10 +25,13 @@ use Modules\User\Notifications\ResetPasswordNotification;
  * @property string                                    $api_token
  * @property string                                    $document
  * @property string                                    $identity
+ * @property string                                    $work_card
  * @property \Modules\User\Models\DatabaseNotification $notifications
  * @property \Modules\User\Models\DatabaseNotification $latestNotifications
  * @property \App\Models\Address                       $address
  * @property \App\Models\Phone                         $phone
+ * @property \Carbon\Carbon                            $birth_date
+ * @property \Carbon\Carbon                            $admission_date
  * @property \Carbon\Carbon                            $created_at
  * @property \Carbon\Carbon                            $updated_at
  * @property \Carbon\Carbon                            $deleted_at
@@ -56,7 +59,12 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
         'document',
         'identity',
         'type',
+        'birth_date',
+        'admission_date',
+        'work_card',
     ];
+
+    protected $dates = ['birth_date', 'admission_date'];
 
     /**
      * Retrieve the model for a bound value.

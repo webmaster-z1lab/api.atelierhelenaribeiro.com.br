@@ -15,10 +15,14 @@ class EmployeeUpdateRequest extends EmployeeRequest
         $employee = \Route::current()->parameter('employee');
 
         $rules = [
-            'name'     => 'bail|required|string',
-            'email'    => $this->getEmailRules($employee),
-            'document' => $this->getDocumentRules('cpf', $employee),
-            'type'     => $this->getTypeRules(),
+            'name'           => 'bail|required|string',
+            'birth_date'     => 'bail|required|date_format:d/m/Y|before_or_equal:today - 18 years',
+            'admission_date' => 'bail|required|date_format:d/m/Y|before_or_equal:today',
+            'email'          => $this->getEmailRules($employee),
+            'document'       => $this->getDocumentRules('cpf', $employee),
+            'type'           => $this->getTypeRules(),
+            'identity'       => $this->getIdentityRules($employee),
+            'work_card'      => $this->getWorkCardRules($employee),
         ];
 
         return $this->mergeRules(
