@@ -19,10 +19,14 @@ class AggregatedProduct extends Resource
     {
         return [
             'template' => TemplateResource::make(Template::find($this->resource->id->template)),
-            'size'     => $this->resource->id->size,
-            'color'    => $this->resource->id->color,
             'amount'   => $this->resource->count,
-            'products' => BasicProduct::collection(collect($this->resource->products->bsonSerialize())),
+            $this->mergeWhen($request->filled('template'), function () {
+                return [
+                    'size'     => $this->resource->id->size,
+                    'color'    => $this->resource->id->color,
+                    'products' => BasicProduct::collection(collect($this->resource->products->bsonSerialize())),
+                ];
+            }),
         ];
     }
 }

@@ -23,13 +23,32 @@ class ProductRepository
     {
         if (!empty(\Request::query()) && NULL !== \Request::query()['search']) return $this->search();
 
+        if (!empty(\Request::query()) && \Request::filled('template')) {
+            $template = \Request::query('template');
+
+            return Product::raw(function ($collection) use ($template) {
+                return $collection->aggregate([
+                    [
+                        '$match' => ['template_id' => $template]
+                    ],
+                    [
+                        '$group'    => [
+                            '_id'   => ['template' => '$template_id', 'size' => '$size', 'color' => '$color.name'],
+                            'count' => [ '$sum' => 1],
+                            'products' => ['$push' => ['_id' => '$_id', 'barcode' => '$barcode']]
+                        ]
+                    ],
+                    [ '$limit' => 30 ]
+                ]);
+            });
+        }
+
         return Product::raw(function ($collection) {
             return $collection->aggregate([
                 [
                     '$group'    => [
-                        '_id'   => ['template' => '$template_id', 'size' => '$size', 'color' => '$color.name'],
+                        '_id'   => ['template' => '$template_id'],
                         'count' => [ '$sum' => 1],
-                        'products' => ['$push' => ['_id' => '$_id', 'barcode' => '$barcode']]
                     ]
                 ],
                 [ '$limit' => 30 ]
