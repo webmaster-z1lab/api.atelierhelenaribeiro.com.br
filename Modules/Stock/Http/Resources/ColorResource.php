@@ -23,8 +23,8 @@ class ColorResource extends Resource
     public function toArray($request)
     {
         return [
-            'name'  => $this->resource->name,
-            'value' => $this->resource->value,
+            'id'   => $this->resource->id,
+            'name' => $this->resource->name,
         ];
     }
 }

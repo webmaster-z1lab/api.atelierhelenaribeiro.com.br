@@ -6,13 +6,13 @@ use App\Models\Image;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
-use Tests\Base64Files;
+use Tests\ImageFiles;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
 
 class ProductControllerTest extends TestCase
 {
-    use RefreshDatabase, WithFaker, Base64Files;
+    use RefreshDatabase, WithFaker, ImageFiles;
 
     private $uri = '/products/';
     /**
@@ -89,7 +89,30 @@ class ProductControllerTest extends TestCase
                     'price',
                     'created_at',
                     'updated_at',
-                    'images'
+                    'images',
+                ],
+                'amount',
+            ],
+        ]);
+
+        $query = http_build_query(['template' => $this->product->template_id]);
+
+        $this->json('GET', "{$this->uri}?$query")->assertOk()->assertJsonStructure([
+            [
+                'template' => [
+                    'id',
+                    'reference',
+                    'prices' => [
+                        [
+                            'id',
+                            'price',
+                            'started_at',
+                        ],
+                    ],
+                    'price',
+                    'created_at',
+                    'updated_at',
+                    'images',
                 ],
                 'size',
                 'color',
@@ -114,10 +137,10 @@ class ProductControllerTest extends TestCase
         $response = $this->json('POST', $this->uri, [
             'amount'   => $amount,
             'size'     => $this->product->size,
-            'color'    => $this->product->color->name,
+            'color'    => $this->product->color,
             'template' => $this->product->template_id,
             'price'    => $this->product->price->price,
-            'images'   => $this->getBase64Images(),
+            'images'   => $this->getImages(),
         ]);
 
         $response
@@ -241,19 +264,20 @@ class ProductControllerTest extends TestCase
     {
         $product = $this->json('POST', $this->uri, [
             'size'     => $this->product->size,
-            'color'    => $this->product->color->name,
+            'color'    => $this->product->color,
             'template' => $this->product->template_id,
             'price'    => $this->product->price->price,
-            'images'   => $this->getBase64Images(),
-        ])->assertStatus(201)
-            ->assertHeader('ETag')
+            'amount' => 1,
+            'images'   => $this->getImages(),
+        ])->assertStatus(200)
+            //->assertHeader('ETag')
             //->assertHeader('Content-Length')
             //->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
+            ->assertJsonStructure([$this->jsonStructure]);
 
-        $product = json_decode($product->getContent());
+        $product = json_decode($product->getContent())[0];
 
-        $this->json('DELETE', '/images/'.$product->images[0]->id.$this->uri.$product->id)->dump()->assertStatus(204);
+        $this->json('DELETE', '/images/'.$product->images[0]->id.$this->uri.$product->id)->assertStatus(204);
     }
 
     /**
@@ -298,8 +322,8 @@ class ProductControllerTest extends TestCase
         return $this->json('PUT', $this->uri.$this->product->id, [
             'price'  => $this->faker->numberBetween(899, 1299),
             'size'   => $this->product->size,
-            'color'  => $this->product->color->name,
-            'images' => $this->getBase64Images(),
+            'color'  => $this->product->color,
+            'images' => $this->getImages(),
         ]);
     }
 }

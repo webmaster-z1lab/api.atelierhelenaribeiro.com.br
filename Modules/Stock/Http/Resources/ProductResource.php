@@ -32,7 +32,7 @@ class ProductResource extends Resource
             'id'         => $this->resource->id,
             'barcode'    => $this->resource->barcode,
             'size'       => $this->resource->size,
-            'color'      => $this->resource->color->name,
+            'color'      => $this->resource->color,
             'template'   => TemplateResource::make($this->resource->template),
             'price'      => NULL !== $this->resource->price ? $this->resource->price->price : NULL,
             'images'     => ImageResource::collection($this->resource->images),

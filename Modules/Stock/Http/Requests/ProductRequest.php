@@ -15,13 +15,16 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'amount'   => 'bail|required|integer|min:1',
-            'size'     => 'bail|required|string',
-            'color'    => 'bail|required|string',
-            'template' => 'bail|required|exists:templates,_id',
-            'images'   => 'bail|required|array|min:1',
-            'images.*' => 'bail|required|array',
-            'price'    => 'bail|nullable|integer|min:1',
+            'amount'                 => 'bail|required|integer|min:1',
+            'size'                   => 'bail|required|string',
+            'color'                  => 'bail|required|string',
+            'template'               => 'bail|required|exists:templates,_id',
+            'images'                 => 'bail|sometimes|array|min:1',
+            'images.*.path'          => 'bail|required|string',
+            'images.*.name'          => 'bail|required|string',
+            'images.*.extension'     => 'bail|required|string',
+            'images.*.size_in_bytes' => 'bail|required|integer|min:1',
+            'price'                  => 'bail|nullable|integer|min:1',
         ];
     }
 

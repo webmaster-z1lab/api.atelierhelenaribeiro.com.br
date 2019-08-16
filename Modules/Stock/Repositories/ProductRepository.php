@@ -2,11 +2,11 @@
 
 namespace Modules\Stock\Repositories;
 
+use App\Models\Image;
 use App\Models\Price;
-use App\Repositories\ImageRepository;
 use App\Traits\FileUpload;
 use Modules\Catalog\Models\Template;
-use Modules\Stock\Models\Color;
+use Modules\Stock\Jobs\CreateColor;
 use Modules\Stock\Models\Product;
 
 class ProductRepository
@@ -21,28 +21,26 @@ class ProductRepository
      */
     public function all(int $items = 10, bool $paginate = TRUE)
     {
-        if (!empty(\Request::query())) {
-            if (\Request::filled('search')) return $this->search();
+        if (\Request::filled('search')) return $this->search();
 
-            if (\Request::filled('template')) {
-                $template = \Request::query('template');
+        if (\Request::filled('template')) {
+            $template = \Request::query('template');
 
-                return Product::raw(function ($collection) use ($template) {
-                    return $collection->aggregate([
-                        [
-                            '$match' => ['template_id' => $template]
-                        ],
-                        [
-                            '$group'    => [
-                                '_id'   => ['template' => '$template_id', 'size' => '$size', 'color' => '$color.name'],
-                                'count' => [ '$sum' => 1],
-                                'products' => ['$push' => ['_id' => '$_id', 'barcode' => '$barcode']]
-                            ]
-                        ],
-                        [ '$limit' => 30 ]
-                    ]);
-                });
-            }
+            return Product::raw(function ($collection) use ($template) {
+                return $collection->aggregate([
+                    [
+                        '$match' => ['template_id' => $template]
+                    ],
+                    [
+                        '$group'    => [
+                            '_id'   => ['template' => '$template_id', 'size' => '$size', 'color' => '$color'],
+                            'count' => [ '$sum' => 1],
+                            'products' => ['$push' => ['_id' => '$_id', 'barcode' => '$barcode']]
+                        ]
+                    ],
+                    [ '$limit' => 30 ]
+                ]);
+            });
         }
 
         return Product::raw(function ($collection) {
@@ -86,7 +84,6 @@ class ProductRepository
             $product = new Product($data);
 
             $product->template()->associate($template);
-            $product->color()->associate($this->createColor($data['color']));
 
             if (array_key_exists('price', $data) && filled($data['price'])) {
                 $product->prices()->associate($this->createPrice(intval($data['price'])));
@@ -95,10 +92,19 @@ class ProductRepository
             }
 
             $product->save();
-            $product->images()->saveMany($this->createImages($data['images']));
+            if (array_key_exists('images', $data) && filled($data['images'])) {
+                $product->images()->saveMany($this->createImages($data['images']));
+            } else {
+                $template->images->each(function ($item, $key) use ($product) {
+                    /** @var \App\Models\Image $item */
+                    $item->product()->attach($product);
+                });
+            }
 
             $products->add($product);
         }
+
+        CreateColor::dispatch($data['color']);
 
         return $products;
     }
@@ -115,15 +121,13 @@ class ProductRepository
             $product->prices()->associate($this->createPrice(intval($data['price'])));
         }
 
-        if ($product->color->name !== $data['color']) {
-            $product->color()->associate($this->createColor($data['color']));
-        }
-
         $product->update($data);
 
         if (array_key_exists('images', $data) && filled($data['images'])) {
             $product->images()->saveMany($this->createImages($data['images']));
         }
+
+        CreateColor::dispatch($data['color']);
 
         return $product;
     }
@@ -146,7 +150,11 @@ class ProductRepository
      */
     private function createImages(array $data): array
     {
-        return (new ImageRepository())->createMany($data);
+        $images = [];
+        foreach ($data as $image)
+            $images[] = new Image($image);
+
+        return $images;
     }
 
     /**
@@ -159,13 +167,6 @@ class ProductRepository
         return new Price([
             'price'      => $price,
             'started_at' => now(),
-        ]);
-    }
-
-    private function createColor(string $color): Color
-    {
-        return new Color([
-            'name' => $color,
         ]);
     }
 }

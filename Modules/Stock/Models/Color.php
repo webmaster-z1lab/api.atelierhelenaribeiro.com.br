@@ -3,13 +3,13 @@
 namespace Modules\Stock\Models;
 
 use App\Models\BaseModel;
+use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 
 /**
  * Modules\Stock\Models\Color
  *
  * @property-read string $id
  * @property string      $name
- * @property string      $value
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Stock\Models\Product newModelQuery()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Stock\Models\Product newQuery()
@@ -19,7 +19,7 @@ use App\Models\BaseModel;
  */
 class Color extends BaseModel
 {
-    public $timestamps = FALSE;
+    use SoftDeletes;
 
-    protected $fillable = ['name', 'value'];
+    protected $fillable = ['name'];
 }

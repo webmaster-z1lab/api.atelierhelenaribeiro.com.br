@@ -9,23 +9,24 @@ use Modules\Stock\Models\Product;
  * Class Image
  *
  * @package App\Models
- * @property string                           $path
- * @property string                           $basic
- * @property string                           $thumbnail
- * @property string                           $square
- * @property string                           $name
- * @property string                           $extension
- * @property string                           $icon
- * @property string                           size
- * @property int                              $size_in_bytes
- * @property bool                             $is_processed
- * @property \Modules\Catalog\Models\Template $template
- * @property-read string                      $id
- * @property-read string                      $square_url
- * @property-read string                      $thumbnail_url
- * @property-read string                      $url
- * @property-read \Carbon\Carbon              $created_at
- * @property-read \Carbon\Carbon              $updated_at
+ * @property-read string                                                              $id
+ * @property string                                                                   $path
+ * @property string                                                                   $basic
+ * @property string                                                                   $thumbnail
+ * @property string                                                                   $square
+ * @property string                                                                   $name
+ * @property string                                                                   $extension
+ * @property string                                                                   $icon
+ * @property string                                                                   $size
+ * @property int                                                                      $size_in_bytes
+ * @property bool                                                                     $is_processed
+ * @property \Modules\Catalog\Models\Template                                         $template
+ * @property \Illuminate\Database\Eloquent\Collection|\Modules\Stock\Models\Product[] $products
+ * @property-read string                                                              $square_url
+ * @property-read string                                                              $thumbnail_url
+ * @property-read string                                                              $url
+ * @property-read \Carbon\Carbon                                                      $created_at
+ * @property-read \Carbon\Carbon                                                      $updated_at
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Image newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Image newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Image query()
@@ -93,10 +94,10 @@ class Image extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function product()
+    public function products()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsToMany(Product::class);
     }
 }

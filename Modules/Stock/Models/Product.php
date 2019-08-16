@@ -14,9 +14,9 @@ use Modules\Catalog\Models\Template;
  * @property-read mixed                                                        $id
  * @property string                                                            $barcode
  * @property string                                                            $size
+ * @property string                                                            $color
  * @property-read \Modules\Catalog\Models\Template                             $template
  * @property \App\Models\Price                                                 $price
- * @property \Modules\Stock\Models\Color                                       $color
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Image[] $images
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Price[] $prices
  * @property-read \Carbon\Carbon                                               $created_at
@@ -32,7 +32,7 @@ class Product extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'barcode', 'size',
+        'barcode', 'size', 'color'
     ];
 
     /**
@@ -41,14 +41,6 @@ class Product extends Model
     public function template()
     {
         return $this->belongsTo(Template::class);
-    }
-
-    /**
-     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
-     */
-    public function color()
-    {
-        return $this->embedsOne(Color::class);
     }
 
     /**
@@ -70,5 +62,16 @@ class Product extends Model
     public function getPriceAttribute()
     {
         return $this->prices->sortByDesc('started_at')->first();
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value)
+    {
+        return $this->find($value) ?? abort(404);
     }
 }
