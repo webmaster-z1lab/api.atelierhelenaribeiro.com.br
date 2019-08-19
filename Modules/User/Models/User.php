@@ -26,6 +26,8 @@ use Modules\User\Notifications\ResetPasswordNotification;
  * @property string                                    $document
  * @property string                                    $identity
  * @property string                                    $work_card
+ * @property integer                                   $remuneration
+ * @property float                                     $remuneration_float
  * @property \Modules\User\Models\DatabaseNotification $notifications
  * @property \Modules\User\Models\DatabaseNotification $latestNotifications
  * @property \App\Models\Address                       $address
@@ -62,8 +64,19 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
         'birth_date',
         'admission_date',
         'work_card',
+        'remuneration',
     ];
 
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'remuneration' => 'integer'
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $dates = ['birth_date', 'admission_date'];
 
     /**
@@ -88,20 +101,27 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    /**
      * @return string
      */
     public function getFirstNameAttribute()
     {
         return explode(' ', $this->attributes['name'])[0];
+    }
+
+    /**
+     * @param $value
+     */
+    public function setRemunerationAttribute($value)
+    {
+        $this->attributes['price'] = intval((floatval($value) * 100));
+    }
+
+    /**
+     * @return float
+     */
+    public function getRemunerationFloatAttribute()
+    {
+        return floatval(number_format(intval($this->attributes['price']) / 100, 2));
     }
 
     /**

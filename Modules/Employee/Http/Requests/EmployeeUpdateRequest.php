@@ -23,6 +23,7 @@ class EmployeeUpdateRequest extends EmployeeRequest
             'type'           => $this->getTypeRules(),
             'identity'       => $this->getIdentityRules($employee),
             'work_card'      => $this->getWorkCardRules($employee),
+            'remuneration'   => 'bail|nullable|numeric|min:0.01'
         ];
 
         return $this->mergeRules(

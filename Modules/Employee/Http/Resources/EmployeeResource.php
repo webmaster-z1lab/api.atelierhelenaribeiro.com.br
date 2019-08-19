@@ -35,6 +35,7 @@ class EmployeeResource extends Resource
             'work_card'      => $this->resource->work_card,
             'email'          => $this->resource->email,
             'type'           => $this->resource->type,
+            'remuneration'   => $this->resource->remuneration_float,
             'birth_date'     => $this->resource->birth_date->format('d/m/Y'),
             'admission_date' => $this->resource->admission_date->format('d/m/Y'),
             'created_at'     => $this->resource->created_at->toW3cString(),

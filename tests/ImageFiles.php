@@ -1,13 +1,10 @@
 <?php
 
-
 namespace Tests;
-
 
 use Faker\Generator as Faker;
 use Faker\Provider\Base;
 use Faker\Provider\pt_BR\Person;
-use Intervention\Image\ImageManager;
 
 trait ImageFiles
 {

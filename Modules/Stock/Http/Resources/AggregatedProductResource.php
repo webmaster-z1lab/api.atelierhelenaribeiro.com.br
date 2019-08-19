@@ -3,7 +3,6 @@
 namespace Modules\Stock\Http\Resources;
 
 use Illuminate\Http\Resources\Json\Resource;
-use Modules\Catalog\Http\Resources\TemplateResource;
 use Modules\Catalog\Models\Template;
 
 class AggregatedProductResource extends Resource
