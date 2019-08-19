@@ -24,7 +24,7 @@ class PriceResource extends JsonResource
     {
         return [
             'id'         => $this->resource->id,
-            'price'      => $this->resource->price,
+            'price'      => $this->resource->price_float,
             'started_at' => $this->resource->started_at->toW3cString(),
         ];
     }

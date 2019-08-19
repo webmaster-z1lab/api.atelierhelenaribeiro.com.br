@@ -30,7 +30,7 @@ class TemplateResource extends Resource
         return [
             'id'         => $this->resource->id,
             'reference'  => $this->resource->reference,
-            'price'      => NULL !== $this->resource->price ? $this->resource->price->price : NULL,
+            'price'      => NULL !== $this->resource->price ? $this->resource->price->price_float : NULL,
             'is_active'  => $this->resource->is_active,
             'created_at' => $this->resource->created_at->toW3cString(),
             'updated_at' => $this->resource->updated_at->toW3cString(),

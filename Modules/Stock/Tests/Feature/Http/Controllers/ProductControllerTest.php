@@ -109,7 +109,7 @@ class ProductControllerTest extends TestCase
             'size'     => $this->product->size,
             'color'    => $this->product->color,
             'template' => $this->product->template_id,
-            'price'    => $this->product->price->price,
+            'price'    => $this->product->price->price_float,
             'images'   => $this->getImages(),
         ]);
 
@@ -236,7 +236,7 @@ class ProductControllerTest extends TestCase
             'size'     => $this->product->size,
             'color'    => $this->product->color,
             'template' => $this->product->template_id,
-            'price'    => $this->product->price->price,
+            'price'    => $this->product->price->price_float,
             'amount'   => 1,
             'images'   => $this->getImages(),
         ])->assertStatus(200)
@@ -290,7 +290,7 @@ class ProductControllerTest extends TestCase
     private function update()
     {
         return $this->json('PUT', $this->uri.$this->product->id, [
-            'price'  => $this->faker->numberBetween(899, 1299),
+            'price'  => $this->faker->randomFloat(2, 899.11, 1299.99),
             'size'   => $this->product->size,
             'color'  => $this->product->color,
             'images' => $this->getImages(),

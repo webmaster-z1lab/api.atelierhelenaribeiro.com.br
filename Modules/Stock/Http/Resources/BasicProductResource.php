@@ -23,7 +23,7 @@ class BasicProductResource extends Resource
             'size'        => $this->resource->size,
             'color'       => $this->resource->color,
             'template_id' => $this->resource->template_id,
-            'price'       => $price->price,
+            'price'       => floatval($price->price / 100),
             'created_at'  => $this->resource->created_at->toDateTime()->format(\DateTime::W3C),
             'updated_at'  => $this->resource->updated_at->toDateTime()->format(\DateTime::W3C),
         ];

@@ -64,12 +64,12 @@ class TemplateControllerTest extends TestCase
     {
         $response = $this->json('POST', $this->uri, [
             'reference' => $this->template->reference,
-            'price'     => $this->template->price->price,
+            'price'     => $this->template->price->price_float,
             'is_active' => $this->template->is_active,
             'images'    => $this->getBase64Images(),
         ]);
 
-        $response
+        $response->dump()
             ->assertStatus(201)
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -189,7 +189,7 @@ class TemplateControllerTest extends TestCase
     {
         $response = $this->json('POST', $this->uri, [
             'reference' => $this->template->reference,
-            'price'     => $this->template->price->price,
+            'price'     => $this->template->price->price_float,
             'is_active' => $this->template->is_active,
             'images'    => $this->getBase64Images(),
         ]);
@@ -253,7 +253,7 @@ class TemplateControllerTest extends TestCase
     private function update()
     {
         return $this->json('PUT', $this->uri.$this->template->id, [
-            'price'     => $this->faker->numberBetween(899, 1299),
+            'price'     => $this->faker->randomFloat(2, 899.11, 1299.99),
             'is_active' => $this->faker->boolean(80),
             'images'    => $this->getBase64Images(),
         ]);
