@@ -10,6 +10,7 @@ use Modules\Stock\Models\Product;
  *
  * @package App\Models
  * @property-read string                                                              $id
+ * @property-read string                                                              $template_id
  * @property string                                                                   $path
  * @property string                                                                   $basic
  * @property string                                                                   $thumbnail

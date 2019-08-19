@@ -14,6 +14,23 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ImageResource extends JsonResource
 {
     /**
+     * @var string
+     */
+    protected $product_id;
+
+    /**
+     * ImageResource constructor.
+     *
+     * @param               $resource
+     * @param  string|NULL  $product_id
+     */
+    public function __construct($resource, string $product_id = NULL)
+    {
+        parent::__construct($resource);
+        $this->product_id = $product_id;
+    }
+
+    /**
      * Transform the resource into an array.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -24,6 +41,8 @@ class ImageResource extends JsonResource
     {
         return [
             'id'            => $this->resource->id,
+            'template_id'   => $this->resource->template_id,
+            'product_id'    => $this->when($this->product_id !== NULL, $this->product_id),
             'name'          => $this->resource->name,
             'extension'     => $this->resource->extension,
             'path'          => $this->resource->path,

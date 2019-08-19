@@ -11,7 +11,8 @@ use Modules\Catalog\Models\Template;
 /**
  * Modules\Stock\Models\Product
  *
- * @property-read mixed                                                        $id
+ * @property-read string                                                       $id
+ * @property-read string                                                       $template_id
  * @property string                                                            $barcode
  * @property string                                                            $size
  * @property string                                                            $color
@@ -32,7 +33,7 @@ class Product extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'barcode', 'size', 'color'
+        'barcode', 'size', 'color',
     ];
 
     /**
@@ -68,6 +69,7 @@ class Product extends Model
      * Retrieve the model for a bound value.
      *
      * @param  mixed  $value
+     *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
     public function resolveRouteBinding($value)

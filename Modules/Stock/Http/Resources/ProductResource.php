@@ -29,16 +29,31 @@ class ProductResource extends Resource
     public function toArray($request)
     {
         return [
-            'id'         => $this->resource->id,
-            'barcode'    => $this->resource->barcode,
-            'size'       => $this->resource->size,
-            'color'      => $this->resource->color,
-            'template'   => TemplateResource::make($this->resource->template),
-            'price'      => NULL !== $this->resource->price ? $this->resource->price->price : NULL,
-            'images'     => ImageResource::collection($this->resource->images),
-            'prices'     => PriceResource::collection($this->resource->prices),
-            'created_at' => $this->resource->created_at->toW3cString(),
-            'updated_at' => $this->resource->updated_at->toW3cString(),
+            'id'          => $this->resource->id,
+            'barcode'     => $this->resource->barcode,
+            'size'        => $this->resource->size,
+            'color'       => $this->resource->color,
+            'template_id' => $this->resource->template_id,
+            'template'    => TemplateResource::make($this->resource->template),
+            'price'       => NULL !== $this->resource->price ? $this->resource->price->price : NULL,
+            'images'      => $this->getImages(),
+            'prices'      => PriceResource::collection($this->resource->prices),
+            'created_at'  => $this->resource->created_at->toW3cString(),
+            'updated_at'  => $this->resource->updated_at->toW3cString(),
         ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getImages()
+    {
+        $images = [];
+
+        foreach ($this->resource->images as $image) {
+            $images[] = new ImageResource($image, $this->resource->id);
+        }
+
+        return $images;
     }
 }
