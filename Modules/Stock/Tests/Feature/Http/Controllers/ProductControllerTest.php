@@ -74,46 +74,9 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([
+        $this->json('GET', $this->uri)->dump()->assertOk()->assertJsonStructure([
             [
-                'template' => [
-                    'id',
-                    'reference',
-                    'prices' => [
-                        [
-                            'id',
-                            'price',
-                            'started_at',
-                        ],
-                    ],
-                    'price',
-                    'created_at',
-                    'updated_at',
-                    'images',
-                ],
-                'amount',
-            ],
-        ]);
-
-        $query = http_build_query(['template' => $this->product->template_id]);
-
-        $this->json('GET', "{$this->uri}?$query")->assertOk()->assertJsonStructure([
-            [
-                'template' => [
-                    'id',
-                    'reference',
-                    'prices' => [
-                        [
-                            'id',
-                            'price',
-                            'started_at',
-                        ],
-                    ],
-                    'price',
-                    'created_at',
-                    'updated_at',
-                    'images',
-                ],
+                'template',
                 'size',
                 'color',
                 'amount',
@@ -121,6 +84,12 @@ class ProductControllerTest extends TestCase
                     [
                         'id',
                         'barcode',
+                        'size',
+                        'color',
+                        'template_id',
+                        'price',
+                        'created_at',
+                        'updated_at',
                     ],
                 ],
             ],
@@ -267,7 +236,7 @@ class ProductControllerTest extends TestCase
             'color'    => $this->product->color,
             'template' => $this->product->template_id,
             'price'    => $this->product->price->price,
-            'amount' => 1,
+            'amount'   => 1,
             'images'   => $this->getImages(),
         ])->assertStatus(200)
             //->assertHeader('ETag')
