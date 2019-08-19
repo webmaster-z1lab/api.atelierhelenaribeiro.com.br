@@ -17,6 +17,12 @@ class ProcessImage implements ShouldQueue
      */
     protected $image;
 
+    private $types = [
+        'cover',
+        'square',
+        'thumbnail',
+    ];
+
     /**
      * ProcessImage constructor.
      *
@@ -24,7 +30,7 @@ class ProcessImage implements ShouldQueue
      */
     public function __construct(Image $image)
     {
-        $this->image = $image;
+        $this->image = $image->fresh();
     }
 
     /**
@@ -34,6 +40,6 @@ class ProcessImage implements ShouldQueue
      */
     public function handle()
     {
-        //
+
     }
 }

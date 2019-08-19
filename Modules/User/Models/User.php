@@ -121,7 +121,7 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
      */
     public function getRemunerationFloatAttribute()
     {
-        return floatval(number_format(intval($this->attributes['remuneration']) / 100, 2));
+        return floatval($this->attributes['remuneration'] / 100);
     }
 
     /**

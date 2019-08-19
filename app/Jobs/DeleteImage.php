@@ -13,13 +13,18 @@ class DeleteImage implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Create a new job instance.
-     *
-     * @return void
+     * @var string
      */
-    public function __construct()
+    protected $path;
+
+    /**
+     * DeleteImage constructor.
+     *
+     * @param  string  $path
+     */
+    public function __construct(string $path)
     {
-        //
+        $this->path = $path;
     }
 
     /**
