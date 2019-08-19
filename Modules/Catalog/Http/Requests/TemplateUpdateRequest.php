@@ -12,7 +12,7 @@ class TemplateUpdateRequest extends TemplateRequest
     public function rules()
     {
         return [
-            'price'    => 'bail|required|integer|min:1',
+            'price'    => 'bail|required|numeric|min:0.1',
             'is_active' => 'bail|required|bool_custom',
             'images'   => 'bail|sometimes|required|array|min:1',
             'images.*' => 'bail|sometimes|required|array',

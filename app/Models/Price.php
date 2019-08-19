@@ -10,6 +10,7 @@ use Jenssegers\Mongodb\Eloquent\Model;
  * @package App\Models
  * @property-read string    $id
  * @property int            $price
+ * @property float          $price_float
  * @property \Carbon\Carbon $started_at
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Price newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Price newQuery()
@@ -32,4 +33,20 @@ class Price extends Model
     ];
 
     protected $dates = ['started_at'];
+
+    /**
+     * @param $value
+     */
+    public function setPriceAttribute(float $value)
+    {
+        $this->attributes['price'] = intval($value * 100);
+    }
+
+    /**
+     * @return float
+     */
+    public function getPriceFloatAttribute()
+    {
+        return floatval($this->attributes['price'] / 100);
+    }
 }

@@ -8,7 +8,7 @@ use Faker\Generator as Faker;
 
 $factory->define(Price::class, function (Faker $faker) {
     return [
-        'price'      => $faker->numberBetween(899, 1299),
+        'price'      => $faker->randomFloat(2, 899.11, 1299.99),
         'started_at' => Carbon::now(),
     ];
 });

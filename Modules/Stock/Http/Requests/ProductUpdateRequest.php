@@ -19,7 +19,7 @@ class ProductUpdateRequest extends ProductRequest
             'images.*.name'          => 'bail|required|string',
             'images.*.extension'     => 'bail|required|string',
             'images.*.size_in_bytes' => 'bail|required|integer|min:1',
-            'price'                  => 'bail|nullable|integer|min:1',
+            'price'                  => 'bail|nullable|numeric|min:0.1',
         ];
     }
 }

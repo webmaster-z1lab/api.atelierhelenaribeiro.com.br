@@ -18,6 +18,7 @@ class AggregatedProductResource extends Resource
     public function toArray($request)
     {
         $template = Template::find($this->resource->id->template);
+
         return [
             'template' => $template->reference,
             'amount'   => $this->resource->count,
