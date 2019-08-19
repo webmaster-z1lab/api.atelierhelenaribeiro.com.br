@@ -113,7 +113,7 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
      */
     public function setRemunerationAttribute($value)
     {
-        $this->attributes['price'] = intval((floatval($value) * 100));
+        $this->attributes['remuneration'] = intval((floatval($value) * 100));
     }
 
     /**
@@ -121,7 +121,7 @@ class User extends Authenticatable implements MustVerifyEmail, EmployeeTypes
      */
     public function getRemunerationFloatAttribute()
     {
-        return floatval(number_format(intval($this->attributes['price']) / 100, 2));
+        return floatval(number_format(intval($this->attributes['remuneration']) / 100, 2));
     }
 
     /**
