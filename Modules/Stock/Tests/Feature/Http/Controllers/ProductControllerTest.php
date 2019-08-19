@@ -25,6 +25,7 @@ class ProductControllerTest extends TestCase
         'barcode',
         'size',
         'color',
+        'template_id',
         'template' => [
             'id',
             'reference',
