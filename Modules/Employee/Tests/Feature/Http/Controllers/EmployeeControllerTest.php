@@ -4,7 +4,6 @@ namespace Modules\Employee\Tests\Feature\Http\Controllers;
 
 use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Str;
 use Modules\User\Models\User;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -32,6 +31,7 @@ class EmployeeControllerTest extends TestCase
         'work_card',
         'email',
         'type',
+        'remuneration',
         'birth_date',
         'admission_date',
         'created_at',
@@ -91,6 +91,7 @@ class EmployeeControllerTest extends TestCase
             'identity'       => $this->employee->identity,
             'work_card'      => $this->employee->work_card,
             'type'           => $this->employee->type,
+            'remuneration'   => $this->employee->remuneration_float,
             'phone'          => [
                 'number'      => $this->employee->phone->full_number,
                 'is_whatsapp' => $this->employee->phone->is_whatsapp,
@@ -276,6 +277,7 @@ class EmployeeControllerTest extends TestCase
             'identity'       => \Str::random(),
             'work_card'      => \Str::random(),
             'type'           => $this->employee->type,
+            'remuneration'   => $this->faker->randomFloat(2, 0.01, 9999999999),
             'phone'          => [
                 'number'      => $this->faker->phoneNumberCleared,
                 'is_whatsapp' => $this->employee->phone->is_whatsapp,

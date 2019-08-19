@@ -3,7 +3,6 @@
 namespace Modules\Stock\Http\Resources;
 
 use Illuminate\Http\Resources\Json\Resource;
-use Modules\Catalog\Http\Resources\TemplateResource;
 use Modules\Catalog\Models\Template;
 
 class AggregatedProductResource extends Resource
@@ -18,6 +17,7 @@ class AggregatedProductResource extends Resource
     public function toArray($request)
     {
         $template = Template::find($this->resource->id->template);
+
         return [
             'template' => $template->reference,
             'amount'   => $this->resource->count,

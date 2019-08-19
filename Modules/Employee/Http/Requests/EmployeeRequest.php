@@ -27,6 +27,7 @@ class EmployeeRequest extends FormRequest
             'type'           => $this->getTypeRules(),
             'identity'       => $this->getIdentityRules(),
             'work_card'      => $this->getWorkCardRules(),
+            'remuneration'   => 'bail|nullable|numeric|min:0.01',
         ];
 
         return $this->mergeRules(
@@ -60,6 +61,7 @@ class EmployeeRequest extends FormRequest
             'admission_date' => 'data de admissão',
             'identity'       => 'identidade',
             'work_card'      => 'carteira de trabalho',
+            'remuneration'   => 'remuneração',
         ];
 
         return $this->mergeAttributes(

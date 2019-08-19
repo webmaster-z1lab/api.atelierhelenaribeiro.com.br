@@ -2,9 +2,6 @@
 
 namespace Modules\Stock\Http\Resources;
 
-use App\Http\Resources\ImageResource;
-use App\Http\Resources\PriceResource;
-use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\Resource;
 
 class BasicProductResource extends Resource
@@ -19,7 +16,6 @@ class BasicProductResource extends Resource
     public function toArray($request)
     {
         $price = collect($this->resource->prices->bsonSerialize())->sortByDesc('started_at')->first();
-
 
         return [
             'id'          => (string) $this->resource->_id,
