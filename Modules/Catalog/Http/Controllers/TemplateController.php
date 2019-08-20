@@ -3,6 +3,7 @@
 namespace Modules\Catalog\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
+use App\Http\Resources\ImageResource;
 use App\Models\Image;
 use Illuminate\Http\JsonResponse;
 use Modules\Catalog\Http\Requests\TemplateRequest;
@@ -91,9 +92,21 @@ class TemplateController extends ApiController
      */
     public function destroyImage(Image $image, Template $template): JsonResponse
     {
+        $image->products()->detach();
+
         $image->delete();
 
         return $this->noContentResponse();
+    }
+
+    /**
+     * @param  \Modules\Catalog\Models\Template  $template
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function gallery(Template $template)
+    {
+        return ImageResource::collection($template->images);
     }
 
     /**

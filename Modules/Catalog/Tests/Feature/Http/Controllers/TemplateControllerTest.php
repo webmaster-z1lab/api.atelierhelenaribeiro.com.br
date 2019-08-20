@@ -203,7 +203,45 @@ class TemplateControllerTest extends TestCase
 
         $template = json_decode($response->getContent());
 
-        $this->json('DELETE', 'images/'.$template->images[0]->id.$this->uri.$template->id)->dump()->assertStatus(204);
+        $this->json('DELETE', 'images/'.$template->images[0]->id.$this->uri.$template->id)->assertStatus(204);
+    }
+
+    /**
+     * @test
+     */
+    public function get_template_gallery()
+    {
+        $response = $this->json('POST', $this->uri, [
+            'reference' => $this->template->reference,
+            'price'     => $this->template->price->price_float,
+            'is_active' => $this->template->is_active,
+            'images'    => $this->getBase64Images(),
+        ]);
+
+        $response
+            ->assertStatus(201)
+            ->assertHeader('ETag')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
+            ->assertJsonStructure($this->jsonStructure);
+
+        $template = json_decode($response->getContent());
+
+        $this->json('GET', $this->uri.$template->id.'/gallery')
+            ->assertOk()
+            ->assertJsonStructure([
+                [
+                    'id',
+                    'template_id',
+                    'product_id',
+                    'name',
+                    'extension',
+                    'path',
+                    'icon',
+                    'size',
+                    'size_in_bytes',
+                ],
+            ]);
     }
 
     /**

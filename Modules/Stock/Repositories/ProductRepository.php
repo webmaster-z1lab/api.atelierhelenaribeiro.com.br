@@ -74,7 +74,11 @@ class ProductRepository
 
             $product->save();
             if (array_key_exists('images', $data) && filled($data['images'])) {
-                $product->images()->saveMany($this->createImages($data['images']));
+                $images = $product->images()->saveMany($this->createImages($data['images']));
+                foreach ($images as $image) {
+                    /** @var \App\Models\Image $image */
+                    $image->template()->associate($template);
+                }
             } else {
                 $template->images->each(function ($item, $key) use ($product) {
                     /** @var \App\Models\Image $item */
