@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Image;
 use App\Models\Price;
+use App\Observers\ImageObserver;
 use App\Observers\PriceObserver;
 use App\Validator\Validator;
 use Illuminate\Http\Resources\Json\Resource;
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Price::observe(PriceObserver::class);
+        //Image::observe(ImageObserver::class);
     }
 
     /**

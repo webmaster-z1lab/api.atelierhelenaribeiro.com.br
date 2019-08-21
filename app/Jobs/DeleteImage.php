@@ -7,6 +7,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Storage;
 
 class DeleteImage implements ShouldQueue
 {
@@ -15,16 +16,16 @@ class DeleteImage implements ShouldQueue
     /**
      * @var string
      */
-    protected $path;
+    protected $paths;
 
     /**
      * DeleteImage constructor.
      *
-     * @param  string  $path
+     * @param  mixed  ...$paths
      */
-    public function __construct(string $path)
+    public function __construct(...$paths)
     {
-        $this->path = $path;
+        $this->paths = $paths;
     }
 
     /**
@@ -34,6 +35,8 @@ class DeleteImage implements ShouldQueue
      */
     public function handle()
     {
-        //
+        foreach ($this->paths as $path) {
+            Storage::delete($path);
+        }
     }
 }

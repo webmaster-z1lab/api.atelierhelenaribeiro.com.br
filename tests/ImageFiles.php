@@ -15,20 +15,12 @@ trait ImageFiles
     {
         $faker = new Faker();
         $faker->addProvider(new Base($faker));
-        $faker->addProvider(new Person($faker));
 
         $images = [];
         $total = $faker->numberBetween(1, 5);
 
         for ($i = 0; $i < $total; $i++) {
-            $name = $faker->name;
-
-            $images[] = [
-                'path'          => "/test/$name.webp",
-                'extension'     => 'webp',
-                'name'          => "$name.webp",
-                'size_in_bytes' => $faker->numberBetween(30000, 523896),
-            ];
+            $images[] = $this->getImage();
         }
 
         return $images;
@@ -46,10 +38,11 @@ trait ImageFiles
         $name = $faker->name;
 
         return [
-            'path'          => "/test/$name.webp",
+            'path'          => "test/$name.webp",
             'extension'     => 'webp',
             'name'          => "$name.webp",
             'size_in_bytes' => $faker->numberBetween(30000, 523896),
+            'mime_type'     => 'image/webp',
         ];
     }
 }

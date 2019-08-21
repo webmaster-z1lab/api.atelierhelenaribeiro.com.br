@@ -2,8 +2,8 @@
 
 namespace Modules\Stock\Repositories;
 
-use App\Models\Image;
 use App\Models\Price;
+use App\Repositories\ImageRepository;
 use App\Traits\FileUpload;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Jobs\CreateColor;
@@ -59,26 +59,23 @@ class ProductRepository
         $products = collect();
         $template = Template::find($data['template']);
 
-        for($i = 0; $i < $data['amount']; $i++) {
+        for ($i = 0; $i < $data['amount']; $i++) {
             $data['barcode'] = \Str::random();
 
             $product = new Product($data);
 
             $product->template()->associate($template);
 
-            if (array_key_exists('price', $data) && filled($data['price'])) {
+            if (isset($data['price'])) {
                 $product->prices()->associate($this->createPrice(intval($data['price'])));
             } else {
                 $product->prices()->associate($this->createPrice($template->price->price));
             }
 
             $product->save();
-            if (array_key_exists('images', $data) && filled($data['images'])) {
-                $images = $product->images()->saveMany($this->createImages($data['images']));
-                foreach ($images as $image) {
-                    /** @var \App\Models\Image $image */
-                    $image->template()->associate($template);
-                }
+
+            if (isset($data['images'])) {
+                $this->createImages($data, $product, $template);
             } else {
                 $template->images->each(function ($item, $key) use ($product) {
                     /** @var \App\Models\Image $item */
@@ -109,7 +106,7 @@ class ProductRepository
         $product->update($data);
 
         if (array_key_exists('images', $data) && filled($data['images'])) {
-            $product->images()->saveMany($this->createImages($data['images']));
+            $product->images()->saveMany((new ImageRepository())->createMany($data['images']));
         }
 
         CreateColor::dispatch($data['color']);
@@ -129,17 +126,18 @@ class ProductRepository
     }
 
     /**
-     * @param  array  $data
-     *
-     * @return array
+     * @param  array                             $data
+     * @param  \Modules\Stock\Models\Product     $product
+     * @param  \Modules\Catalog\Models\Template  $template
      */
-    private function createImages(array $data): array
+    private function createImages(array $data, Product $product, Template $template)
     {
-        $images = [];
-        foreach ($data as $image)
-            $images[] = new Image($image);
+        $images = $product->images()->saveMany((new ImageRepository)->createMany($data['images']));
 
-        return $images;
+        foreach ($images as $image) {
+            /** @var \App\Models\Image $image */
+            $image->template()->associate($template);
+        }
     }
 
     /**

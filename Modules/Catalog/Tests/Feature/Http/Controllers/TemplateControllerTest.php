@@ -5,13 +5,13 @@ namespace Modules\Catalog\Tests\Feature\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Catalog\Models\Template;
-use Tests\Base64Files;
+use Tests\ImageFiles;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
 
 class TemplateControllerTest extends TestCase
 {
-    use RefreshDatabase, WithFaker, Base64Files;
+    use RefreshDatabase, WithFaker, ImageFiles;
 
     private $uri = '/templates/';
     /**
@@ -66,7 +66,7 @@ class TemplateControllerTest extends TestCase
             'reference' => $this->template->reference,
             'price'     => $this->template->price->price_float,
             'is_active' => $this->template->is_active,
-            'images'    => $this->getBase64Images(),
+            'images'    => $this->getImages(),
         ]);
 
         $response->dump()
@@ -191,7 +191,7 @@ class TemplateControllerTest extends TestCase
             'reference' => $this->template->reference,
             'price'     => $this->template->price->price_float,
             'is_active' => $this->template->is_active,
-            'images'    => $this->getBase64Images(),
+            'images'    => $this->getImages(),
         ]);
 
         $response
@@ -215,7 +215,7 @@ class TemplateControllerTest extends TestCase
             'reference' => $this->template->reference,
             'price'     => $this->template->price->price_float,
             'is_active' => $this->template->is_active,
-            'images'    => $this->getBase64Images(),
+            'images'    => $this->getImages(),
         ]);
 
         $response
@@ -293,7 +293,7 @@ class TemplateControllerTest extends TestCase
         return $this->json('PUT', $this->uri.$this->template->id, [
             'price'     => $this->faker->randomFloat(2, 899.11, 1299.99),
             'is_active' => $this->faker->boolean(80),
-            'images'    => $this->getBase64Images(),
+            'images'    => $this->getImages(),
         ]);
     }
 }

@@ -68,6 +68,23 @@ trait CommonRulesValidation
     }
 
     /**
+     * @param  bool  $required
+     *
+     * @return array
+     */
+    public function getImagesRules(bool $required = FALSE)
+    {
+        return [
+            'images'                 => !$required ? 'bail|sometimes|array|min:1' : 'bail|required|array|min:1',
+            'images.*.path'          => 'bail|required|string',
+            'images.*.name'          => 'bail|required|string',
+            'images.*.extension'     => 'bail|required|string',
+            'images.*.mime_type'     => 'bail|required|string',
+            'images.*.size_in_bytes' => 'bail|required|integer|min:1',
+        ];
+    }
+
+    /**
      * @param  string|NULL  $ignore
      *
      * @return array
@@ -150,6 +167,19 @@ trait CommonRulesValidation
             'address.postal_code' => 'CEP',
             'address.city'        => 'cidade',
             'address.state'       => 'estado',
+        ];
+    }
+
+    public function getImageAttributes()
+    {
+        return [
+            'images'                 => 'imagens',
+            'images.*'               => 'imagem',
+            'images.*.path'          => 'caminho da imagem',
+            'images.*.name'          => 'nome da imagem',
+            'images.*.extension'     => 'extensão da imagem',
+            'images.*.size_in_bytes' => 'tamanho da imagem',
+            'images.*.mime_type'     => 'tipo da imagem',
         ];
     }
 

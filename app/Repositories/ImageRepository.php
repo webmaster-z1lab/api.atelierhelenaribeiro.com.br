@@ -16,15 +16,13 @@ class ImageRepository
     use FileUpload;
 
     /**
-     * @param $data
+     * @param  array  $data
      *
      * @return \App\Models\Image
      */
-    public function create($data): Image
+    public function create(array $data): Image
     {
-        $file = $this->uploadImageBase64($data, 'images');
-
-        return new Image($file);
+        return new Image($data);
     }
 
     /**
@@ -38,6 +36,34 @@ class ImageRepository
 
         foreach ($data as $image) {
             $images[] = $this->create($image);
+        }
+
+        return $images;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return \App\Models\Image
+     */
+    public function createBase64($data): Image
+    {
+        $file = $this->uploadImageBase64($data, 'images');
+
+        return new Image($file);
+    }
+
+    /**
+     * @param  array  $data
+     *
+     * @return array
+     */
+    public function createManyBase64(array $data): array
+    {
+        $images = [];
+
+        foreach ($data as $image) {
+            $images[] = $this->createBase64($image);
         }
 
         return $images;

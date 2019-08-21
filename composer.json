@@ -20,6 +20,7 @@
         "laravel/telescope": "^2.0",
         "laravel/tinker": "^1.0",
         "lcobucci/jwt": "^3.3",
+        "league/flysystem-aws-s3-v3": "^1.0",
         "nwidart/laravel-modules": "^5.0",
         "optimus/heimdal": "~1.5",
         "phpseclib/phpseclib": "^2.0",

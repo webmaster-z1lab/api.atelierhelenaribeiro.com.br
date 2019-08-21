@@ -11,15 +11,12 @@ class ProductUpdateRequest extends ProductRequest
      */
     public function rules()
     {
-        return [
-            'size'                   => 'bail|required|string',
-            'color'                  => 'bail|required|string',
-            'images'                 => 'bail|sometimes|required|array|min:1',
-            'images.*.path'          => 'bail|required|string',
-            'images.*.name'          => 'bail|required|string',
-            'images.*.extension'     => 'bail|required|string',
-            'images.*.size_in_bytes' => 'bail|required|integer|min:1',
-            'price'                  => 'bail|nullable|numeric|min:0.1',
+        $rules = [
+            'size'  => 'bail|required|string',
+            'color' => 'bail|required|string',
+            'price' => 'bail|nullable|numeric|min:0.1',
         ];
+
+        return $this->mergeRules($rules, $this->getImagesRules());
     }
 }

@@ -46,9 +46,13 @@ class ImageResource extends JsonResource
             'name'          => $this->resource->name,
             'extension'     => $this->resource->extension,
             'path'          => $this->resource->path,
+            'url'           => $this->resource->url,
+            'square_url'    => $this->resource->square_url,
+            'thumbnail_url' => $this->resource->thumbnail_url,
             'icon'          => $this->resource->icon,
             'size'          => $this->resource->size,
             'size_in_bytes' => $this->resource->size_in_bytes,
+            'mime_type'     => $this->resource->mime_type,
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\S3FileUrl;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
 
@@ -19,6 +20,7 @@ use Modules\Stock\Models\Product;
  * @property string                                                                   $extension
  * @property string                                                                   $icon
  * @property string                                                                   $size
+ * @property string                                                                   $mime_type
  * @property int                                                                      $size_in_bytes
  * @property bool                                                                     $is_processed
  * @property \Modules\Catalog\Models\Template                                         $template
@@ -37,6 +39,8 @@ use Modules\Stock\Models\Product;
  */
 class Image extends BaseModel
 {
+    use S3FileUrl;
+
     private const PROCESSED_STATUS = FALSE;
 
     protected $fillable = [
@@ -46,6 +50,7 @@ class Image extends BaseModel
         'square',
         'name',
         'extension',
+        'mime_type',
         'size',
         'size_in_bytes',
         'icon',
@@ -62,8 +67,8 @@ class Image extends BaseModel
     public function getUrlAttribute()
     {
         return (isset($this->attributes['basic']))
-            ? \Storage::url($this->attributes['basic'])
-            : \Storage::url($this->attributes['path']);
+            ? $this->temporaryFileUrl($this->attributes['basic'])
+            : $this->temporaryFileUrl($this->attributes['path']);
     }
 
     /**
@@ -72,8 +77,8 @@ class Image extends BaseModel
     public function getThumbnailUrlAttribute()
     {
         return (isset($this->attributes['thumbnail']))
-            ? \Storage::url($this->attributes['thumbnail'])
-            : NULL;
+            ? $this->temporaryFileUrl($this->attributes['thumbnail'])
+            : config('image.sizes.thumbnail.placeholder');
     }
 
     /**
@@ -82,8 +87,8 @@ class Image extends BaseModel
     public function getSquareUrlAttribute()
     {
         return (isset($this->attributes['square']))
-            ? \Storage::url($this->attributes['square'])
-            : NULL;
+            ? $this->temporaryFileUrl($this->attributes['square'])
+            : config('image.sizes.square.placeholder');
     }
 
     /**

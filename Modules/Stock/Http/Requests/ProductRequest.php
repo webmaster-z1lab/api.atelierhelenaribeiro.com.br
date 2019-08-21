@@ -2,10 +2,13 @@
 
 namespace Modules\Stock\Http\Requests;
 
+use App\Traits\CommonRulesValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductRequest extends FormRequest
 {
+    use CommonRulesValidation;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -13,18 +16,15 @@ class ProductRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'amount'                 => 'bail|required|integer|min:1',
             'size'                   => 'bail|required|string',
             'color'                  => 'bail|required|string',
             'template'               => 'bail|required|exists:templates,_id',
-            'images'                 => 'bail|sometimes|array|min:1',
-            'images.*.path'          => 'bail|required|string',
-            'images.*.name'          => 'bail|required|string',
-            'images.*.extension'     => 'bail|required|string',
-            'images.*.size_in_bytes' => 'bail|required|integer|min:1',
             'price'                  => 'bail|nullable|numeric|min:0.1',
         ];
+
+        return $this->mergeRules($rules, $this->getImagesRules());
     }
 
     /**
@@ -42,13 +42,13 @@ class ProductRequest extends FormRequest
      */
     public function attributes()
     {
-        return [
+        $attr = [
             'size'     => 'tamanho',
             'color'    => 'cor',
             'template' => 'modelo',
-            'images'   => 'imagens',
-            'images.*' => 'imagem',
             'price'    => 'preço',
         ];
+
+        return $this->mergeAttributes($attr, $this->getImageAttributes());
     }
 }

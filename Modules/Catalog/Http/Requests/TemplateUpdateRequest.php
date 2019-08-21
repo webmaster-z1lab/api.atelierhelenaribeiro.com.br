@@ -11,11 +11,11 @@ class TemplateUpdateRequest extends TemplateRequest
      */
     public function rules()
     {
-        return [
-            'price'    => 'bail|required|numeric|min:0.1',
+        $rules = [
+            'price'     => 'bail|required|numeric|min:0.1',
             'is_active' => 'bail|required|bool_custom',
-            'images'   => 'bail|sometimes|required|array|min:1',
-            'images.*' => 'bail|sometimes|required|array',
         ];
+
+        return $this->mergeRules($rules, $this->getImagesRules());
     }
 }

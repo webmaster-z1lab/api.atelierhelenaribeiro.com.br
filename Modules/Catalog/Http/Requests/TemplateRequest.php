@@ -2,11 +2,14 @@
 
 namespace Modules\Catalog\Http\Requests;
 
+use App\Traits\CommonRulesValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class TemplateRequest extends FormRequest
 {
+    use CommonRulesValidation;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -14,13 +17,13 @@ class TemplateRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'reference' => $this->getReferenceRules(),
             'price'     => 'bail|required|numeric|min:0.1',
             'is_active' => 'bail|required|bool_custom',
-            'images'    => 'bail|required|array|min:1',
-            'images.*'  => 'bail|required|array',
         ];
+
+        return $this->mergeRules($rules, $this->getImagesRules(TRUE));
     }
 
     /**
@@ -38,13 +41,13 @@ class TemplateRequest extends FormRequest
      */
     public function attributes()
     {
-        return [
+        $attr = [
             'reference' => 'referência',
             'is_active' => 'ativo',
-            'images'    => 'imagens',
-            'images.*'  => 'imagem',
             'price'     => 'preço',
         ];
+
+        return $this->mergeAttributes($attr, $this->getImageAttributes());
     }
 
     /**
