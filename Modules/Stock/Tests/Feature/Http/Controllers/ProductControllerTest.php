@@ -103,6 +103,25 @@ class ProductControllerTest extends TestCase
     public function create_product()
     {
         $amount = $this->faker->numberBetween(1, 5);
+//
+//        $response = $this->json('POST', $this->uri, [
+//            'amount'   => $amount,
+//            'size'     => $this->product->size,
+//            'color'    => $this->product->color,
+//            'template' => $this->product->template_id,
+//            'price'    => $this->product->price->price_float,
+//            'images'   => $this->getImages(),
+//        ]);
+//
+//        $response
+//            ->assertStatus(200)
+//            //->assertHeader('ETag')
+//            //->assertHeader('Content-Length')
+//            //->assertHeader('Cache-Control')
+//            ->assertJsonStructure([$this->jsonStructure])
+//            ->assertJsonCount($amount);
+
+        $images = factory(Image::class, 2)->create();
 
         $response = $this->json('POST', $this->uri, [
             'amount'   => $amount,
@@ -110,10 +129,17 @@ class ProductControllerTest extends TestCase
             'color'    => $this->product->color,
             'template' => $this->product->template_id,
             'price'    => $this->product->price->price_float,
-            'images'   => $this->getImages(),
+            'images'   => [
+                [
+                    'id' => $images->first()->id,
+                ],
+                [
+                    'id' => $images->last()->id
+                ],
+            ],
         ]);
 
-        $response
+        $response->dump()
             ->assertStatus(200)
             //->assertHeader('ETag')
             //->assertHeader('Content-Length')

@@ -76,11 +76,12 @@ trait CommonRulesValidation
     {
         return [
             'images'                 => !$required ? 'bail|sometimes|array|min:1' : 'bail|required|array|min:1',
-            'images.*.path'          => 'bail|required|string',
-            'images.*.name'          => 'bail|required|string',
-            'images.*.extension'     => 'bail|required|string',
-            'images.*.mime_type'     => 'bail|required|string',
-            'images.*.size_in_bytes' => 'bail|required|integer|min:1',
+            'images.*.id'            => 'bail|required_without:images.*.path,images.*.name,images.*.extension,images.*.mime_type,images.*.size_in_bytes|exists:images,_id',
+            'images.*.path'          => 'bail|required_without:images.*.id|required_with:images.*.name,images.*.extension,images.*.mime_type,images.*.size_in_bytes|string',
+            'images.*.name'          => 'bail|required_without:images.*.id|required_with:images.*.path,images.*.extension,images.*.mime_type,images.*.size_in_bytes|string',
+            'images.*.extension'     => 'bail|required_without:images.*.id|required_with:images.*.path,images.*.name,images.*.mime_type,images.*.size_in_bytes|string',
+            'images.*.mime_type'     => 'bail|required_without:images.*.id|required_with:images.*.path,images.*.name,images.*.extension,images.*.size_in_bytes|string',
+            'images.*.size_in_bytes' => 'bail|required_without:images.*.id|required_with:images.*.path,images.*.name,images.*.extension,images.*.mime_type|integer|min:1',
         ];
     }
 

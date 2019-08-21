@@ -79,7 +79,7 @@ class ProductRepository
             } else {
                 $template->images->each(function ($item, $key) use ($product) {
                     /** @var \App\Models\Image $item */
-                    $item->product()->attach($product);
+                    $item->products()->attach($product);
                 });
             }
 
@@ -132,11 +132,25 @@ class ProductRepository
      */
     private function createImages(array $data, Product $product, Template $template)
     {
-        $images = $product->images()->saveMany((new ImageRepository)->createMany($data['images']));
+        $imageRepository = new ImageRepository;
+        $ids = \Arr::where(\Arr::pluck($data['images'], 'id'), function ($value, $key) {
+            return filled($value);
+        });
 
-        foreach ($images as $image) {
-            /** @var \App\Models\Image $image */
-            $image->template()->associate($template);
+        if (filled($ids))
+            $product->images()->saveMany($imageRepository->find($ids));
+
+        $uploads = \Arr::where($data['images'], function ($value, $key) {
+            return !isset($value['id']) || !filled($value['id']);
+        });
+
+        if (filled($uploads)) {
+            $images = $product->images()->saveMany($imageRepository->createMany($uploads));
+
+            foreach ($images as $image) {
+                /** @var \App\Models\Image $image */
+                $image->template()->associate($template);
+            }
         }
     }
 
