@@ -103,11 +103,10 @@ class ProductRepository
             $product->prices()->associate($this->createPrice(intval($data['price'])));
         }
 
-        $product->update($data);
+        if (isset($data['images']))
+            $this->createImages($data,  $product, $product->template);
 
-        if (array_key_exists('images', $data) && filled($data['images'])) {
-            $product->images()->saveMany((new ImageRepository())->createMany($data['images']));
-        }
+        $product->update($data);
 
         CreateColor::dispatch($data['color']);
 
@@ -132,20 +131,19 @@ class ProductRepository
      */
     private function createImages(array $data, Product $product, Template $template)
     {
-        $imageRepository = new ImageRepository;
         $ids = \Arr::where(\Arr::pluck($data['images'], 'id'), function ($value, $key) {
             return filled($value);
         });
 
         if (filled($ids))
-            $product->images()->saveMany($imageRepository->find($ids));
+            $product->images()->sync($ids);
 
         $uploads = \Arr::where($data['images'], function ($value, $key) {
             return !isset($value['id']) || !filled($value['id']);
         });
 
         if (filled($uploads)) {
-            $images = $product->images()->saveMany($imageRepository->createMany($uploads));
+            $images = $product->images()->saveMany((new ImageRepository)->createMany($uploads));
 
             foreach ($images as $image) {
                 /** @var \App\Models\Image $image */

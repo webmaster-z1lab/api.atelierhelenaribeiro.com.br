@@ -45,13 +45,16 @@ class Product extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function images()
     {
-        return $this->hasMany(Image::class);
+        return $this->belongsToMany(Image::class);
     }
 
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsMany
+     */
     public function prices()
     {
         return $this->embedsMany(Price::class);

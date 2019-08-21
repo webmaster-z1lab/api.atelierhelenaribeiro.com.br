@@ -68,10 +68,4 @@ class ImageRepository
 
         return $images;
     }
-
-    public function find(array $ids)
-    {
-        return Image::whereIn('_id', $ids)->get();
-    }
-
 }
