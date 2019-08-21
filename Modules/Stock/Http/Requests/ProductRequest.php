@@ -22,6 +22,9 @@ class ProductRequest extends FormRequest
             'color'                  => 'bail|required|string',
             'template'               => 'bail|required|exists:templates,_id',
             'price'                  => 'bail|nullable|numeric|min:0.1',
+            'template_images'        => 'bail|sometimes|array|min:1',
+            'template_images.*'      => 'bail|required|exists:images,_id',
+
         ];
 
         return $this->mergeRules($rules, $this->getImagesRules());

@@ -74,7 +74,7 @@ class ProductRepository
 
             $product->save();
 
-            if (isset($data['images'])) {
+            if ((isset($data['images']) && filled($data['images'])) || (isset($data['template_images']) && filled($data['template_images']))) {
                 $this->createImages($data, $product, $template);
             } else {
                 $template->images->each(function ($item, $key) use ($product) {
@@ -131,19 +131,11 @@ class ProductRepository
      */
     private function createImages(array $data, Product $product, Template $template)
     {
-        $ids = \Arr::where(\Arr::pluck($data['images'], 'id'), function ($value, $key) {
-            return filled($value);
-        });
+        if (isset($data['template_images']) && filled($data['template_images']))
+            $product->images()->sync($data['template_images']);
 
-        if (filled($ids))
-            $product->images()->sync($ids);
-
-        $uploads = \Arr::where($data['images'], function ($value, $key) {
-            return !isset($value['id']) || !filled($value['id']);
-        });
-
-        if (filled($uploads)) {
-            $images = $product->images()->saveMany((new ImageRepository)->createMany($uploads));
+        if (isset($data['images']) && filled($data['images'])) {
+            $images = $product->images()->saveMany((new ImageRepository)->createMany($data['images']));
 
             foreach ($images as $image) {
                 /** @var \App\Models\Image $image */

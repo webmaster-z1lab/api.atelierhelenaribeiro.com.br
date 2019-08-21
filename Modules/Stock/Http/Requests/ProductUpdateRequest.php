@@ -12,9 +12,11 @@ class ProductUpdateRequest extends ProductRequest
     public function rules()
     {
         $rules = [
-            'size'  => 'bail|required|string',
-            'color' => 'bail|required|string',
-            'price' => 'bail|nullable|numeric|min:0.1',
+            'size'              => 'bail|required|string',
+            'color'             => 'bail|required|string',
+            'price'             => 'bail|nullable|numeric|min:0.1',
+            'template_images'   => 'bail|sometimes|array|min:1',
+            'template_images.*' => 'bail|required|exists:images,_id',
         ];
 
         return $this->mergeRules($rules, $this->getImagesRules());

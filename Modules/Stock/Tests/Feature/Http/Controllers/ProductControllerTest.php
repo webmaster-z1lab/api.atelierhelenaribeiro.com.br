@@ -124,19 +124,12 @@ class ProductControllerTest extends TestCase
         $images = factory(Image::class, 2)->create();
 
         $response = $this->json('POST', $this->uri, [
-            'amount'   => $amount,
-            'size'     => $this->product->size,
-            'color'    => $this->product->color,
-            'template' => $this->product->template_id,
-            'price'    => $this->product->price->price_float,
-            'images'   => [
-                [
-                    'id' => $images->first()->id,
-                ],
-                [
-                    'id' => $images->last()->id
-                ],
-            ],
+            'amount'          => $amount,
+            'size'            => $this->product->size,
+            'color'           => $this->product->color,
+            'template'        => $this->product->template_id,
+            'price'           => $this->product->price->price_float,
+            'template_images' => $images->pluck('id')->toArray(),
         ]);
 
         $response
