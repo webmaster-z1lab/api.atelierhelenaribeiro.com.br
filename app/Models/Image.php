@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\S3FileUrl;
+use App\Traits\FileUrl;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
 
@@ -39,7 +39,7 @@ use Modules\Stock\Models\Product;
  */
 class Image extends BaseModel
 {
-    use S3FileUrl;
+    use FileUrl;
 
     private const PROCESSED_STATUS = FALSE;
 
@@ -67,8 +67,8 @@ class Image extends BaseModel
     public function getUrlAttribute()
     {
         return (isset($this->attributes['basic']))
-            ? $this->temporaryFileUrl($this->attributes['basic'])
-            : $this->temporaryFileUrl($this->attributes['path']);
+            ? $this->fileUrl($this->attributes['basic'])
+            : $this->fileUrl($this->attributes['path']);
     }
 
     /**
@@ -77,7 +77,7 @@ class Image extends BaseModel
     public function getThumbnailUrlAttribute()
     {
         return (isset($this->attributes['thumbnail']))
-            ? $this->temporaryFileUrl($this->attributes['thumbnail'])
+            ? $this->fileUrl($this->attributes['thumbnail'])
             : config('image.sizes.thumbnail.placeholder');
     }
 
@@ -87,7 +87,7 @@ class Image extends BaseModel
     public function getSquareUrlAttribute()
     {
         return (isset($this->attributes['square']))
-            ? $this->temporaryFileUrl($this->attributes['square'])
+            ? $this->fileUrl($this->attributes['square'])
             : config('image.sizes.square.placeholder');
     }
 
