@@ -31,6 +31,7 @@ class ProductResource extends Resource
         return [
             'id'          => $this->resource->id,
             'barcode'     => $this->resource->barcode,
+            'thumbnail'   => $this->resource->thumbnail,
             'size'        => $this->resource->size,
             'color'       => $this->resource->color,
             'template_id' => $this->resource->template_id,

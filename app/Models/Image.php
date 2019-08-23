@@ -48,6 +48,7 @@ class Image extends BaseModel
         'path',
         'basic',
         'thumbnail',
+        'template_id',
         'square',
         'name',
         'extension',

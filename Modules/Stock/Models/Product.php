@@ -13,9 +13,11 @@ use Modules\Catalog\Models\Template;
  *
  * @property-read string                                                       $id
  * @property-read string                                                       $template_id
+ * @property string                                                            $thumbnail
  * @property string                                                            $barcode
  * @property string                                                            $size
  * @property string                                                            $color
+ * @property boolean                                                           $is_processed
  * @property-read \Modules\Catalog\Models\Template                             $template
  * @property \App\Models\Price                                                 $price
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Image[] $images
@@ -32,9 +34,31 @@ class Product extends Model
 {
     use SoftDeletes;
 
+    private const PROCESSED_STATUS = FALSE;
+
     protected $fillable = [
-        'barcode', 'size', 'color',
+        'barcode',
+        'thumbnail',
+        'size',
+        'color',
+        'is_processed',
     ];
+
+    protected $attributes = [
+        'is_processed' => self::PROCESSED_STATUS,
+    ];
+
+    protected $casts = [
+        'is_processed' => 'boolean',
+    ];
+
+    /**
+     * @return \App\Models\Price |null
+     */
+    public function getPriceAttribute()
+    {
+        return $this->prices->sortByDesc('started_at')->first();
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -58,14 +82,6 @@ class Product extends Model
     public function prices()
     {
         return $this->embedsMany(Price::class);
-    }
-
-    /**
-     * @return \App\Models\Price |null
-     */
-    public function getPriceAttribute()
-    {
-        return $this->prices->sortByDesc('started_at')->first();
     }
 
     /**

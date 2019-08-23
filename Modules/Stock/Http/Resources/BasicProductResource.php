@@ -20,6 +20,7 @@ class BasicProductResource extends Resource
         return [
             'id'          => (string) $this->resource->_id,
             'barcode'     => $this->resource->barcode,
+            'thumbnail'   => $this->resource->thumbnail,
             'size'        => $this->resource->size,
             'color'       => $this->resource->color,
             'template_id' => $this->resource->template_id,

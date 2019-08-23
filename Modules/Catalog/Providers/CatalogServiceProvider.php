@@ -3,6 +3,8 @@
 namespace Modules\Catalog\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\Catalog\Models\Template;
+use Modules\Catalog\Observers\TemplateObserver;
 
 class CatalogServiceProvider extends ServiceProvider
 {
@@ -14,6 +16,8 @@ class CatalogServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerConfig();
+
+        Template::observe(TemplateObserver::class);
     }
 
     /**

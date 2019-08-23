@@ -10,32 +10,38 @@ namespace App\Repositories;
 
 use App\Models\Image;
 use App\Traits\FileUpload;
+use Modules\Catalog\Models\Template;
 
 class ImageRepository
 {
     use FileUpload;
 
     /**
-     * @param  array  $data
+     * @param  array                             $data
+     * @param  \Modules\Catalog\Models\Template  $template
      *
      * @return \App\Models\Image
      */
-    public function create(array $data): Image
+    public function create(array $data, Template $template = NULL): Image
     {
-        return new Image($data);
+        $image = new Image($data);
+        if (NULL !== $template) $image->template()->associate($template);
+
+        return $image;
     }
 
     /**
-     * @param  array  $data
+     * @param  array                             $data
+     * @param  \Modules\Catalog\Models\Template  $template
      *
      * @return array
      */
-    public function createMany(array $data): array
+    public function createMany(array $data, Template $template = NULL): array
     {
         $images = [];
 
         foreach ($data as $image) {
-            $images[] = $this->create($image);
+            $images[] = $this->create($image, $template);
         }
 
         return $images;

@@ -13,7 +13,9 @@ use Jenssegers\Mongodb\Eloquent\SoftDeletes;
  * @package Modules\Catalog\Models
  * @property-read string                              $id
  * @property string                                   $reference
+ * @property string                                   $thumbnail
  * @property boolean                                  $is_active
+ * @property boolean                                  $is_processed
  * @property \Illuminate\Database\Eloquent\Collection $images
  * @property \Illuminate\Database\Eloquent\Collection $prices
  * @property \App\Models\Price                        $price
@@ -31,20 +33,25 @@ class Template extends BaseModel
 {
     use SoftDeletes;
 
-    public const REFERENCE_LENGTH = 8;
-    public const STATUS_ACTIVE    = TRUE;
+    public const  REFERENCE_LENGTH = 8;
+    public const  STATUS_ACTIVE    = TRUE;
+    private const PROCESSED_STATUS = FALSE;
 
     protected $fillable = [
         'reference',
         'is_active',
+        'thumbnail',
+        'is_processed',
     ];
 
     protected $attributes = [
-        'is_active' => self::STATUS_ACTIVE,
+        'is_active'    => self::STATUS_ACTIVE,
+        'is_processed' => self::PROCESSED_STATUS,
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_processed' => 'boolean',
     ];
 
     /**

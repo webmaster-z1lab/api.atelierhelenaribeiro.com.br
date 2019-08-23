@@ -27,6 +27,7 @@ class ProductControllerTest extends TestCase
         'size',
         'color',
         'template_id',
+        'thumbnail',
         'template' => [
             'id',
             'reference',
@@ -76,7 +77,7 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('GET', $this->uri)->dump()->assertOk()->assertJsonStructure([
+        $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([
             [
                 'template',
                 'size',
@@ -86,6 +87,7 @@ class ProductControllerTest extends TestCase
                     [
                         'id',
                         'barcode',
+                        'thumbnail',
                         'size',
                         'color',
                         'template_id',
@@ -111,10 +113,10 @@ class ProductControllerTest extends TestCase
             'color'    => $this->product->color,
             'template' => $this->product->template_id,
             'price'    => $this->product->price->price_float,
-            'images'   => $this->getImages(),
+            'images'   => factory(Image::class, 2)->make(),
         ]);
 
-        $response->dump()
+        $response
             ->assertStatus(200)
             //->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -247,19 +249,18 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_template_image(): void
+    public function delete_product_image(): void
     {
-        $product = $this->json('POST', $this->uri, [
-            'size'     => $this->product->size,
-            'color'    => $this->product->color,
-            'template' => $this->product->template_id,
-            'price'    => $this->product->price->price_float,
-            'amount'   => 1,
-            'images'   => $this->getImages(),
-        ])->assertStatus(200)
-            //->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
+        $product = $this
+            ->json('POST', $this->uri, [
+                'size'     => $this->product->size,
+                'color'    => $this->product->color,
+                'template' => $this->product->template_id,
+                'price'    => $this->product->price->price_float,
+                'amount'   => 1,
+                'images'   => factory(Image::class, 2)->make(),
+            ])
+            ->assertStatus(200)
             ->assertJsonStructure([$this->jsonStructure]);
 
         $product = json_decode($product->getContent())[0];
@@ -312,7 +313,7 @@ class ProductControllerTest extends TestCase
             'price'  => $this->faker->randomFloat(2, 899.11, 1299.99),
             'size'   => $this->product->size,
             'color'  => $this->product->color,
-            'images' => $this->getImages(),
+            'images' => factory(Image::class, 2)->make(),
         ]);
     }
 }

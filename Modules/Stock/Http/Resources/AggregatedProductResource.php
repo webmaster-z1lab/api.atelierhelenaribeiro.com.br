@@ -20,6 +20,7 @@ class AggregatedProductResource extends Resource
 
         return [
             'template' => $template->reference,
+            'thumbnail' => $template->thumbnail,
             'amount'   => $this->resource->count,
             'size'     => $this->resource->id->size,
             'color'    => $this->resource->id->color,

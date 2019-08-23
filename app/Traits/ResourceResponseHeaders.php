@@ -17,8 +17,8 @@ trait ResourceResponseHeaders
     public function withResponse($request, $response)
     {
         $response->header('ETag', md5($this->resource->updated_at));
-        //$response->header('Content-Length' , mb_strlen($response->__toString(), '8bit'));
-        //$response->header('Cache-Control', 'private, must-revalidate, max-age:3600');
+        //$response->header('Content-Length' , mb_strlen($response->getOriginalContent(), '8bit'));
+        $response->header('Cache-Control', 'private, must-revalidate, max-age:3600');
     }
 
 }

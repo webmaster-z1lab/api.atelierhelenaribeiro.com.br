@@ -36,6 +36,10 @@ class ProcessImageTest extends TestCase
             return $job->image->id === $image->id;
         });
 
+        $this->assertDatabaseHas('images', [
+            'is_processed' => TRUE
+        ]);
+
         $image = $image->fresh();
 
         $album = $image->album;
@@ -62,14 +66,9 @@ class ProcessImageTest extends TestCase
      */
     private function persist(): Image
     {
+        /** @var Template $template */
         $template = factory(Template::class)->create();
 
-        $file = $this->getImage();
-
-        $image = (new ImageRepository())->create($file);
-        $image->template()->associate($template);
-        $image->save();
-
-        return $image;
+        return factory(Image::class)->create(['template_id' => $template->id]);
     }
 }

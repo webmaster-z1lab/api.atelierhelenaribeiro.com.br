@@ -55,6 +55,8 @@ class DeleteImageTest extends TestCase
             return count($image->album->diffAssoc($job->album)->all()) === 0;
         });
 
+        $this->assertDatabaseMissing('images', $image->toArray());
+
         foreach ($album as $item) {
             Storage::assertMissing($item);
         }
@@ -65,15 +67,10 @@ class DeleteImageTest extends TestCase
      */
     private function persist(): Image
     {
+        /** @var Template $template */
         $template = factory(Template::class)->create();
 
-        $file = $this->getImage();
-
-        $image = (new ImageRepository())->create($file);
-        $image->template()->associate($template);
-        $image->save();
-
-        return $image;
+        return factory(Image::class)->create(['template_id' => $template->id]);
     }
 
 }

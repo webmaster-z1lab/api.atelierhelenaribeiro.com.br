@@ -3,10 +3,9 @@
 namespace Modules\Stock\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 use Modules\Stock\Models\Color;
 
 class CreateColor implements ShouldQueue
@@ -15,7 +14,7 @@ class CreateColor implements ShouldQueue
     /**
      * @var string
      */
-    private $color;
+    public $color;
 
     /**
      * CreateColor constructor.
@@ -29,12 +28,9 @@ class CreateColor implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-        if (!Color::where('name', $this->color)->exists())
-            Color::create(['name' => $this->color]);
+        if (!Color::where('name', $this->color)->exists()) Color::create(['name' => $this->color]);
     }
 }

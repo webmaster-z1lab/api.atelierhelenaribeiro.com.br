@@ -3,6 +3,8 @@
 namespace Modules\Stock\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\Stock\Models\Product;
+use Modules\Stock\Observers\ProductObserver;
 
 class StockServiceProvider extends ServiceProvider
 {
@@ -14,6 +16,8 @@ class StockServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerConfig();
+
+        Product::observe(ProductObserver::class);
     }
 
     /**

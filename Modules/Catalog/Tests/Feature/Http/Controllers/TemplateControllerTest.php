@@ -23,6 +23,7 @@ class TemplateControllerTest extends TestCase
     private $jsonStructure = [
         'id',
         'reference',
+        'thumbnail',
         'price',
         'created_at',
         'updated_at',
@@ -63,12 +64,7 @@ class TemplateControllerTest extends TestCase
      */
     public function create_template(): void
     {
-        $response = $this->json('POST', $this->uri, [
-            'reference' => $this->template->reference,
-            'price'     => $this->template->price->price_float,
-            'is_active' => $this->template->is_active,
-            'images'    => $this->getImages(),
-        ]);
+        $response = $this->sendPostRequest();
 
         $response
             ->assertStatus(201)
@@ -188,12 +184,7 @@ class TemplateControllerTest extends TestCase
      */
     public function delete_template_image(): void
     {
-        $response = $this->json('POST', $this->uri, [
-            'reference' => $this->template->reference,
-            'price'     => $this->template->price->price_float,
-            'is_active' => $this->template->is_active,
-            'images'    => $this->getImages(),
-        ]);
+        $response = $this->sendPostRequest();
 
         $response
             ->assertStatus(201)
@@ -212,12 +203,7 @@ class TemplateControllerTest extends TestCase
      */
     public function get_template_gallery(): void
     {
-        $response = $this->json('POST', $this->uri, [
-            'reference' => $this->template->reference,
-            'price'     => $this->template->price->price_float,
-            'is_active' => $this->template->is_active,
-            'images'    => $this->getImages(),
-        ]);
+        $response = $this->sendPostRequest();
 
         $response
             ->assertStatus(201)
@@ -279,6 +265,19 @@ class TemplateControllerTest extends TestCase
     }
 
     /**
+     * @return \Illuminate\Foundation\Testing\TestResponse
+     */
+    private function sendPostRequest(): TestResponse
+    {
+        return $this->json('POST', $this->uri, [
+            'reference' => $this->template->reference,
+            'price'     => $this->template->price->price_float,
+            'is_active' => $this->template->is_active,
+            'images'    => factory(Image::class, 2)->make(),
+        ]);
+    }
+
+    /**
      * @return $this
      */
     private function persist(): TemplateControllerTest
@@ -296,7 +295,7 @@ class TemplateControllerTest extends TestCase
         return $this->json('PUT', $this->uri.$this->template->id, [
             'price'     => $this->faker->randomFloat(2, 899.11, 1299.99),
             'is_active' => $this->faker->boolean(80),
-            'images'    => $this->getImages(),
+            'images'    => factory(Image::class, 2)->make(),
         ]);
     }
 }
