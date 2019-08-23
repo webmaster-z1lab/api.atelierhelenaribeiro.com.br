@@ -26,6 +26,7 @@ class ImageRepository
     {
         $image = new Image($data);
         if (NULL !== $template) $image->template()->associate($template);
+        $image->save();
 
         return $image;
     }

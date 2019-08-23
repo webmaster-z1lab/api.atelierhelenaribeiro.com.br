@@ -8,7 +8,6 @@
 
 namespace Modules\Catalog\Repositories;
 
-use App\Models\Image;
 use App\Models\Price;
 use App\Repositories\ImageRepository;
 use App\Traits\FileUpload;
@@ -53,7 +52,7 @@ class TemplateRepository
         $template = new Template($data);
 
         $template->prices()->associate($this->createPrice($data))->save();
-        $template->images()->saveMany($this->createImages($data));
+        $this->createImages($data, $template);
 
         return $template;
     }
@@ -68,7 +67,7 @@ class TemplateRepository
     {
         $template->prices()->associate($this->createPrice($data));
 
-        if(isset($data['images'])) $template->images()->saveMany($this->createImages($data));
+        if (isset($data['images'])) $this->createImages($data, $template);
 
         $template->update($data);
 
@@ -114,12 +113,13 @@ class TemplateRepository
     }
 
     /**
-     * @param  array  $data
+     * @param  array                             $data
+     * @param  \Modules\Catalog\Models\Template  $template
      *
      * @return array
      */
-    public function createImages(array $data)
+    public function createImages(array $data, Template $template)
     {
-        return (new ImageRepository)->createMany($data['images']);
+        return (new ImageRepository)->createMany($data['images'], $template);
     }
 }

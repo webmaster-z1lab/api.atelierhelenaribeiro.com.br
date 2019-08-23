@@ -5,7 +5,6 @@ namespace Modules\Stock\Tests\Feature\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
-use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
 use Tests\ImageFiles;
 use Tests\RefreshDatabase;
@@ -108,31 +107,18 @@ class ProductControllerTest extends TestCase
         $amount = $this->faker->numberBetween(1, 3);
 
         $response = $this->json('POST', $this->uri, [
-            'amount'   => $amount,
-            'size'     => $this->product->size,
-            'color'    => $this->product->color,
-            'template' => $this->product->template_id,
-            'price'    => $this->product->price->price_float,
-            'images'   => factory(Image::class, 2)->make(),
+            'amount'          => $amount,
+            'size'            => $this->product->size,
+            'color'           => $this->product->color,
+            'template'        => $this->product->template_id,
+            'price'           => $this->product->price->price_float,
+            'images'          => factory(Image::class, 2)->make(),
+            'template_images' => [
+                $this->product->template->images->first()->id,
+            ],
         ]);
 
         $response->dump()
-            ->assertStatus(200)
-            //->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
-            ->assertJsonStructure([$this->jsonStructure])
-            ->assertJsonCount($amount);
-
-        $response = $this->json('POST', $this->uri, [
-            'amount'   => $amount,
-            'size'     => $this->product->size,
-            'color'    => $this->product->color,
-            'template' => $this->product->template_id,
-            'price'    => $this->product->price->price_float,
-        ]);
-
-        $response
             ->assertStatus(200)
             //->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -285,11 +271,11 @@ class ProductControllerTest extends TestCase
      */
     public function tearDown(): void
     {
-        Product::truncate();
+        /*Product::truncate();
         Template::truncate();
         Image::truncate();
 
-        $this->destroyImages();
+        $this->destroyImages();*/
 
         parent::tearDown();
     }
