@@ -5,7 +5,6 @@ namespace Modules\Stock\Tests\Feature\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Bus;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
 use Tests\ImageFiles;
@@ -104,8 +103,6 @@ class ProductControllerTest extends TestCase
      */
     public function create_product(): void
     {
-        Bus::fake();
-
         $amount = $this->faker->numberBetween(1, 3);
 
         $response = $this->json('POST', $this->uri, [
@@ -206,8 +203,6 @@ class ProductControllerTest extends TestCase
      */
     public function update_product(): void
     {
-        Bus::fake();
-
         $this->persist();
 
         $response = $this->update();
