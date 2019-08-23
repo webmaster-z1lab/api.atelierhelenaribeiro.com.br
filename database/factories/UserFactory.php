@@ -53,7 +53,7 @@ $factory->state(User::class, 'fake', function (Faker $faker) use ($types) {
         'document'          => $faker->cpf(FALSE),
         'identity'          => Str::random(),
         'work_card'         => Str::random(),
-        'remuneration'      => $faker->randomFloat(2, 0.01, 99999999),
+        'remuneration'      => $faker->randomFloat(2, 0.02, 5000.99),
         'birth_date'        => $faker->dateTime('today - 18 years'),
         'admission_date'    => $faker->dateTime('today'),
         'email_verified_at' => $faker->dateTime,

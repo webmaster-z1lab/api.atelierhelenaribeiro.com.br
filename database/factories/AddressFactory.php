@@ -12,7 +12,7 @@ $faker->addProvider(new AddressFaker($faker));
 $factory->define(Address::class, function (Faker $faker) {
     return [
         'street'      => $faker->streetName,
-        'number'      => $faker->buildingNumber,
+        'number'      => $faker->numberBetween(1,2000),
         'complement'  => $faker->secondaryAddress,
         'district'    => $faker->citySuffix,
         'postal_code' => '36520000',
