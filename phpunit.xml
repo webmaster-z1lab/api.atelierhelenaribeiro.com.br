@@ -35,5 +35,6 @@
         <server name="TELESCOPE_DB_DATABASE" value="telescope-tests"/>
         <server name="DB_DATABASE" value="unit-tests"/>
         <server name="TELESCOPE_DB_DATABASE" value="unit-tests"/>
+        <server name="FILESYSTEM_DRIVER" value="local"/>
     </php>
 </phpunit>

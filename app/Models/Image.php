@@ -28,6 +28,7 @@ use Modules\Stock\Models\Product;
  * @property-read string                                                              $square_url
  * @property-read string                                                              $thumbnail_url
  * @property-read string                                                              $url
+ * @property-read \Illuminate\Support\Collection                                      $album
  * @property-read \Carbon\Carbon                                                      $created_at
  * @property-read \Carbon\Carbon                                                      $updated_at
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Image newModelQuery()
@@ -89,6 +90,19 @@ class Image extends BaseModel
         return (isset($this->attributes['square']))
             ? $this->fileUrl($this->attributes['square'])
             : config('image.sizes.square.placeholder');
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAlbumAttribute()
+    {
+        return collect([
+            'path'      => $this->attributes['path'],
+            'basic'     => isset($this->attributes['basic']) ? $this->attributes['basic'] : NULL,
+            'square'    => isset($this->attributes['square']) ? $this->attributes['square'] : NULL,
+            'thumbnail' => isset($this->attributes['thumbnail']) ? $this->attributes['thumbnail'] : NULL,
+        ]);
     }
 
     /**

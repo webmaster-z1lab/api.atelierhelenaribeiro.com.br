@@ -3,6 +3,7 @@
 namespace Modules\Catalog\Tests\Feature\Http\Controllers;
 
 use App\Models\Image;
+use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Catalog\Models\Template;
 use Tests\ImageFiles;
@@ -52,7 +53,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_templates()
+    public function get_templates(): void
     {
         $this->json('GET', $this->uri)->assertOk()->assertJsonStructure([]);
     }
@@ -60,7 +61,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_template()
+    public function create_template(): void
     {
         $response = $this->json('POST', $this->uri, [
             'reference' => $this->template->reference,
@@ -69,7 +70,7 @@ class TemplateControllerTest extends TestCase
             'images'    => $this->getImages(),
         ]);
 
-        $response->dump()
+        $response
             ->assertStatus(201)
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -80,7 +81,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_template_fails()
+    public function create_template_fails(): void
     {
         $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
@@ -88,7 +89,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_template()
+    public function get_template(): void
     {
         $this->persist();
 
@@ -104,7 +105,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_template_fails()
+    public function get_template_fails(): void
     {
         $this->persist();
 
@@ -117,7 +118,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_template_not_modified()
+    public function get_template_not_modified(): void
     {
         $this->persist();
 
@@ -139,7 +140,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_template()
+    public function update_template(): void
     {
         $this->persist();
 
@@ -156,7 +157,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_template_fails()
+    public function update_template_fails(): void
     {
         $this->persist();
 
@@ -175,7 +176,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_template()
+    public function delete_template(): void
     {
         $this->persist();
 
@@ -185,7 +186,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_template_image()
+    public function delete_template_image(): void
     {
         $response = $this->json('POST', $this->uri, [
             'reference' => $this->template->reference,
@@ -209,7 +210,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_template_gallery()
+    public function get_template_gallery(): void
     {
         $response = $this->json('POST', $this->uri, [
             'reference' => $this->template->reference,
@@ -247,7 +248,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_template_fails()
+    public function delete_template_fails(): void
     {
         $this->persist();
 
@@ -259,7 +260,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_new_reference()
+    public function get_new_reference(): void
     {
         $this->json('GET', $this->uri.'reference')->assertOk()->assertJsonStructure(['reference']);
     }
@@ -272,13 +273,15 @@ class TemplateControllerTest extends TestCase
         Template::truncate();
         Image::truncate();
 
+        $this->destroyImages();
+
         parent::tearDown();
     }
 
     /**
      * @return $this
      */
-    private function persist()
+    private function persist(): TemplateControllerTest
     {
         $this->template->save();
 
@@ -288,7 +291,7 @@ class TemplateControllerTest extends TestCase
     /**
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function update()
+    private function update(): TestResponse
     {
         return $this->json('PUT', $this->uri.$this->template->id, [
             'price'     => $this->faker->randomFloat(2, 899.11, 1299.99),

@@ -14,18 +14,18 @@ class DeleteImage implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var string
+     * @var \Illuminate\Support\Collection
      */
-    protected $paths;
+    public $album;
 
     /**
      * DeleteImage constructor.
      *
-     * @param  mixed  ...$paths
+     * @param \Illuminate\Support\Collection $album
      */
-    public function __construct(...$paths)
+    public function __construct($album)
     {
-        $this->paths = $paths;
+        $this->album = $album;
     }
 
     /**
@@ -35,8 +35,8 @@ class DeleteImage implements ShouldQueue
      */
     public function handle()
     {
-        foreach ($this->paths as $path) {
-            Storage::delete($path);
+        foreach ($this->album as $path) {
+            if(NULL !== $path) Storage::delete($path);
         }
     }
 }

@@ -36,7 +36,7 @@ class NotificationControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_notifications()
+    public function get_notifications(): void
     {
         $this
             ->withHeaders(['Authorization' => "Bearer {$this->login()}"])
@@ -48,7 +48,7 @@ class NotificationControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_latest_notifications()
+    public function get_latest_notifications(): void
     {
         $this
             ->withHeaders(['Authorization' => "Bearer {$this->login()}"])
@@ -60,7 +60,7 @@ class NotificationControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_notification()
+    public function update_notification(): void
     {
         $this->assertTrue(TRUE);
     }
@@ -77,7 +77,7 @@ class NotificationControllerTest extends TestCase
     /**
      * @return string
      */
-    private function login()
+    private function login(): string
     {
         $response = $this->json('POST', '/login', [
             'email'    => $this->user->email,

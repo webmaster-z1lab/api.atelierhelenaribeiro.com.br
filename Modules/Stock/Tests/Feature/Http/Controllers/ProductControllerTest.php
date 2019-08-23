@@ -3,7 +3,9 @@
 namespace Modules\Stock\Tests\Feature\Http\Controllers;
 
 use App\Models\Image;
+use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Bus;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
 use Tests\ImageFiles;
@@ -71,7 +73,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_products()
+    public function get_products(): void
     {
         $this->persist();
 
@@ -100,9 +102,11 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_product()
+    public function create_product(): void
     {
-        $amount = $this->faker->numberBetween(1, 5);
+        Bus::fake();
+
+        $amount = $this->faker->numberBetween(1, 3);
 
         $response = $this->json('POST', $this->uri, [
             'amount'   => $amount,
@@ -113,7 +117,7 @@ class ProductControllerTest extends TestCase
             'images'   => $this->getImages(),
         ]);
 
-        $response
+        $response->dump()
             ->assertStatus(200)
             //->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -121,15 +125,12 @@ class ProductControllerTest extends TestCase
             ->assertJsonStructure([$this->jsonStructure])
             ->assertJsonCount($amount);
 
-        $images = factory(Image::class, 2)->create();
-
         $response = $this->json('POST', $this->uri, [
-            'amount'          => $amount,
-            'size'            => $this->product->size,
-            'color'           => $this->product->color,
-            'template'        => $this->product->template_id,
-            'price'           => $this->product->price->price_float,
-            'template_images' => $images->pluck('id')->toArray(),
+            'amount'   => $amount,
+            'size'     => $this->product->size,
+            'color'    => $this->product->color,
+            'template' => $this->product->template_id,
+            'price'    => $this->product->price->price_float,
         ]);
 
         $response
@@ -144,7 +145,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_product_fails()
+    public function create_product_fails(): void
     {
         $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
@@ -152,7 +153,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_product()
+    public function get_product(): void
     {
         $this->persist();
 
@@ -168,7 +169,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_product_fails()
+    public function get_product_fails(): void
     {
         $this->persist();
 
@@ -181,7 +182,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_product_not_modified()
+    public function get_product_not_modified(): void
     {
         $this->persist();
 
@@ -203,8 +204,10 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_product()
+    public function update_product(): void
     {
+        Bus::fake();
+
         $this->persist();
 
         $response = $this->update();
@@ -220,7 +223,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_product_fails()
+    public function update_product_fails(): void
     {
         $this->persist();
 
@@ -239,7 +242,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_product()
+    public function delete_product(): void
     {
         $this->persist();
 
@@ -249,7 +252,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_template_image()
+    public function delete_template_image(): void
     {
         $product = $this->json('POST', $this->uri, [
             'size'     => $this->product->size,
@@ -272,7 +275,7 @@ class ProductControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_product_fails()
+    public function delete_product_fails(): void
     {
         $this->persist();
 
@@ -290,13 +293,15 @@ class ProductControllerTest extends TestCase
         Template::truncate();
         Image::truncate();
 
+        $this->destroyImages();
+
         parent::tearDown();
     }
 
     /**
      * @return $this
      */
-    private function persist()
+    private function persist(): ProductControllerTest
     {
         $this->product->save();
 
@@ -306,7 +311,7 @@ class ProductControllerTest extends TestCase
     /**
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function update()
+    private function update(): TestResponse
     {
         return $this->json('PUT', $this->uri.$this->product->id, [
             'price'  => $this->faker->randomFloat(2, 899.11, 1299.99),

@@ -23,21 +23,12 @@ trait Base64Files
     {
         $faker = new Faker();
         $faker->addProvider(new Base($faker));
-        $faker->addProvider(new Person($faker));
 
         $images = [];
         $total = $faker->numberBetween(1, 5);
 
         for ($i = 0; $i < $total; $i++) {
-            $image = (new ImageManager())->canvas(1200, 720)->encode('data-url');
-
-            $images[] = [
-                'dataURL' => $image->encoded,
-                'upload'  => [
-                    'filename' => $faker->name.'.webp',
-                    'total'    => $faker->numberBetween(1, 20000),
-                ],
-            ];
+            $images[] = $this->getBase64Image();
         }
 
         return $images;
@@ -57,7 +48,7 @@ trait Base64Files
         return [
             'dataURL' => $image->encoded,
             'upload'  => [
-                'filename' => $this->faker->name.'.webp',
+                'filename' => $faker->name.'.webp',
                 'total'    => $faker->numberBetween(1, 20000),
             ],
         ];

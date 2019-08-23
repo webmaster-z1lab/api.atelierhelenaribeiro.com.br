@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Price::observe(PriceObserver::class);
-        //Image::observe(ImageObserver::class);
+        Image::observe(ImageObserver::class);
     }
 
     /**

@@ -17,7 +17,7 @@ class ProcessImage implements ShouldQueue
     /**
      * @var \App\Models\Image
      */
-    protected $image;
+    public $image;
 
     /**
      * ProcessImage constructor.
@@ -50,10 +50,10 @@ class ProcessImage implements ShouldQueue
      */
     private function makeFormats(): array
     {
-        $processor = new ImageProcessor();
+        $path = NULL !== $this->image->template_id ? 'templates/'.$this->image->template_id : 'templates';
 
-        $path = 'templates/'.$this->image->template_id;
-        $processor->setPath($path)->setSource($this->image->path);
+        $processor = new ImageProcessor($this->image);
+        $processor->setPath($path);
 
         return $processor->process();
     }

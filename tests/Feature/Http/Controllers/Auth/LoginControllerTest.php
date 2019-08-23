@@ -3,6 +3,7 @@
 namespace Tests\Feature\Http\Controllers\Auth;
 
 use App\Auth\Models\Token;
+use Illuminate\Foundation\Testing\TestResponse;
 use Modules\User\Models\User;
 use Tests\TestCase as parentAlias;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -42,13 +43,15 @@ class LoginControllerTest extends parentAlias
      *
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function login(array $data, string $method = 'POST')
+    private function login(array $data, string $method = 'POST'): TestResponse
     {
         return $this->json($method, 'login', $data);
     }
 
-    /** @test */
-    public function login_is_post()
+    /**
+     * @test
+     */
+    public function login_is_post(): void
     {
         $response = $this->login(['email' => $this->user->email, 'password' => $this->password], 'GET');
 
@@ -76,7 +79,7 @@ class LoginControllerTest extends parentAlias
      *
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function loginSuccess(array $data)
+    private function loginSuccess(array $data): TestResponse
     {
         $response = $this->login($data);
 
@@ -101,7 +104,7 @@ class LoginControllerTest extends parentAlias
      *
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function loginFail(array $data, string $error = 'email')
+    private function loginFail(array $data, string $error = 'email'): TestResponse
     {
         $response = $this->login($data);
 
@@ -125,19 +128,23 @@ class LoginControllerTest extends parentAlias
     /**
      * @test
      */
-    public function login_with_email()
+    public function login_with_email(): void
     {
         $this->loginSuccess(['email' => $this->user->email, 'password' => $this->password]);
     }
 
-    /** @test */
-    public function login_with_document()
+    /**
+     * @test
+     */
+    public function login_with_document(): void
     {
         $this->loginSuccess(['email' => $this->user->document, 'password' => $this->password]);
     }
 
-    /** @test */
-    public function login_returns_validation_error()
+    /**
+     * @test
+     */
+    public function login_returns_validation_error(): void
     {
         $this->loginFail(['email' => '06771783600', 'password' => $this->password]);
 
@@ -166,7 +173,7 @@ class LoginControllerTest extends parentAlias
      *
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function logout(string $token = NULL, string $method = 'POST')
+    private function logout(string $token = NULL, string $method = 'POST'): TestResponse
     {
         if ($token) {
             return $this->json($method, 'logout', [], ['Authorization' => "Bearer $token"]);
@@ -178,15 +185,17 @@ class LoginControllerTest extends parentAlias
     /**
      * @return string
      */
-    private function createToken()
+    private function createToken(): string
     {
         $response = $this->login(['email' => $this->user->email, 'password' => $this->password]);
 
         return json_decode($response->getContent())->api_token;
     }
 
-    /** @test */
-    public function logout_is_post()
+    /**
+     * @test
+     */
+    public function logout_is_post(): void
     {
         $token = $this->createToken();
 

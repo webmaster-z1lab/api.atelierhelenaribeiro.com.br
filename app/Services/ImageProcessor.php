@@ -9,10 +9,11 @@
 namespace App\Services;
 
 
+use App\Models\Image as Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManagerStatic;
 use \Intervention\Image\Image;
+use Intervention\Image\ImageManagerStatic;
 
 class ImageProcessor
 {
@@ -40,15 +41,26 @@ class ImageProcessor
      * @var array
      */
     private $types;
+    /**
+     * @var
+     */
+    private $image;
 
     /**
      * ImageProcessor constructor.
+     *
+     * @param  \App\Models\Image  $image
+     *
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function __construct()
+    public function __construct(Model $image)
     {
         $this->extension = config('image.extension');
         $this->quality = config('image.quality');
         $this->types = array_keys(config('image.sizes'));
+
+        $this->image = $image;
+        $this->setSource($image->path);
     }
 
     /**
@@ -66,6 +78,8 @@ class ImageProcessor
             if (method_exists($this, $method)) $images[$type] = $this->$method();
         }
 
+        $images['path'] = $this->moveOriginal();
+
         return $images;
     }
 
@@ -74,7 +88,7 @@ class ImageProcessor
      *
      * @return $this
      */
-    public function setPath(string $path)
+    public function setPath(string $path): ImageProcessor
     {
         $this->path = config('image.path')."/$path/";
 
@@ -87,7 +101,7 @@ class ImageProcessor
      * @return $this
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function setSource(string $source)
+    public function setSource(string $source): ImageProcessor
     {
         $this->source = $source;
         $this->file = Storage::get($source);
@@ -125,6 +139,20 @@ class ImageProcessor
     public function basic(): string
     {
         return $this->create('basic', 'webp', FALSE);
+    }
+
+    /**
+     * Move original image to path folder
+     *
+     * @return string
+     */
+    public function moveOriginal(): string
+    {
+        $newPath = "{$this->path}{$this->image->name}";
+
+        Storage::move($this->source, $newPath);
+
+        return $newPath;
     }
 
     /**
@@ -171,22 +199,22 @@ class ImageProcessor
     {
         $size = config("image.sizes.$type");
 
-        $image->resize(NULL, $size[0], function ($constraint) {
+        $image->resize(NULL, $size['w'], function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
-        })->crop($size[0], $size[1]);
+        })->crop($size['w'], $size['h']);
     }
 
     /**
      * @param  \Intervention\Image\Image  $image
      * @param  string                     $type
      */
-    private function resize(Image &$image, string $type)
+    private function resize(Image &$image, string $type): void
     {
         $size = config("image.sizes.$type");
 
-        if ($image->filesize() > $size[0]) {
-            $image->resize($size[0], NULL, function ($constraint) {
+        if ($image->filesize() > $size['w']) {
+            $image->resize($size['w'], NULL, function ($constraint) {
                 $constraint->aspectRatio();
             });
         }

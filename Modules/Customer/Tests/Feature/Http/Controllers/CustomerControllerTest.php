@@ -2,8 +2,8 @@
 
 namespace Modules\Customer\Tests\Feature\Http\Controllers;
 
-use Carbon\Carbon;
 use Faker\Provider\pt_BR\PhoneNumber;
+use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Customer\Models\Customer;
 use Modules\User\Models\User;
@@ -54,7 +54,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_customers()
+    public function get_customers(): void
     {
         $this->persist();
 
@@ -64,7 +64,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_customer()
+    public function create_customer(): void
     {
         $response = $this->json('POST', $this->uri, [
             'company_name'           => $this->customer->company_name,
@@ -93,7 +93,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_customer_fails()
+    public function create_customer_fails(): void
     {
         $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
@@ -101,7 +101,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_customer()
+    public function get_customer(): void
     {
         $this->persist();
 
@@ -117,7 +117,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_customer_fails()
+    public function get_customer_fails(): void
     {
         $this->persist();
 
@@ -130,7 +130,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_customer_not_modified()
+    public function get_customer_not_modified(): void
     {
         $this->persist();
 
@@ -152,7 +152,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_customer()
+    public function update_customer(): void
     {
         $this->persist();
 
@@ -169,7 +169,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_customer_fails()
+    public function update_customer_fails(): void
     {
         $this->persist();
 
@@ -188,7 +188,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_customer()
+    public function delete_customer(): void
     {
         $this->persist();
 
@@ -198,7 +198,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_customer_fails()
+    public function delete_customer_fails(): void
     {
         $this->persist();
 
@@ -219,7 +219,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function update()
+    private function update(): TestResponse
     {
         return $this->json('PUT', $this->uri.$this->customer->id, [
             'company_name'           => $this->faker->company,
@@ -249,7 +249,7 @@ class CustomerControllerTest extends TestCase
     /**
      * @return $this
      */
-    private function persist()
+    private function persist(): CustomerControllerTest
     {
         $this->customer->save();
 

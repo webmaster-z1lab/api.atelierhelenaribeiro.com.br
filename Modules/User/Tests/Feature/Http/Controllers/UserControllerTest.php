@@ -59,12 +59,12 @@ class UserControllerTest extends TestCase
     /**
      * @test
      */
-    public function change_password()
+    public function change_password(): void
     {
         $this->assertTrue(TRUE);
     }
 
-    public function get_users_fail()
+    public function get_users_fail(): void
     {
         $this->json('GET', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
     }
@@ -72,7 +72,7 @@ class UserControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_user()
+    public function get_user(): void
     {
         $token = $this->login();
 
@@ -82,7 +82,7 @@ class UserControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_user_fails()
+    public function get_user_fails(): void
     {
         $this->json('GET', $this->uri.$this->user->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
     }
@@ -90,7 +90,7 @@ class UserControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_user_fails()
+    public function delete_user_fails(): void
     {
         $this->json('DELETE', $this->uri.$this->user->id)->assertStatus(405)->assertJsonStructure($this->errorStructure);
     }
@@ -98,7 +98,7 @@ class UserControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_user_fails()
+    public function update_user_fails(): void
     {
         $this->json('PUT', $this->uri.$this->user->id, [])->assertStatus(405)->assertJsonStructure($this->errorStructure);
     }
@@ -106,7 +106,7 @@ class UserControllerTest extends TestCase
     /**
      * @return string
      */
-    private function login()
+    private function login(): string
     {
         $response = $this->json('POST', '/login', [
             'email'    => $this->user->email,

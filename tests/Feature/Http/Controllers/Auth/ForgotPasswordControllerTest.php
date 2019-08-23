@@ -16,7 +16,6 @@ class ForgotPasswordControllerTest extends TestCase
      * @var \Modules\User\Models\User
      */
     private $user;
-
     /**
      * @var array
      */
@@ -52,8 +51,10 @@ class ForgotPasswordControllerTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
-    public function send_forgot_password_email()
+    /**
+     * @test
+     */
+    public function send_forgot_password_email(): void
     {
         \Notification::fake();
 
@@ -66,8 +67,10 @@ class ForgotPasswordControllerTest extends TestCase
         \Notification::assertSentTo($this->user, ResetPasswordNotification::class);
     }
 
-    /** @test */
-    public function fail_to_send_forgot_password_email()
+    /**
+     * @test
+     */
+    public function fail_to_send_forgot_password_email(): void
     {
         \Notification::fake();
 

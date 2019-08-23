@@ -4,10 +4,21 @@ namespace Tests;
 
 use Faker\Generator as Faker;
 use Faker\Provider\Base;
-use Faker\Provider\pt_BR\Person;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 trait ImageFiles
 {
+    /**
+     * @var string
+     */
+    protected $fileDir = 'tests';
+    /**
+     * @var string
+     */
+    protected $disk = 'local';
+
     /**
      * @return array
      */
@@ -17,7 +28,7 @@ trait ImageFiles
         $faker->addProvider(new Base($faker));
 
         $images = [];
-        $total = $faker->numberBetween(1, 5);
+        $total = $faker->numberBetween(1, 3);
 
         for ($i = 0; $i < $total; $i++) {
             $images[] = $this->getImage();
@@ -31,18 +42,28 @@ trait ImageFiles
      */
     public function getImage(): array
     {
-        $faker = new Faker();
-        $faker->addProvider(new Base($faker));
-        $faker->addProvider(new Person($faker));
+        Storage::persistentFake($this->disk);
 
-        $name = $faker->name;
+        $name = Str::uuid()->toString().'.png';
+
+        $file = UploadedFile::fake()->image($name, 2000, 1500);
+        $path = $file->storeAs($this->fileDir, $name);
 
         return [
-            'path'          => "test/$name.webp",
-            'extension'     => 'webp',
-            'name'          => "$name.webp",
-            'size_in_bytes' => $faker->numberBetween(30000, 523896),
-            'mime_type'     => 'image/webp',
+            'name'          => $name,
+            'path'          => $path,
+            'extension'     => $file->getClientOriginalExtension(),
+            'mime_type'     => $file->getMimeType(),
+            'size_in_bytes' => $file->getSize(),
         ];
+    }
+
+    /**
+     * Clear the test directory
+     */
+    public function destroyImages(): void
+    {
+        Storage::disk($this->disk)->deleteDirectory($this->fileDir);
+        Storage::disk($this->disk)->deleteDirectory('images');
     }
 }

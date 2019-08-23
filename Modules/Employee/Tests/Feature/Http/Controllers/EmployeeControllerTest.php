@@ -3,6 +3,7 @@
 namespace Modules\Employee\Tests\Feature\Http\Controllers;
 
 use Faker\Provider\pt_BR\PhoneNumber;
+use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\User\Models\User;
 use Tests\RefreshDatabase;
@@ -62,7 +63,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_employees()
+    public function get_employees(): void
     {
         $this->persist();
 
@@ -72,7 +73,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_sellers()
+    public function get_sellers(): void
     {
         $this->persist();
 
@@ -82,7 +83,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_employee()
+    public function create_employee(): void
     {
         $response = $this->json('POST', $this->uri, [
             'name'           => $this->employee->name,
@@ -112,7 +113,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function create_employee_fails()
+    public function create_employee_fails(): void
     {
         $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
@@ -120,7 +121,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_employee()
+    public function get_employee(): void
     {
         $this->persist();
 
@@ -136,7 +137,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_employee_fails()
+    public function get_employee_fails(): void
     {
         $this->persist();
 
@@ -149,7 +150,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_employee_not_modified()
+    public function get_employee_not_modified(): void
     {
         $this->persist();
 
@@ -171,7 +172,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function get_employee_modified()
+    public function get_employee_modified(): void
     {
         $this->persist();
 
@@ -201,7 +202,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_employee()
+    public function update_employee(): void
     {
         $this->persist();
 
@@ -218,7 +219,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function update_employee_fails()
+    public function update_employee_fails(): void
     {
         $this->persist();
 
@@ -237,7 +238,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_employee()
+    public function delete_employee(): void
     {
         $this->persist();
 
@@ -247,7 +248,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @test
      */
-    public function delete_employee_fails()
+    public function delete_employee_fails(): void
     {
         $this->persist();
 
@@ -268,7 +269,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
-    private function update()
+    private function update(): TestResponse
     {
         return $this->json('PUT', $this->uri.$this->employee->id, [
             'name'           => $this->faker->name,
@@ -299,7 +300,7 @@ class EmployeeControllerTest extends TestCase
     /**
      * Save employee to Database
      */
-    private function persist()
+    private function persist(): void
     {
         $this->employee->save();
     }

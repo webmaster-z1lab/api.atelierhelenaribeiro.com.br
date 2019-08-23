@@ -16,7 +16,6 @@ class ResetPasswordControllerTest extends TestCase
      * @var \Modules\User\Models\User
      */
     private $user;
-
     /**
      * @var array
      */
@@ -78,8 +77,10 @@ class ResetPasswordControllerTest extends TestCase
         return $token;
     }
 
-    /** @test */
-    public function reset_password()
+    /**
+     * @test
+     */
+    public function reset_password(): void
     {
         $token = $this->sendForgotPassword();
         $password = $this->faker->password(8);
@@ -94,8 +95,10 @@ class ResetPasswordControllerTest extends TestCase
         $this->assertTrue(\Hash::check($password, $this->user->password));
     }
 
-    /** @test */
-    public function fail_to_reset_password()
+    /**
+     * @test
+     */
+    public function fail_to_reset_password(): void
     {
         $token = $this->sendForgotPassword();
         $password = $this->faker->password(8);

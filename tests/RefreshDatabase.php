@@ -12,7 +12,7 @@ trait RefreshDatabase
      *
      * @return void
      */
-    public function refreshDatabase()
+    public function refreshDatabase(): void
     {
         $this->usingInMemoryDatabase()
             ? $this->refreshInMemoryDatabase()
@@ -24,7 +24,7 @@ trait RefreshDatabase
      *
      * @return bool
      */
-    protected function usingInMemoryDatabase()
+    protected function usingInMemoryDatabase(): bool
     {
         $default = config('database.default');
 
@@ -36,11 +36,11 @@ trait RefreshDatabase
      *
      * @return void
      */
-    protected function refreshInMemoryDatabase()
+    protected function refreshInMemoryDatabase(): void
     {
         $this->artisan('migrate');
 
-        $this->app[Kernel::class]->setArtisan(null);
+        $this->app[Kernel::class]->setArtisan(NULL);
     }
 
     /**
@@ -48,17 +48,17 @@ trait RefreshDatabase
      *
      * @return void
      */
-    protected function refreshTestDatabase()
+    protected function refreshTestDatabase(): void
     {
-        if (! RefreshDatabaseState::$migrated) {
+        if (!RefreshDatabaseState::$migrated) {
             $this->artisan('migrate:fresh', [
                 '--drop-views' => $this->shouldDropViews(),
                 '--drop-types' => $this->shouldDropTypes(),
             ]);
 
-            $this->app[Kernel::class]->setArtisan(null);
+            $this->app[Kernel::class]->setArtisan(NULL);
 
-            RefreshDatabaseState::$migrated = true;
+            RefreshDatabaseState::$migrated = TRUE;
         }
 
         $this->beginDatabaseTransaction();
@@ -69,7 +69,7 @@ trait RefreshDatabase
      *
      * @return void
      */
-    public function beginDatabaseTransaction()
+    public function beginDatabaseTransaction(): void
     {
         $database = $this->app->make('db');
 
@@ -104,10 +104,10 @@ trait RefreshDatabase
      *
      * @return array
      */
-    protected function connectionsToTransact()
+    protected function connectionsToTransact(): array
     {
         return property_exists($this, 'connectionsToTransact')
-            ? $this->connectionsToTransact : [null];
+            ? $this->connectionsToTransact : [NULL];
     }
 
     /**
@@ -115,10 +115,10 @@ trait RefreshDatabase
      *
      * @return bool
      */
-    protected function shouldDropViews()
+    protected function shouldDropViews(): bool
     {
         return property_exists($this, 'dropViews')
-            ? $this->dropViews : false;
+            ? $this->dropViews : FALSE;
     }
 
     /**
@@ -126,9 +126,9 @@ trait RefreshDatabase
      *
      * @return bool
      */
-    protected function shouldDropTypes()
+    protected function shouldDropTypes(): bool
     {
         return property_exists($this, 'dropTypes')
-            ? $this->dropTypes : false;
+            ? $this->dropTypes : FALSE;
     }
 }
