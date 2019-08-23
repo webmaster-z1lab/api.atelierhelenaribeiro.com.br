@@ -59,6 +59,16 @@ class ProductRepository
         $products = collect();
         $template = Template::find($data['template']);
 
+        if (isset($data['images']) && filled($data['images'])) {
+            $images = (new ImageRepository)->createMany($data['images']);
+
+            foreach ($images as $image) {
+                /** @var \App\Models\Image $image */
+                $image->template()->associate($template);
+                $image->save();
+            }
+        }
+
         for ($i = 0; $i < $data['amount']; $i++) {
             $data['barcode'] = \Str::random();
 
@@ -74,8 +84,12 @@ class ProductRepository
 
             $product->save();
 
-            if ((isset($data['images']) && filled($data['images'])) || (isset($data['template_images']) && filled($data['template_images']))) {
-                $this->createImages($data, $product, $template);
+            if ((isset($images) && filled($images)) || (isset($data['template_images']) && filled($data['template_images']))) {
+                if (isset($images) && filled($images)) {
+                    $product->images()->saveMany($images);
+                } else {
+                    $product->images()->sync($data['template_images']);
+                }
             } else {
                 $template->images->each(function ($item, $key) use ($product) {
                     /** @var \App\Models\Image $item */
@@ -103,8 +117,7 @@ class ProductRepository
             $product->prices()->associate($this->createPrice(intval($data['price'])));
         }
 
-        if (isset($data['images']))
-            $this->createImages($data,  $product, $product->template);
+        $this->createImages($data, $product, $product->template);
 
         $product->update($data);
 
@@ -131,8 +144,9 @@ class ProductRepository
      */
     private function createImages(array $data, Product $product, Template $template)
     {
-        if (isset($data['template_images']) && filled($data['template_images']))
+        if (isset($data['template_images']) && filled($data['template_images'])) {
             $product->images()->sync($data['template_images']);
+        }
 
         if (isset($data['images']) && filled($data['images'])) {
             $images = $product->images()->saveMany((new ImageRepository)->createMany($data['images']));
