@@ -116,7 +116,7 @@ class ProductControllerTest extends TestCase
             'images'   => factory(Image::class, 2)->make(),
         ]);
 
-        $response
+        $response->dump()
             ->assertStatus(200)
             //->assertHeader('ETag')
             //->assertHeader('Content-Length')

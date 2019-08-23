@@ -2,16 +2,19 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use Faker\Generator as Faker;
+use Faker\Generator;
+use Faker\Provider\Color;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Product;
-use App\Models\Image;
 
-$factory->define(Product::class, function (Faker $faker) {
+$faker = Faker\Factory::create();
+$faker->addProvider(new Color($faker));
+
+$factory->define(Product::class, function (Generator $faker) {
     return [
         'barcode' => $faker->isbn13,
-        'size'    => $faker->randomElement(['P', 'M', 'G', 'GG']),
-        'color'   => 'Branco',
+        'size'    => $faker->randomElement(['P', 'M', 'G', 'GG', 'PLUS1', 'PLUS2', 'PLUS3']),
+        'color'   => $faker->safeColorName,
     ];
 });
 
