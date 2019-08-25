@@ -22,7 +22,7 @@ class ImageObserver
      */
     public function created(Image $image): void
     {
-        ProcessImage::dispatchNow($image);
+        ProcessImage::dispatch($image);
     }
 
     /**
