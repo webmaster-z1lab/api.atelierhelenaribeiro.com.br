@@ -6,6 +6,7 @@ use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Customer\Models\Customer;
+use Modules\Employee\Models\EmployeeTypes;
 use Modules\User\Models\User;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -42,6 +43,10 @@ class CustomerControllerTest extends TestCase
         'links',
         'meta',
     ];
+    /**
+     * @var \Modules\User\Models\User
+     */
+    private $user;
 
     public function setUp(): void
     {
@@ -49,6 +54,7 @@ class CustomerControllerTest extends TestCase
 
         $this->customer = factory(Customer::class)->make();
         $this->faker->addProvider(new PhoneNumber($this->faker));
+        $this->user = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_ADMIN]);
     }
 
     /**
@@ -66,7 +72,7 @@ class CustomerControllerTest extends TestCase
      */
     public function create_customer(): void
     {
-        $response = $this->json('POST', $this->uri, [
+        $response = $this->actingAs($this->user)->json('POST', $this->uri, [
             'company_name'           => $this->customer->company_name,
             'trading_name'           => $this->customer->trading_name,
             'state_registration'     => $this->customer->state_registration,
@@ -95,7 +101,7 @@ class CustomerControllerTest extends TestCase
      */
     public function create_customer_fails(): void
     {
-        $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -105,7 +111,7 @@ class CustomerControllerTest extends TestCase
     {
         $this->persist();
 
-        $this
+        $this->actingAs($this->user)
             ->json('GET', $this->uri.$this->customer->id)
             ->assertOk()
             ->assertHeader('ETag')
@@ -134,7 +140,7 @@ class CustomerControllerTest extends TestCase
     {
         $this->persist();
 
-        $response = $this->json('GET', $this->uri.$this->customer->id);
+        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->customer->id);
 
         $response
             ->assertOk()
@@ -143,7 +149,7 @@ class CustomerControllerTest extends TestCase
             //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->withHeaders(['If-None-Match' => $response->getEtag()])
             ->json('GET', $this->uri.$this->customer->id)
             ->assertStatus(304);
@@ -173,11 +179,11 @@ class CustomerControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('PATCH', $this->uri.$this->customer->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->customer->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->json('PATCH', $this->uri.$this->customer->id, [
                 'document' => '0000000000000',
             ])
@@ -192,7 +198,7 @@ class CustomerControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri.$this->customer->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->customer->id)->assertStatus(204);
     }
 
     /**
@@ -202,9 +208,9 @@ class CustomerControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('DELETE', $this->uri.$this->customer->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->customer->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -221,7 +227,7 @@ class CustomerControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        return $this->json('PUT', $this->uri.$this->customer->id, [
+        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->customer->id, [
             'company_name'           => $this->faker->company,
             'trading_name'           => $this->faker->companySuffix,
             'state_registration'     => $this->customer->state_registration,

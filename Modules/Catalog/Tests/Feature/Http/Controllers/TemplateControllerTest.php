@@ -6,6 +6,8 @@ use App\Models\Image;
 use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Modules\Catalog\Models\Template;
+use Modules\Employee\Models\EmployeeTypes;
+use Modules\User\Models\User;
 use Tests\ImageFiles;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -40,6 +42,11 @@ class TemplateControllerTest extends TestCase
     ];
 
     /**
+     * @var \Modules\User\Models\User
+     */
+    private $user;
+
+    /**
      * A basic feature test example.
      *
      * @return void
@@ -49,6 +56,7 @@ class TemplateControllerTest extends TestCase
         parent::setUp();
 
         $this->template = factory(Template::class)->make();
+        $this->user = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_ADMIN]);
     }
 
     /**
@@ -79,7 +87,7 @@ class TemplateControllerTest extends TestCase
      */
     public function create_template_fails(): void
     {
-        $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -89,7 +97,7 @@ class TemplateControllerTest extends TestCase
     {
         $this->persist();
 
-        $this
+        $this->actingAs($this->user)
             ->json('GET', $this->uri.$this->template->id)
             ->assertOk()
             ->assertHeader('ETag')
@@ -105,7 +113,7 @@ class TemplateControllerTest extends TestCase
     {
         $this->persist();
 
-        $this
+        $this->actingAs($this->user)
             ->json('GET', $this->uri.$this->template->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
@@ -118,7 +126,7 @@ class TemplateControllerTest extends TestCase
     {
         $this->persist();
 
-        $response = $this->json('GET', $this->uri.$this->template->id);
+        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->template->id);
 
         $response
             ->assertOk()
@@ -127,7 +135,7 @@ class TemplateControllerTest extends TestCase
             //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->withHeaders(['If-None-Match' => $response->getEtag()])
             ->json('GET', $this->uri.$this->template->id)
             ->assertStatus(304);
@@ -157,11 +165,11 @@ class TemplateControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('PATCH', $this->uri.$this->template->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->template->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->json('PATCH', $this->uri.$this->template->id, [
                 'price' => '0',
             ])
@@ -176,7 +184,7 @@ class TemplateControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri.$this->template->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->template->id)->assertStatus(204);
     }
 
     /**
@@ -238,9 +246,9 @@ class TemplateControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('DELETE', $this->uri.$this->template->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->template->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -269,7 +277,7 @@ class TemplateControllerTest extends TestCase
      */
     private function sendPostRequest(): TestResponse
     {
-        return $this->json('POST', $this->uri, [
+        return $this->actingAs($this->user)->json('POST', $this->uri, [
             'reference' => $this->template->reference,
             'price'     => $this->template->price->price_float,
             'is_active' => $this->template->is_active,
@@ -292,7 +300,7 @@ class TemplateControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        return $this->json('PUT', $this->uri.$this->template->id, [
+        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->template->id, [
             'price'     => $this->faker->randomFloat(2, 899.11, 1299.99),
             'is_active' => $this->faker->boolean(80),
             'images'    => factory(Image::class, 2)->make(),

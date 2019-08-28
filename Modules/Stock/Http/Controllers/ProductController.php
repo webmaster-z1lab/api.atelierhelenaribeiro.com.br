@@ -27,6 +27,8 @@ class ProductController extends ApiController
     public function __construct(ProductRepository $repository)
     {
         $this->repository = $repository;
+        $this->authorizeResource(Product::class, 'product');
+        $this->middleware('can:destroyImage,product')->only('destroyImage');
     }
 
     /**
@@ -92,7 +94,16 @@ class ProductController extends ApiController
      */
     public function destroyImage(Image $image, Product $product)
     {
-        $image->delete();
+        if ($product->images()->count() === 1) {
+            abort(400, 'O produto não pode ficar sem imagens.');
+        }
+
+        $product->images()->detach($image->id);
+        $product->save();
+
+        if (!$image->template()->exists() && $image->products()->count() === 0) {
+            $image->delete();
+        }
 
         return $this->noContentResponse();
     }

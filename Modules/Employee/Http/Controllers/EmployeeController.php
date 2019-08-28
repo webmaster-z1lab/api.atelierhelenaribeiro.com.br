@@ -25,6 +25,7 @@ class EmployeeController extends ApiController
     public function __construct(EmployeeRepository $repository)
     {
         $this->repository = $repository;
+        $this->authorizeResource(User::class, 'employee');
     }
 
     /**

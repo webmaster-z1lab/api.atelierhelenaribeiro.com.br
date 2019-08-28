@@ -22,7 +22,7 @@ class EmployeeRequest extends FormRequest
             'name'           => 'bail|required|string',
             'birth_date'     => 'bail|required|date_format:d/m/Y|before_or_equal:today - 18 years',
             'admission_date' => 'bail|required|date_format:d/m/Y|before_or_equal:today',
-            'email'          => $this->getEmailRules(),
+            'email'          => $this->getEmailRules(NULL, FALSE),
             'document'       => $this->getDocumentRules(),
             'type'           => $this->getTypeRules(),
             'identity'       => $this->getIdentityRules(),
@@ -80,6 +80,11 @@ class EmployeeRequest extends FormRequest
             EmployeeTypes::TYPE_ADMIN,
             EmployeeTypes::TYPE_DRESSMAKER,
             EmployeeTypes::TYPE_SELLER,
+            EmployeeTypes::TYPE_EMBROIDERER,
+            EmployeeTypes::TYPE_EMBROIDERER_ASSISTANT,
+            EmployeeTypes::TYPE_DRESSMAKER_ASSISTANT,
+            EmployeeTypes::TYPE_MODELIST,
+            EmployeeTypes::TYPE_OFFICE_ASSISTANT,
         ];
 
         return 'bail|required|string|in:'.implode(',', $types);

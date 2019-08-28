@@ -5,6 +5,14 @@ namespace App\Providers;
 use App\Auth\Guards\JwtGuard;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Modules\Catalog\Models\Template;
+use Modules\Catalog\Policies\TemplatePolicy;
+use Modules\Customer\Models\Customer;
+use Modules\Customer\Policies\CustomerPolicy;
+use Modules\Employee\Policies\EmployeePolicy;
+use Modules\Stock\Models\Product;
+use Modules\Stock\Policies\ProductPolicy;
+use Modules\User\Models\User;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -14,7 +22,10 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        // 'App\Model' => 'App\Policies\ModelPolicy',
+        Template::class => TemplatePolicy::class,
+        Customer::class => CustomerPolicy::class,
+        User::class     => EmployeePolicy::class,
+        Product::class  => ProductPolicy::class,
     ];
 
     /**

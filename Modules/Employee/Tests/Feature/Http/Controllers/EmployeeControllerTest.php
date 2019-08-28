@@ -5,6 +5,7 @@ namespace Modules\Employee\Tests\Feature\Http\Controllers;
 use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
+use Modules\Employee\Models\EmployeeTypes;
 use Modules\User\Models\User;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -52,12 +53,18 @@ class EmployeeControllerTest extends TestCase
         'meta',
     ];
 
+    /**
+     * @var \Modules\User\Models\User
+     */
+    private $user;
+
     public function setUp(): void
     {
         parent::setUp();
 
         $this->faker->addProvider(new PhoneNumber($this->faker));
         $this->employee = factory(User::class)->state('fake')->make();
+        $this->user = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_ADMIN]);
     }
 
     /**
@@ -77,7 +84,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('GET', $this->uri.'?search=seller')->assertOk()->assertJsonStructure([]);
+        $this->actingAs($this->user)->json('GET', $this->uri.'?search=seller')->assertOk()->assertJsonStructure([]);
     }
 
     /**
@@ -85,7 +92,7 @@ class EmployeeControllerTest extends TestCase
      */
     public function create_employee(): void
     {
-        $response = $this->json('POST', $this->uri, [
+        $response = $this->actingAs($this->user)->json('POST', $this->uri, [
             'name'           => $this->employee->name,
             'email'          => $this->employee->email,
             'document'       => $this->employee->document,
@@ -115,7 +122,7 @@ class EmployeeControllerTest extends TestCase
      */
     public function create_employee_fails(): void
     {
-        $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -125,7 +132,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $this
+        $this->actingAs($this->user)
             ->json('GET', $this->uri.$this->employee->id)
             ->assertOk()
             ->assertHeader('ETag')
@@ -141,7 +148,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $this
+        $this->actingAs($this->user)
             ->json('GET', $this->uri.$this->employee->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
@@ -154,7 +161,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $response = $this->json('GET', $this->uri.$this->employee->id);
+        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->employee->id);
 
         $response
             ->assertOk()
@@ -163,7 +170,7 @@ class EmployeeControllerTest extends TestCase
             //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->withHeaders(['If-None-Match' => $response->getEtag()])
             ->json('GET', $this->uri.$this->employee->id)
             ->assertStatus(304);
@@ -176,7 +183,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $response = $this->json('GET', $this->uri.$this->employee->id);
+        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->employee->id);
 
         $response
             ->assertOk()
@@ -189,7 +196,7 @@ class EmployeeControllerTest extends TestCase
 
         $this->update();
 
-        $this
+        $this->actingAs($this->user)
             ->withHeaders(['If-None-Match' => $response->getEtag()])
             ->json('GET', $this->uri.$this->employee->id)
             ->assertOk()
@@ -223,11 +230,11 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('PATCH', $this->uri.$this->employee->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->employee->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->json('PATCH', $this->uri.$this->employee->id, [
                 'document' => '00000000000',
             ])
@@ -242,7 +249,7 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri.$this->employee->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->employee->id)->assertStatus(204);
     }
 
     /**
@@ -252,9 +259,9 @@ class EmployeeControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('DELETE', $this->uri.$this->employee->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->employee->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -271,7 +278,7 @@ class EmployeeControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        return $this->json('PUT', $this->uri.$this->employee->id, [
+        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->employee->id, [
             'name'           => $this->faker->name,
             'email'          => $this->faker->safeEmail,
             'document'       => $this->employee->document,

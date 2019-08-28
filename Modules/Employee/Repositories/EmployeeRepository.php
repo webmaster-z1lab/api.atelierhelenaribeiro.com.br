@@ -49,6 +49,10 @@ class EmployeeRepository
             unset($data['remuneration']);
         }
 
+        if (!array_key_exists('email', $data) || !filled($data['email'])) {
+            unset($data['email']);
+        }
+
         $data['birth_date'] = Carbon::createFromFormat('d/m/Y', $data['birth_date']);
         $data['admission_date'] = Carbon::createFromFormat('d/m/Y', $data['admission_date']);
         $user = new User($data);
@@ -72,6 +76,11 @@ class EmployeeRepository
         if (!array_key_exists('remuneration', $data) || !filled($data['remuneration'])) {
             $employee->unset('remuneration');
             unset($data['remuneration']);
+        }
+
+        if (!array_key_exists('email', $data) || !filled($data['email'])) {
+            $employee->unset('email');
+            unset($data['email']);
         }
 
         $data['birth_date'] = Carbon::createFromFormat('d/m/Y', $data['birth_date']);

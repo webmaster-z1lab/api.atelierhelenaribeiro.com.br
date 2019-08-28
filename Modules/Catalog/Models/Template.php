@@ -6,6 +6,7 @@ use App\Models\BaseModel;
 use App\Models\Image;
 use App\Models\Price;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
+use Modules\Stock\Models\Product;
 
 /**
  * Class Template
@@ -68,6 +69,14 @@ class Template extends BaseModel
     public function prices()
     {
         return $this->embedsMany(Price::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class);
     }
 
     /**

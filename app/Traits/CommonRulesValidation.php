@@ -86,14 +86,15 @@ trait CommonRulesValidation
 
     /**
      * @param  string|NULL  $ignore
+     * @param  bool         $required
      *
      * @return array
      */
-    public function getEmailRules($ignore = NULL): array
+    public function getEmailRules($ignore = NULL, bool $required = TRUE): array
     {
         return [
             'bail',
-            'required',
+            $required ? 'required' : 'nullable',
             'email',
             Rule::unique('users', 'email')->ignore($ignore)->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');

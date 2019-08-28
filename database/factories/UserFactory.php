@@ -24,6 +24,11 @@ $types = [
     EmployeeTypes::TYPE_ADMIN,
     EmployeeTypes::TYPE_DRESSMAKER,
     EmployeeTypes::TYPE_SELLER,
+    EmployeeTypes::TYPE_EMBROIDERER,
+    EmployeeTypes::TYPE_EMBROIDERER_ASSISTANT,
+    EmployeeTypes::TYPE_DRESSMAKER_ASSISTANT,
+    EmployeeTypes::TYPE_MODELIST,
+    EmployeeTypes::TYPE_OFFICE_ASSISTANT,
 ];
 
 $factory->define(User::class, function (Faker $faker) {

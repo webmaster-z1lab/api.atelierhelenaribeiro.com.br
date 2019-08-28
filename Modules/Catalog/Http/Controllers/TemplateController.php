@@ -27,6 +27,8 @@ class TemplateController extends ApiController
     public function __construct(TemplateRepository $repository)
     {
         $this->repository = $repository;
+        $this->authorizeResource(Template::class, 'template');
+        $this->middleware('can:destroyImage,template')->only('destroyImage');
     }
 
     /**
@@ -92,9 +94,10 @@ class TemplateController extends ApiController
      */
     public function destroyImage(Image $image, Template $template): JsonResponse
     {
-        $image->products()->detach();
-
-        $image->delete();
+        $image->template()->dissociate();
+        if ($image->products()->count() === 0) {
+            $image->delete();
+        }
 
         return $this->noContentResponse();
     }

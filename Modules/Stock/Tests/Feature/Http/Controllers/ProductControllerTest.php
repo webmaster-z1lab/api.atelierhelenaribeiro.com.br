@@ -5,7 +5,10 @@ namespace Modules\Stock\Tests\Feature\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
+use Modules\Catalog\Models\Template;
+use Modules\Employee\Models\EmployeeTypes;
 use Modules\Stock\Models\Product;
+use Modules\User\Models\User;
 use Tests\ImageFiles;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
@@ -58,6 +61,11 @@ class ProductControllerTest extends TestCase
     ];
 
     /**
+     * @var \Modules\User\Models\User
+     */
+    private $user;
+
+    /**
      * A basic feature test example.
      *
      * @return void
@@ -67,6 +75,7 @@ class ProductControllerTest extends TestCase
         parent::setUp();
 
         $this->product = factory(Product::class)->make();
+        $this->user = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_ADMIN]);
     }
 
     /**
@@ -106,7 +115,7 @@ class ProductControllerTest extends TestCase
     {
         $amount = $this->faker->numberBetween(1, 3);
 
-        $response = $this->json('POST', $this->uri, [
+        $response = $this->actingAs($this->user)->json('POST', $this->uri, [
             'amount'          => $amount,
             'size'            => $this->product->size,
             'color'           => $this->product->color,
@@ -118,7 +127,7 @@ class ProductControllerTest extends TestCase
             ],
         ]);
 
-        $response->dump()
+        $response
             ->assertStatus(200)
             //->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -132,7 +141,7 @@ class ProductControllerTest extends TestCase
      */
     public function create_product_fails(): void
     {
-        $this->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -142,7 +151,7 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this
+        $this->actingAs($this->user)
             ->json('GET', $this->uri.$this->product->id)
             ->assertOk()
             ->assertHeader('ETag')
@@ -158,7 +167,7 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this
+        $this->actingAs($this->user)
             ->json('GET', $this->uri.$this->product->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
@@ -171,7 +180,7 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $response = $this->json('GET', $this->uri.$this->product->id);
+        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->product->id);
 
         $response
             ->assertOk()
@@ -180,7 +189,7 @@ class ProductControllerTest extends TestCase
             //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->withHeaders(['If-None-Match' => $response->getEtag()])
             ->json('GET', $this->uri.$this->product->id)
             ->assertStatus(304);
@@ -210,11 +219,11 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('PUT', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PUT', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('PUT', $this->uri.$this->product->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PUT', $this->uri.$this->product->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
-        $this
+        $this->actingAs($this->user)
             ->json('PUT', $this->uri.$this->product->id, [
                 'price' => '0',
             ])
@@ -229,7 +238,7 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri.$this->product->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->product->id)->assertStatus(204);
     }
 
     /**
@@ -237,7 +246,7 @@ class ProductControllerTest extends TestCase
      */
     public function delete_product_image(): void
     {
-        $product = $this
+        $product = $this->actingAs($this->user)
             ->json('POST', $this->uri, [
                 'size'     => $this->product->size,
                 'color'    => $this->product->color,
@@ -251,7 +260,7 @@ class ProductControllerTest extends TestCase
 
         $product = json_decode($product->getContent())[0];
 
-        $this->json('DELETE', '/images/'.$product->images[0]->id.$this->uri.$product->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', '/images/'.$product->images[0]->id.$this->uri.$product->id)->assertStatus(204);
     }
 
     /**
@@ -261,9 +270,9 @@ class ProductControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->json('DELETE', $this->uri.$this->product->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->product->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -271,11 +280,11 @@ class ProductControllerTest extends TestCase
      */
     public function tearDown(): void
     {
-        /*Product::truncate();
+        Product::truncate();
         Template::truncate();
         Image::truncate();
 
-        $this->destroyImages();*/
+        $this->destroyImages();
 
         parent::tearDown();
     }
@@ -295,7 +304,7 @@ class ProductControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        return $this->json('PUT', $this->uri.$this->product->id, [
+        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->product->id, [
             'price'  => $this->faker->randomFloat(2, 899.11, 1299.99),
             'size'   => $this->product->size,
             'color'  => $this->product->color,

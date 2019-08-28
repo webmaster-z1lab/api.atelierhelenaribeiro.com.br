@@ -117,7 +117,15 @@ class CustomerRepository
     private function createOwners(array $data, Customer &$customer)
     {
         foreach ($data['owners'] as $owner) {
-            $owner['birth_date'] = Carbon::createFromFormat('d/m/Y', $owner['birth_date']);
+            if (isset($owner)) {
+                $owner['birth_date'] = Carbon::createFromFormat('d/m/Y', $owner['birth_date']);
+            } else {
+                unset($owner['birth_date']);
+            }
+
+            if (!isset($owner['document'])) {
+                unset($owner['document']);
+            }
 
             $aux = new Owner($owner);
             $aux->phone()->associate($this->createPhone($owner['phone']));

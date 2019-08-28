@@ -24,6 +24,7 @@ class CustomerController extends ApiController
     public function __construct(CustomerRepository $repository)
     {
         $this->repository = $repository;
+        $this->authorizeResource(Customer::class, 'customer');
     }
 
     /**
