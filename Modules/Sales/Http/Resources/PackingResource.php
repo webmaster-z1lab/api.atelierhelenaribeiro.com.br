@@ -2,6 +2,7 @@
 
 namespace Modules\Sales\Http\Resources;
 
+use App\Traits\ResourceResponseHeaders;
 use Illuminate\Http\Resources\Json\Resource;
 use Modules\Employee\Http\Resources\EmployeeResource;
 
@@ -14,6 +15,8 @@ use Modules\Employee\Http\Resources\EmployeeResource;
  */
 class PackingResource extends Resource
 {
+    use ResourceResponseHeaders;
+
     /**
      * Transform the resource into an array.
      *

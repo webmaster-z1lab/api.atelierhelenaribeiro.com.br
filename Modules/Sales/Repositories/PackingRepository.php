@@ -32,18 +32,19 @@ class PackingRepository
      */
     public function create(array $data): Packing
     {
-        foreach ($data['products'] as $item) {
-            if (Product::where('reference', $item['reference'])->where('status', ProductStatus::AVAILABLE_STATUS)->count() < intval($item['amount'])) {
+        foreach ($data['products'] as $key => $item) {
+            $data['products'][$key]['amount'] = $item['amount'] = intval($item['amount']);
+            if (Product::where('reference', $item['reference'])->where('status', ProductStatus::AVAILABLE_STATUS)->count() < $item['amount']) {
                 abort(400, "Não há peças suficientes do produto {$item['reference']}.");
             }
         }
 
-        $products = $this->createProducts($data['products']);
-
         $packing = new Packing();
 
+        foreach ($this->createProducts($data['products']) as $product) {
+            $packing->products()->associate($product);
+        }
         $packing->seller()->associate($data['seller']);
-        $packing->products()->saveMany($products);
 
         $packing->save();
 
@@ -58,17 +59,21 @@ class PackingRepository
      */
     public function update(array $data, Packing $packing): Packing
     {
-        foreach ($data['products'] as $item) {
+        foreach ($data['products'] as $key => $item) {
+            $data['products'][$key]['amount'] = $item['amount'] = intval($item['amount']);
             $available = Product::where('reference', $item['reference'])->where('status', ProductStatus::AVAILABLE_STATUS)->count();
-            $available += $packing->products()->where('reference', $item['reference'])->sum('amount');
-            if ($available < intval($item['amount'])) {
+            $available += $packing->products()->where('reference', $item['reference'])->count();
+            if ($available < $item['amount']) {
                 abort(400, "Não há peças suficientes do produto {$item['reference']}.");
             }
         }
 
+        $this->releaseProducts($packing);
+
         $packing->seller()->associate($data['seller']);
-        $packing->products()->delete();
-        $packing->products()->createMany($this->createProducts($data['products']));
+        foreach ($this->createProducts($data['products']) as $product) {
+            $packing->products()->associate($product);
+        }
 
         $packing->save();
 
@@ -83,6 +88,8 @@ class PackingRepository
      */
     public function delete(Packing $packing)
     {
+        $this->releaseProducts($packing);
+
         return $packing->delete();
     }
 
@@ -95,11 +102,12 @@ class PackingRepository
     public function checkOut(array $data, Packing $packing)
     {
         foreach ($data['checked'] as $checked) {
-            $checked['amount'] = intval($checked['amount']);
-            /** @var \Modules\Sales\Models\Product $product */
-            $product = $packing->products()->where('reference', $checked['reference'])->first();
-            if ($checked['amount'] !== ($product->amount + $product->returned - $product->sold)) {
-                abort(400, 'A quantidade informada é diferente da esperada.');
+            $expected = $packing->products()
+                ->where('reference', $checked['reference'])
+                ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
+                ->count();
+            if ($expected !== intval($checked['amount'])) {
+                abort(400, "A quantidade informada do produto {$checked['reference']} é diferente da esperada.");
             }
         }
 
@@ -119,26 +127,36 @@ class PackingRepository
     private function createProducts(array $data): array
     {
         $products = [];
-        foreach ($data as $key => $item) {
-            $item['amount'] = intval($item['amount']);
+        foreach ($data as $item) {
             $product = Product::where('reference', $item['reference'])
                 ->where('status', ProductStatus::AVAILABLE_STATUS)
-                ->latest()->take($data['amount'])->get();
+                ->latest()->take($item['amount'])->get();
 
-            $products[$key] = new \Modules\Sales\Models\Product([
-                'reference' => $item['reference'],
-                'thumbnail' => $product->first->thumbnail,
-                'size' => $product->first->size,
-                'color' => $product->first->color,
-                'price' => $product->first->price->price,
-                'amount' => $item['amount'],
-            ]);
+            $product->each(function (Product $product, int $key) use (&$products) {
+                $products[] = new \Modules\Sales\Models\Product([
+                    'product_id' => $product->id,
+                    'reference'  => $product->reference,
+                    'thumbnail'  => $product->thumbnail,
+                    'size'       => $product->size,
+                    'color'      => $product->color,
+                    'price'      => $product->price->price,
+                ]);
+            });
 
-            $ids = $product->pluck('_id')->toArray();
-
-            Product::whereIn('_id', $ids)->update(['status' => ProductStatus::IN_TRANSIT_STATUS]);
+            Product::whereIn('_id', $product->modelKeys())->update(['status' => ProductStatus::IN_TRANSIT_STATUS]);
         }
 
         return $products;
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Packing  $packing
+     */
+    private function releaseProducts(Packing $packing)
+    {
+        Product::whereIn('_id', $packing->products->pluck('product_id')->all())
+            ->update(['status' => ProductStatus::AVAILABLE_STATUS]);
+
+        $packing->products()->dissociate($packing->products->modelKeys());
     }
 }

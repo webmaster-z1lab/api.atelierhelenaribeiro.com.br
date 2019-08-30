@@ -7,7 +7,7 @@ use Modules\Stock\Models\Size;
 
 $factory->define(Size::class, function (Faker $faker) {
     return [
-        'name' => $faker->randomElement(['P', 'M', 'G', 'GG'])
+        'name' => $faker->randomElement(['P', 'M', 'G', 'GG', 'Plus 1', 'Plus 2', 'Plus 3'])
     ];
 });
 

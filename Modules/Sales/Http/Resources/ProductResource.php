@@ -4,6 +4,13 @@ namespace Modules\Sales\Http\Resources;
 
 use Illuminate\Http\Resources\Json\Resource;
 
+/**
+ * Class ProductResource
+ *
+ * @package Modules\Sales\Http\Resources
+ *
+ * @property-read \Modules\Sales\Models\Product $resource
+ */
 class ProductResource extends Resource
 {
     /**
@@ -17,7 +24,7 @@ class ProductResource extends Resource
         return [
             'id'         => $this->resource->id,
             'product_id' => $this->resource->product_id,
-            'barcode'    => $this->resource->barcode,
+            'reference'  => $this->resource->reference,
             'thumbnail'  => $this->resource->thumbnail,
             'size'       => $this->resource->size,
             'color'      => $this->resource->color,

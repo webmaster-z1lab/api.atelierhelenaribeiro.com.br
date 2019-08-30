@@ -8,6 +8,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Modules\Sales\Models\Packing;
+use Modules\Stock\Models\Product;
+use Modules\Stock\Models\ProductStatus;
 
 class CheckOutProducts implements ShouldQueue
 {
@@ -35,5 +37,10 @@ class CheckOutProducts implements ShouldQueue
      */
     public function handle()
     {
+        $products = $this->packing->products()
+            ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
+            ->get()->pluck('product_id')->all();
+
+        Product::whereIn('_id', $products)->update(['status' => ProductStatus::AVAILABLE_STATUS]);
     }
 }
