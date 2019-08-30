@@ -18,7 +18,7 @@ class CustomerRepository
     {
         if (!empty(\Request::query()) && NULL !== \Request::query()['search']) return $this->search();
 
-        return Customer::all()->take(30);
+        return Customer::take(30)->get();
     }
 
     /**

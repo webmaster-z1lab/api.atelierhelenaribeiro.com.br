@@ -1,13 +1,13 @@
 <?php
 
-
 namespace Modules\Stock\Repositories;
 
-
+use App\Traits\Reference;
 use Modules\Stock\Models\Color;
 
 class ColorRepository
 {
+    use Reference;
     /**
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
      */
@@ -30,6 +30,8 @@ class ColorRepository
      */
     public function create(array $data): Color
     {
+        $data['reference'] = $this->getNewNumericReference(Color::class, Color::REFERENCE_LENGTH);
+
         return Color::create($data);
     }
 

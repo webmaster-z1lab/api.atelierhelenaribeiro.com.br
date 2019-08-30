@@ -4,6 +4,7 @@ namespace Modules\Stock\Http\Requests;
 
 use App\Traits\CommonRulesValidation;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductRequest extends FormRequest
 {
@@ -18,7 +19,7 @@ class ProductRequest extends FormRequest
     {
         $rules = [
             'amount'                 => 'bail|required|integer|min:1',
-            'size'                   => 'bail|required|string',
+            'size'                   => $this->getSizeRules(),
             'color'                  => 'bail|required|string',
             'template'               => 'bail|required|exists:templates,_id',
             'price'                  => 'bail|nullable|numeric|min:0.1',
@@ -53,5 +54,16 @@ class ProductRequest extends FormRequest
         ];
 
         return $this->mergeAttributes($attr, $this->getImageAttributes());
+    }
+
+    protected function getSizeRules()
+    {
+        return [
+            'bail',
+            'required',
+            Rule::exists('sizes', 'name')->where(function ($query) {
+                $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
+            }),
+        ];
     }
 }

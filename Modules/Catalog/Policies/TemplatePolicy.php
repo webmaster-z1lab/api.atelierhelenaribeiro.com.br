@@ -48,7 +48,7 @@ class TemplatePolicy
      */
     public function delete(User $user, Template $template)
     {
-        return !$template->products()->exists() && $user->type === EmployeeTypes::TYPE_ADMIN;
+        return $user->type === EmployeeTypes::TYPE_ADMIN;
     }
 
     /**

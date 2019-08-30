@@ -12,22 +12,25 @@ use Modules\Stock\Models\Product;
  * Class Template
  *
  * @package Modules\Catalog\Models
- * @property-read string                              $id
- * @property string                                   $reference
- * @property string                                   $thumbnail
- * @property boolean                                  $is_active
- * @property boolean                                  $is_processed
- * @property \Illuminate\Database\Eloquent\Collection $images
- * @property \Illuminate\Database\Eloquent\Collection $prices
- * @property \App\Models\Price                        $price
- * @property-read \Carbon\Carbon                      $created_at
- * @property-read \Carbon\Carbon                      $updated_at
- * @property-read \Carbon\Carbon                      $deleted_at
+ * @property-read string                                                                   $id
+ * @property string                                                                        $reference
+ * @property string                                                                        $thumbnail
+ * @property boolean                                                                       $is_active
+ * @property boolean                                                                       $is_processed
+ * @property \Illuminate\Database\Eloquent\Collection                                      $images
+ * @property \Illuminate\Database\Eloquent\Collection                                      $prices
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Stock\Models\Product[] $products
+ * @property \App\Models\Price                                                             $price
+ * @property-read \Carbon\Carbon                                                           $created_at
+ * @property-read \Carbon\Carbon                                                           $updated_at
+ * @property-read \Carbon\Carbon                                                           $deleted_at
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Catalog\Models\Template newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Catalog\Models\Template newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Catalog\Models\Template query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel search($search = NULL)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel searchPaginated($search = NULL, $page = 1, $limit = 10)
  * @mixin \Eloquent
  */
 class Template extends BaseModel

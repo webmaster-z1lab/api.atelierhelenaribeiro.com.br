@@ -12,7 +12,7 @@ class ProductUpdateRequest extends ProductRequest
     public function rules()
     {
         $rules = [
-            'size'              => 'bail|required|string',
+            'size'              => $this->getSizeRules(),
             'color'             => 'bail|required|string',
             'price'             => 'bail|nullable|numeric|min:0.1',
             'template_images'   => 'bail|sometimes|array|min:1',

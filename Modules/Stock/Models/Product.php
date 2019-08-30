@@ -13,8 +13,10 @@ use Modules\Catalog\Models\Template;
  *
  * @property-read string                                                       $id
  * @property-read string                                                       $template_id
+ * @property string                                                            $status
  * @property string                                                            $thumbnail
  * @property string                                                            $barcode
+ * @property string                                                            $reference
  * @property string                                                            $size
  * @property string                                                            $color
  * @property boolean                                                           $is_processed
@@ -36,16 +38,21 @@ class Product extends Model
 
     private const PROCESSED_STATUS = FALSE;
 
+    public const BARCODE_LENGTH = 10;
+
     protected $fillable = [
         'barcode',
         'thumbnail',
         'size',
         'color',
         'is_processed',
+        'status',
+        'reference',
     ];
 
     protected $attributes = [
         'is_processed' => self::PROCESSED_STATUS,
+        'status'       => ProductStatus::AVAILABLE_STATUS,
     ];
 
     protected $casts = [

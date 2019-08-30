@@ -22,6 +22,8 @@ use Carbon\Carbon;
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Customer\Models\Owner newQuery()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Customer\Models\Owner query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel search($search = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel searchPaginated($search = null, $page = 1, $limit = 10)
  * @mixin \Eloquent
  */
 class Owner extends BaseModel

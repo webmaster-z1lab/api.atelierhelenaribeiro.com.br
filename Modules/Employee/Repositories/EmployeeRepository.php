@@ -23,7 +23,7 @@ class EmployeeRepository
     {
         if (!empty(\Request::query()) && NULL !== \Request::query()['search']) return $this->search();
 
-        return User::all()->take(30);
+        return User::take(30)->get();
     }
 
     /**

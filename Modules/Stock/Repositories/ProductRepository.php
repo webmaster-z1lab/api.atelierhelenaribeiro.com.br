@@ -4,12 +4,17 @@ namespace Modules\Stock\Repositories;
 
 use App\Models\Price;
 use App\Repositories\ImageRepository;
+use App\Traits\Reference;
 use Illuminate\Support\Collection;
 use Modules\Catalog\Models\Template;
+use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
+use Modules\Stock\Models\Size;
 
 class ProductRepository
 {
+    use Reference;
+
     /**
      * @param  int  $limit
      *
@@ -21,7 +26,7 @@ class ProductRepository
             return $collection->aggregate([
                 [
                     '$group' => [
-                        '_id'      => ['template' => '$template_id', 'size' => '$size', 'color' => '$color'],
+                        '_id'      => '$reference',
                         'count'    => ['$sum' => 1],
                         'products' => ['$push' => '$$ROOT'],
                     ],
@@ -41,10 +46,18 @@ class ProductRepository
         $products = collect();
         $template = Template::find($data['template']);
         $price = $this->createPrice($data, $template);
+        /** @var \Modules\Stock\Models\Size $size */
+        $size = Size::where('name', $data['size'])->first();
+        $color = Color::where('name', $data['color'])->first();
+        if (is_null($color)) {
+            $colorRepository = new ColorRepository();
+            $color = $colorRepository->create(['name' => $data['color']]);
+        }
 
         $images = isset($data['images']) ? (new ImageRepository)->createMany($data['images'], $template) : [];
 
         $data['amount'] = intval($data['amount']);
+        $data['reference'] = implode('-', [$template->reference, $color->reference, $size->reference]);
 
         for ($i = 0; $i < $data['amount']; $i++) {
             $products->add($this->createProduct($data, $template, $price, $images));
@@ -94,7 +107,7 @@ class ProductRepository
      */
     public function createProduct(array $data, Template $template, Price $price, array $images = []): Product
     {
-        $data['barcode'] = \Str::random(10);
+        $data['barcode'] = $this->getNewReference(Product::class, Product::BARCODE_LENGTH, 'barcode');
 
         $product = new Product($data);
 

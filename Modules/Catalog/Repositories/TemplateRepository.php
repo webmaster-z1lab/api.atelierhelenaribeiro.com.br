@@ -29,7 +29,7 @@ class TemplateRepository
     {
         if (!empty(\Request::query()) && NULL !== \Request::query()['search']) return $this->search();
 
-        return Template::all()->take(30);
+        return Template::take(30)->get();
     }
 
     /**
@@ -82,6 +82,10 @@ class TemplateRepository
      */
     public function delete(Template $template)
     {
+        abort_if($template->products()->count() > 0,400, 'Já existem produtos vinculados ao modelo.');
+
+        $template->images()->delete();
+
         return $template->delete();
     }
 

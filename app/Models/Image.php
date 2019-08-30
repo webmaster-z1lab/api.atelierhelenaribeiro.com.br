@@ -36,6 +36,8 @@ use Modules\Stock\Models\Product;
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\App\Models\Image query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel search($search = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel searchPaginated($search = null, $page = 1, $limit = 10)
  * @mixin \Eloquent
  */
 class Image extends BaseModel
