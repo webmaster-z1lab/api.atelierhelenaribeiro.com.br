@@ -18,7 +18,7 @@ class CheckOutProducts implements ShouldQueue
     /**
      * @var \Modules\Sales\Models\Packing
      */
-    private $packing;
+    public $packing;
 
     /**
      * Create a new job instance.
@@ -39,7 +39,9 @@ class CheckOutProducts implements ShouldQueue
     {
         $products = $this->packing->products()
             ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
-            ->get()->pluck('product_id')->all();
+            ->get(['product_id'])
+            ->pluck('product_id')
+            ->all();
 
         Product::whereIn('_id', $products)->update(['status' => ProductStatus::AVAILABLE_STATUS]);
     }

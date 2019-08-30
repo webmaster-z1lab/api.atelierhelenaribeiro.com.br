@@ -4,7 +4,6 @@ namespace Modules\Sales\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Modules\Sales\Models\Packing;
 
 class CheckOutRequest extends FormRequest
 {
@@ -25,10 +24,12 @@ class CheckOutRequest extends FormRequest
      */
     public function rules()
     {
-        $packing = Packing::find($this->route('packing'));
+        /** @var \Modules\Sales\Models\Packing $packing */
+        $packing = $this->route('packing');
+        $size = $packing->products()->distinct()->get(['reference'])->count();
 
         return [
-            'checked'             => 'bail|required|array|size:'.$packing->products()->count(),
+            'checked'             => "bail|required|array|size:$size",
             'checked.*.amount'    => 'bail|required|integer|min:0',
             'checked.*.reference' => [
                 'bail',

@@ -7,6 +7,7 @@ use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
 use Modules\Catalog\Models\Template;
 use Modules\Employee\Models\EmployeeTypes;
+use Modules\Sales\Jobs\CheckOutProducts;
 use Modules\Sales\Models\Packing;
 use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
@@ -231,6 +232,58 @@ class PackingControllerTest extends TestCase
         $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
         $this->actingAs($this->user)->json('DELETE', $this->uri.$this->packing->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+    }
+
+    /** @test */
+    public function check_out_packing(): void
+    {
+        \Queue::fake();
+
+        $this->persist();
+
+        $packing = $this->packing;
+
+        $checked = [];
+        foreach ($packing->products()->distinct()->get(['reference']) as $reference) {
+            $checked[] = [
+                'reference' => $reference->reference,
+                'amount' => $packing->products()->where('reference', $reference->reference)->count(),
+            ];
+        }
+
+        \Queue::assertNothingPushed();
+
+        $response = $this->actingAs($this->user)->json('POST', $this->uri.$packing->id, compact('checked'));
+
+        \Queue::assertPushed(CheckOutProducts::class, function (CheckOutProducts $job) use ($packing) {
+            return $job->packing->id === $packing->id;
+        });
+
+        $response
+            ->assertOk()
+            ->assertHeader('ETag')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
+            ->assertJsonStructure($this->jsonStructure);
+    }
+
+    /**  @test */
+    public function check_out_packing_fails(): void
+    {
+        \Queue::fake();
+
+        $this->persist();
+
+        $this->actingAs($this->user)->json('POST', $this->uri.$this->packing->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+
+        \Queue::assertNothingPushed();
+
+        $this->actingAs($this->user)
+            ->json('PATCH', $this->uri.$this->packing->id, [])
+            ->assertStatus(422)
+            ->assertJsonStructure($this->errorStructure);
+
+        \Queue::assertNothingPushed();
     }
 
     /**
