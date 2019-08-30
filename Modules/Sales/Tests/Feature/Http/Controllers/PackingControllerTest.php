@@ -2,8 +2,10 @@
 
 namespace Modules\Sales\Tests\Feature\Http\Controllers;
 
+use App\Models\Image;
 use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
+use Modules\Catalog\Models\Template;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Models\Packing;
 use Modules\Stock\Models\Color;
@@ -240,6 +242,8 @@ class PackingControllerTest extends TestCase
         Product::truncate();
         Color::truncate();
         Size::truncate();
+        Template::truncate();
+        Image::truncate();
         Packing::truncate();
 
         parent::tearDown();

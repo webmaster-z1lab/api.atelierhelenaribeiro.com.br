@@ -22,9 +22,9 @@ class AggregatedProductResource extends Resource
         /** @var \Modules\Catalog\Models\Template $template */
         $template = Template::where('reference', $data[0])->first();
         /** @var \Modules\Stock\Models\Color $color */
-        $color = Color::where('reference', $data[0])->first();
+        $color = Color::where('reference', $data[1])->first();
         /** @var \Modules\Stock\Models\Size $size */
-        $size = Size::where('reference', $data[0])->first();
+        $size = Size::where('reference', $data[2])->first();
 
         return [
             'reference' => $this->resource->id,

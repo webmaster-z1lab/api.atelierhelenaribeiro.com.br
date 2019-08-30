@@ -37,7 +37,7 @@ class Template extends BaseModel
 {
     use SoftDeletes;
 
-    public const  REFERENCE_LENGTH = 8;
+    public const  REFERENCE_LENGTH = 5;
     public const  STATUS_ACTIVE    = TRUE;
     private const PROCESSED_STATUS = FALSE;
 
