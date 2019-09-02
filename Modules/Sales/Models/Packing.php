@@ -16,6 +16,8 @@ use Modules\User\Models\User;
  * @property-read \Carbon\Carbon                                                           $created_at
  * @property-read \Carbon\Carbon                                                           $updated_at
  * @property-read \Carbon\Carbon                                                           $deleted_at
+ * @property-read int                                                                      $total_amount
+ * @property-read float                                                                    $total_price
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Sales\Models\Packing newModelQuery()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Sales\Models\Packing newQuery()
@@ -47,5 +49,21 @@ class Packing extends BaseModel
     public function products()
     {
         return $this->embedsMany(Product::class);
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalAmountAttribute(): int
+    {
+        return $this->products()->count();
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalPriceAttribute(): float
+    {
+        return floatval($this->products()->sum('price') / 100.0);
     }
 }

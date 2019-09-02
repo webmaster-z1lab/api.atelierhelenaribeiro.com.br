@@ -48,7 +48,7 @@ class PackingControllerTest extends TestCase
         'id',
         'status',
         'seller_id',
-        'seller' => [
+        'seller'   => [
             'id',
             'name',
             'document',
@@ -64,16 +64,15 @@ class PackingControllerTest extends TestCase
             'address',
             'phone',
         ],
+        'total_amount',
+        'total_price',
         'products' => [
             [
-                'id',
-                'product_id',
-                'reference',
                 'thumbnail',
                 'size',
                 'color',
                 'price',
-                'status',
+                'amount',
             ],
         ],
         'created_at',
@@ -118,13 +117,13 @@ class PackingControllerTest extends TestCase
         foreach ($this->packing->products()->distinct()->get(['reference']) as $reference) {
             $products[] = [
                 'reference' => $reference->reference,
-                'amount' => $this->packing->products()->where('reference', $reference->reference)->count(),
+                'amount'    => $this->packing->products()->where('reference', $reference->reference)->count(),
             ];
         }
 
         $response = $this->actingAs($this->user)->json('POST', $this->uri, [
-            'seller' => $this->packing->seller_id,
-            'products' => $products
+            'seller'   => $this->packing->seller_id,
+            'products' => $products,
         ]);
 
         $response
@@ -247,7 +246,7 @@ class PackingControllerTest extends TestCase
         foreach ($packing->products()->distinct()->get(['reference']) as $reference) {
             $checked[] = [
                 'reference' => $reference->reference,
-                'amount' => $packing->products()->where('reference', $reference->reference)->count(),
+                'amount'    => $packing->products()->where('reference', $reference->reference)->count(),
             ];
         }
 
@@ -323,13 +322,13 @@ class PackingControllerTest extends TestCase
         foreach ($this->packing->products()->distinct()->get(['reference']) as $reference) {
             $products[] = [
                 'reference' => $reference->reference,
-                'amount' => $this->packing->products()->where('reference', $reference->reference)->count(),
+                'amount'    => $this->packing->products()->where('reference', $reference->reference)->count(),
             ];
         }
 
         return $this->actingAs($this->user)->json('PUT', $this->uri.$this->packing->id, [
-            'seller' => $this->packing->seller_id,
-            'products' => $products
+            'seller'   => $this->packing->seller_id,
+            'products' => $products,
         ]);
     }
 }

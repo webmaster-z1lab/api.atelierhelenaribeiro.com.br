@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Modules\Catalog\Models\Template;
 use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
+use Modules\Stock\Models\ProductStatus;
 use Modules\Stock\Models\Size;
 
 class ProductRepository
@@ -24,6 +25,11 @@ class ProductRepository
     {
         return Product::raw(function ($collection) use ($limit){
             return $collection->aggregate([
+                [
+                    '$match' => [
+                        'status' => ProductStatus::AVAILABLE_STATUS,
+                    ]
+                ],
                 [
                     '$group' => [
                         '_id'      => '$reference',
