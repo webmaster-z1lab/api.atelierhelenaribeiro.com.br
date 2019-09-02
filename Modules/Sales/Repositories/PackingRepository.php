@@ -32,6 +32,13 @@ class PackingRepository
      */
     public function create(array $data): Packing
     {
+        if (Packing::where('seller_id', $data['seller'])
+            ->where(function ($query) {
+                $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
+            })->exists()) {
+            abort(400, 'Já existe um romaneio em aberto para esse vendedor.');
+        }
+
         foreach ($data['products'] as $key => $item) {
             $data['products'][$key]['amount'] = $item['amount'] = intval($item['amount']);
             if (Product::where('reference', $item['reference'])->where('status', ProductStatus::AVAILABLE_STATUS)->count() < $item['amount']) {
@@ -59,6 +66,14 @@ class PackingRepository
      */
     public function update(array $data, Packing $packing): Packing
     {
+        if (Packing::where('_id', '<>', $packing->id)
+            ->where('seller_id', $data['seller'])
+            ->where(function ($query) {
+                $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
+            })->exists()) {
+            abort(400, 'Já existe um romaneio em aberto para esse vendedor.');
+        }
+
         foreach ($data['products'] as $key => $item) {
             $data['products'][$key]['amount'] = $item['amount'] = intval($item['amount']);
             $available = Product::where('reference', $item['reference'])->where('status', ProductStatus::AVAILABLE_STATUS)->count();

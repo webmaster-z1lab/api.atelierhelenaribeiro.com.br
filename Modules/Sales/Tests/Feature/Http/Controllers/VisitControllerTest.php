@@ -7,8 +7,8 @@ use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
 use Modules\Catalog\Models\Template;
 use Modules\Employee\Models\EmployeeTypes;
-use Modules\Sales\Jobs\CheckOutProducts;
 use Modules\Sales\Models\Packing;
+use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
 use Modules\Stock\Models\Size;
@@ -17,19 +17,19 @@ use Tests\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 
-class PackingControllerTest extends TestCase
+class VisitControllerTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
     /**
      * @var string
      */
-    private $uri = '/packings/';
+    private $uri = '/visits/';
 
     /**
-     * @var \Modules\Sales\Models\Packing
+     * @var \Modules\Sales\Models\Visit
      */
-    private $packing;
+    private $visit;
 
     /**
      * @var \Modules\User\Models\User
@@ -41,9 +41,10 @@ class PackingControllerTest extends TestCase
      */
     private $jsonStructure = [
         'id',
-        'status',
+        'date',
+        'annotations',
         'seller_id',
-        'seller'   => [
+        'seller' => [
             'id',
             'name',
             'document',
@@ -56,23 +57,83 @@ class PackingControllerTest extends TestCase
             'admission_date',
             'created_at',
             'updated_at',
-            'address',
-            'phone',
-        ],
-        'total_amount',
-        'total_price',
-        'products' => [
-            [
-                'thumbnail',
-                'size',
-                'color',
-                'price',
-                'amount',
+            'address' => [
+                'id',
+                'street',
+                'number',
+                'complement',
+                'district',
+                'postal_code',
+                'city',
+                'state',
+                'formatted',
+            ],
+            'phone'   => [
+                'id',
+                'area_code',
+                'phone',
+                'international',
+                'number',
+                'is_whatsapp',
+                'formatted',
             ],
         ],
-        'created_at',
-        'updated_at',
-
+        'customer_id',
+        'customer' => [
+            'id',
+            'company_name',
+            'trading_name',
+            'document',
+            'state_registration',
+            'municipal_registration',
+            'email',
+            'annotation',
+            'status',
+            'contact',
+            'seller',
+            'address' => [
+                'id',
+                'street',
+                'number',
+                'complement',
+                'district',
+                'postal_code',
+                'city',
+                'state',
+                'formatted',
+            ],
+            'phones'  => [
+                [
+                    'id',
+                    'area_code',
+                    'phone',
+                    'international',
+                    'number',
+                    'is_whatsapp',
+                    'formatted',
+                ],
+            ],
+            'owners'  => [
+                [
+                    'id',
+                    'name',
+                    'document',
+                    'email',
+                    'birth_date',
+                    'phone' => [
+                        'id',
+                        'area_code',
+                        'phone',
+                        'international',
+                        'number',
+                        'is_whatsapp',
+                        'formatted',
+                    ],
+                ],
+            ],
+            'created_at',
+            'updated_at',
+        ],
     ];
 
     /**
@@ -93,11 +154,11 @@ class PackingControllerTest extends TestCase
 
         $this->faker->addProvider(new PhoneNumber($this->faker));
         $this->user = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_ADMIN]);
-        $this->packing = factory(Packing::class)->make();
+        $this->visit = factory(Visit::class)->make();
     }
 
     /** @test */
-    public function get_packings(): void
+    public function get_visits(): void
     {
         $this->persist();
 
@@ -105,13 +166,12 @@ class PackingControllerTest extends TestCase
     }
 
     /** @test */
-    public function create_packing(): void
+    public function create_visit(): void
     {
-        $products = $this->getProducts();
-
         $response = $this->actingAs($this->user)->json('POST', $this->uri, [
-            'seller'   => $this->packing->seller_id,
-            'products' => $products,
+            'customer'    => $this->visit->customer_id,
+            'date'        => $this->visit->date->format('d/m/Y'),
+            'annotations' => '',
         ]);
 
         $response
@@ -123,18 +183,18 @@ class PackingControllerTest extends TestCase
     }
 
     /** @test */
-    public function create_packing_fails(): void
+    public function create_visit_fails(): void
     {
         $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
     }
 
     /** @test */
-    public function get_packing(): void
+    public function get_visit(): void
     {
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->packing->id)
+            ->json('GET', $this->uri.$this->visit->id)
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -143,22 +203,22 @@ class PackingControllerTest extends TestCase
     }
 
     /** @test */
-    public function get_packing_fails(): void
+    public function get_visit_fails(): void
     {
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->packing->id.'a')
+            ->json('GET', $this->uri.$this->visit->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
     }
 
     /** @test */
-    public function get_packing_not_modified(): void
+    public function get_visit_not_modified(): void
     {
         $this->persist();
 
-        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->packing->id);
+        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->visit->id);
 
         $response
             ->assertOk()
@@ -169,12 +229,12 @@ class PackingControllerTest extends TestCase
 
         $this->actingAs($this->user)
             ->withHeaders(['If-None-Match' => $response->getEtag()])
-            ->json('GET', $this->uri.$this->packing->id)
+            ->json('GET', $this->uri.$this->visit->id)
             ->assertStatus(304);
     }
 
     /** @test */
-    public function update_packing(): void
+    public function update_visit(): void
     {
         $this->persist();
 
@@ -189,16 +249,16 @@ class PackingControllerTest extends TestCase
     }
 
     /**  @test */
-    public function update_packing_fails(): void
+    public function update_visit_fails(): void
     {
         $this->persist();
 
         $this->actingAs($this->user)->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->packing->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->visit->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         $this->actingAs($this->user)
-            ->json('PATCH', $this->uri.$this->packing->id, [])
+            ->json('PATCH', $this->uri.$this->visit->id, [])
             ->assertStatus(422)
             ->assertJsonStructure($this->errorStructure);
     }
@@ -208,7 +268,7 @@ class PackingControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->packing->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->visit->id)->assertStatus(204);
     }
 
     /** @test */
@@ -218,51 +278,7 @@ class PackingControllerTest extends TestCase
 
         $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->packing->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
-    }
-
-    /** @test */
-    public function check_out_packing(): void
-    {
-        \Queue::fake();
-
-        $this->persist();
-
-        $checked = $this->getProducts();
-
-        \Queue::assertNothingPushed();
-
-        $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->packing->id, compact('checked'));
-
-        \Queue::assertPushed(CheckOutProducts::class, function (CheckOutProducts $job) {
-            return $job->packing->id === $this->packing->id;
-        });
-
-        $response
-            ->assertOk()
-            ->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
-    }
-
-    /**  @test */
-    public function check_out_packing_fails(): void
-    {
-        \Queue::fake();
-
-        $this->persist();
-
-        $this->actingAs($this->user)->json('POST', $this->uri.$this->packing->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
-
-        \Queue::assertNothingPushed();
-
-        $this->actingAs($this->user)
-            ->json('PATCH', $this->uri.$this->packing->id, [])
-            ->assertStatus(422)
-            ->assertJsonStructure($this->errorStructure);
-
-        \Queue::assertNothingPushed();
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->visit->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
     }
 
     /**
@@ -282,11 +298,11 @@ class PackingControllerTest extends TestCase
     }
 
     /**
-     * @return \Modules\Sales\Tests\Feature\Http\Controllers\PackingControllerTest
+     * @return \Modules\Sales\Tests\Feature\Http\Controllers\VisitControllerTest
      */
-    private function persist(): PackingControllerTest
+    private function persist(): VisitControllerTest
     {
-        $this->packing->save();
+        $this->visit->save();
 
         return $this;
     }
@@ -296,26 +312,10 @@ class PackingControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        $seller = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_SELLER]);
-
-        $products = $this->getProducts();
-
-        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->packing->id, [
-            'seller'   => $seller->id,
-            'products' => $products,
+        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->visit->id, [
+            'customer'    => $this->visit->customer_id,
+            'date'        => $this->visit->date->format('d/m/Y'),
+            'annotations' => $this->faker->sentence,
         ]);
-    }
-
-    private function getProducts(): array
-    {
-        $products = [];
-        foreach ($this->packing->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
-            $products[] = [
-                'reference' => $reference,
-                'amount'    => $this->packing->products()->where('reference', $reference)->count(),
-            ];
-        }
-
-        return $products;
     }
 }

@@ -18,13 +18,13 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'amount'                 => 'bail|required|integer|min:1',
-            'size'                   => $this->getSizeRules(),
-            'color'                  => 'bail|required|string',
-            'template'               => 'bail|required|exists:templates,_id',
-            'price'                  => 'bail|nullable|numeric|min:0.1',
-            'template_images'        => 'bail|sometimes|array|min:1',
-            'template_images.*'      => 'bail|required|exists:images,_id',
+            'amount'            => 'bail|required|integer|min:1',
+            'size'              => $this->getSizeRules(),
+            'color'             => 'bail|required|string',
+            'template'          => $this->getTemplateRules(),
+            'price'             => 'bail|nullable|numeric|min:0.1',
+            'template_images'   => 'bail|sometimes|array|min:1',
+            'template_images.*' => 'bail|required|exists:images,_id',
 
         ];
 
@@ -56,12 +56,26 @@ class ProductRequest extends FormRequest
         return $this->mergeAttributes($attr, $this->getImageAttributes());
     }
 
-    protected function getSizeRules()
+    /**
+     * @return array
+     */
+    protected function getSizeRules(): array
     {
         return [
             'bail',
             'required',
             Rule::exists('sizes', 'name')->where(function ($query) {
+                $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
+            }),
+        ];
+    }
+
+    protected function getTemplateRules(): array
+    {
+        return [
+            'bail',
+            'required',
+            Rule::exists('templates', '_id')->where(function ($query) {
                 $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
         ];
