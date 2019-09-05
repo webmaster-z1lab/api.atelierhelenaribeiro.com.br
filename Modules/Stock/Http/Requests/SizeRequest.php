@@ -34,7 +34,7 @@ class SizeRequest extends FormRequest
         return [
             'bail',
             'required',
-            Rule::unique('sizes', 'name')->ignore($ignore),
+            Rule::unique('sizes', 'name')->ignore($ignore, '_id'),
         ];
     }
 }

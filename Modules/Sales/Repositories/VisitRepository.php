@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Modules\Sales\Repositories;
-
 
 use Carbon\Carbon;
 use Modules\Employee\Models\EmployeeTypes;
@@ -16,7 +14,7 @@ class VisitRepository
             return Visit::orderBy('date', 'desc')->take(30)->get();
         }
 
-        return Visit::where('seller', \Auth::id())->orderBy('date', 'desc')->take(30)->get();
+        return Visit::where('seller_id', \Auth::id())->orderBy('date', 'desc')->take(30)->get();
     }
 
     /**
@@ -64,6 +62,10 @@ class VisitRepository
      */
     public function delete(Visit $visit)
     {
+        if ($visit->sales()->exists() || $visit->payrolls()->exists()) {
+            abort(400, 'Já existem transações relacionadas a essa visita.');
+        }
+
         return $visit->delete();
     }
 }

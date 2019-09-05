@@ -40,7 +40,7 @@ class ColorRequest extends FormRequest
             'bail',
             'required',
             'string',
-            Rule::unique('colors', 'name')->ignore($ignore)->where(function ($query) {
+            Rule::unique('colors', 'name')->ignore($ignore, '_id')->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
         ];

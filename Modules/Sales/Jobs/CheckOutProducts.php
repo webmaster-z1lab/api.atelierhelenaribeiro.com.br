@@ -37,9 +37,8 @@ class CheckOutProducts implements ShouldQueue
      */
     public function handle()
     {
-        $products = $this->packing->products()
+        $products = $this->packing->products
             ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
-            ->get(['product_id'])
             ->pluck('product_id')
             ->all();
 

@@ -61,7 +61,7 @@ class TemplateRequest extends FormRequest
             'bail',
             'required',
             'string',
-            Rule::unique('templates', 'reference')->ignore($ignore)->where(function ($query) {
+            Rule::unique('templates', 'reference')->ignore($ignore, '_id')->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
         ];

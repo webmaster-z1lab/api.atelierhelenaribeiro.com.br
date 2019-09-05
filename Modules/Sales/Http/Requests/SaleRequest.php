@@ -4,10 +4,8 @@ namespace Modules\Sales\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Modules\Employee\Models\EmployeeTypes;
-use Modules\Stock\Models\ProductStatus;
 
-class PackingRequest extends FormRequest
+class SaleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,18 +25,10 @@ class PackingRequest extends FormRequest
     public function rules()
     {
         return [
-            'seller'               => [
-                'bail',
-                'required',
-                Rule::exists('users', '_id')->whereIn('type', [EmployeeTypes::TYPE_ADMIN, EmployeeTypes::TYPE_SELLER]),
-            ],
+            'visit'                => $this->getVisitRules(),
+            'discount'             => 'bail|required|numeric|min:0',
             'products'             => 'bail|required|array|min:1',
-            'products.*.reference' => [
-                'bail',
-                'required',
-                'distinct',
-                Rule::exists('products', 'reference')->where('status', ProductStatus::AVAILABLE_STATUS),
-            ],
+            'products.*.reference' => 'bail|required|distinct|exists:products,reference',
             'products.*.amount'    => 'bail|required|integer|min:1',
         ];
     }
@@ -46,10 +36,25 @@ class PackingRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'seller'               => 'vendedor',
+            'visit'                => 'visita',
+            'discount'             => 'desconto',
             'products'             => 'produtos',
             'products.*.reference' => 'referência do produto',
             'products.*.amount'    => 'quantidade do produto',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getVisitRules(): array
+    {
+        return [
+            'bail',
+            'required',
+            Rule::exists('visits', '_id')->where(function ($query) {
+                $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
+            }),
         ];
     }
 }

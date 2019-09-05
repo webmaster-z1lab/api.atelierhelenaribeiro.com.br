@@ -235,6 +235,8 @@ class PackingControllerTest extends TestCase
         $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->packing->id, compact('checked'));
 
         \Queue::assertPushed(CheckOutProducts::class, function (CheckOutProducts $job) {
+            $job->handle();
+
             return $job->packing->id === $this->packing->id;
         });
 

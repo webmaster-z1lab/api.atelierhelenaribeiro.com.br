@@ -96,7 +96,7 @@ trait CommonRulesValidation
             'bail',
             $required ? 'required' : 'nullable',
             'email',
-            Rule::unique('users', 'email')->ignore($ignore)->where(function ($query) {
+            Rule::unique('users', 'email')->ignore($ignore, '_id')->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
         ];
@@ -114,7 +114,7 @@ trait CommonRulesValidation
             'bail',
             'required',
             $type,
-            Rule::unique('users', 'document')->ignore($ignore)->where(function ($query) {
+            Rule::unique('users', 'document')->ignore($ignore, '_id')->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
         ];
@@ -131,7 +131,7 @@ trait CommonRulesValidation
             'bail',
             'required',
             'string',
-            Rule::unique('users', 'identity')->ignore($ignore)->where(function ($query) {
+            Rule::unique('users', 'identity')->ignore($ignore, '_id')->where(function ($query) {
                 return $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
         ];

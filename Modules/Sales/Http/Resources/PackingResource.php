@@ -2,6 +2,7 @@
 
 namespace Modules\Sales\Http\Resources;
 
+use App\Traits\AggregateProducts;
 use App\Traits\ResourceResponseHeaders;
 use Illuminate\Http\Resources\Json\Resource;
 use Modules\Employee\Http\Resources\EmployeeResource;
@@ -15,7 +16,7 @@ use Modules\Employee\Http\Resources\EmployeeResource;
  */
 class PackingResource extends Resource
 {
-    use ResourceResponseHeaders;
+    use ResourceResponseHeaders, AggregateProducts;
 
     /**
      * Transform the resource into an array.
@@ -27,19 +28,6 @@ class PackingResource extends Resource
     public function toArray($request)
     {
         $is_closed = $this->resource->checked_out_at !== NULL;
-        $products = [];
-        foreach ($this->resource->products()->distinct()->get(['reference'])->pluck(['reference'])->all() as $reference) {
-            /** @var \Modules\Sales\Models\Product $product */
-            $product = $this->resource->products()->where('reference', $reference)->first();
-            $products[] = [
-                'reference' => $reference,
-                'thumbnail' => $product->thumbnail,
-                'size'      => $product->size,
-                'color'     => $product->color,
-                'price'     => floatval($product->price / 100.0),
-                'amount'    => $this->resource->products()->where('reference', $reference)->count(),
-            ];
-        }
 
         return [
             'id'             => $this->resource->id,
@@ -48,7 +36,7 @@ class PackingResource extends Resource
             'seller'         => EmployeeResource::make($this->resource->seller),
             'total_amount'   => $this->resource->total_amount,
             'total_price'    => $this->resource->total_price,
-            'products'       => $products,
+            'products'       => $this->getProducts(),
             'checked_out_at' => $this->when($is_closed, function () {
                 return $this->resource->checked_out_at->format('d/m/Y H:i');
             }),

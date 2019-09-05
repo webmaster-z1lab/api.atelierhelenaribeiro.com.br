@@ -39,4 +39,16 @@ class CheckOutRequest extends FormRequest
             ],
         ];
     }
+
+    /**
+     * @return array
+     */
+    public function attributes(): array
+    {
+        return [
+            'checked'             => 'itens',
+            'checked.*.amount'    => 'quantidade do item',
+            'checked.*.reference' => 'referência do item',
+        ];
+    }
 }

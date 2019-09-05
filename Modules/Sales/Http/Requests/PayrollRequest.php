@@ -5,7 +5,7 @@ namespace Modules\Sales\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class VisitRequest extends FormRequest
+class PayrollRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,11 +25,11 @@ class VisitRequest extends FormRequest
     public function rules()
     {
         return [
-            'customer'    => $this->getCustomerRules(),
-            'date'        => 'bail|required|date_format:d/m/Y|before_or_equal:today',
-            'annotations' => 'bail|nullable|string|min:3',
+            'visit'                => $this->getVisitRules(),
+            'products'             => 'bail|required|array|min:1',
+            'products.*.reference' => 'bail|required|distinct|exists:products,reference',
+            'products.*.amount'    => 'bail|required|integer|min:1',
         ];
-
     }
 
     /**
@@ -38,21 +38,22 @@ class VisitRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'customer'    => 'cliente',
-            'date'        => 'data',
-            'annotations' => 'anotações',
+            'visit'                => 'visita',
+            'products'             => 'produtos',
+            'products.*.reference' => 'referência do produto',
+            'products.*.amount'    => 'quantidade do produto',
         ];
     }
 
     /**
      * @return array
      */
-    protected function getCustomerRules(): array
+    protected function getVisitRules(): array
     {
         return [
             'bail',
             'required',
-            Rule::exists('customers', '_id')->where(function ($query) {
+            Rule::exists('visits', '_id')->where(function ($query) {
                 $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
             }),
         ];

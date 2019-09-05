@@ -6,30 +6,35 @@ use App\Models\Image;
 use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
 use Modules\Catalog\Models\Template;
+use Modules\Customer\Models\Customer;
 use Modules\Employee\Models\EmployeeTypes;
+use Modules\Sales\Jobs\UpdateProductsStatus;
 use Modules\Sales\Models\Packing;
+use Modules\Sales\Models\Payroll;
+use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
+use Modules\Stock\Models\ProductStatus;
 use Modules\Stock\Models\Size;
 use Modules\User\Models\User;
 use Tests\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 
-class VisitControllerTest extends TestCase
+class PayrollControllerTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
     /**
      * @var string
      */
-    private $uri = '/visits/';
+    private $uri = '/payrolls/';
 
     /**
-     * @var \Modules\Sales\Models\Visit
+     * @var \Modules\Sales\Models\Payroll
      */
-    private $visit;
+    private $payroll;
 
     /**
      * @var \Modules\User\Models\User
@@ -42,9 +47,11 @@ class VisitControllerTest extends TestCase
     private $jsonStructure = [
         'id',
         'date',
-        'annotations',
+        'visit_id',
+        'total_amount',
+        'total_price',
         'seller_id',
-        'seller' => [
+        'seller'   => [
             'id',
             'name',
             'document',
@@ -131,9 +138,18 @@ class VisitControllerTest extends TestCase
                     ],
                 ],
             ],
-            'created_at',
-            'updated_at',
         ],
+        'products' => [
+            [
+                'thumbnail',
+                'size',
+                'color',
+                'price',
+                'amount',
+            ],
+        ],
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -154,11 +170,11 @@ class VisitControllerTest extends TestCase
 
         $this->faker->addProvider(new PhoneNumber($this->faker));
         $this->user = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_ADMIN]);
-        $this->visit = factory(Visit::class)->make();
+        $this->payroll = factory(Payroll::class)->make();
     }
 
     /** @test */
-    public function get_visits(): void
+    public function get_payrolls(): void
     {
         $this->persist();
 
@@ -166,13 +182,30 @@ class VisitControllerTest extends TestCase
     }
 
     /** @test */
-    public function create_visit(): void
+    public function create_payroll(): void
     {
+        \Queue::fake();
+
+        $products = [];
+        foreach ($this->payroll->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+            $products[] = [
+                'reference' => $reference,
+                'amount'    => $this->payroll->products()->where('reference', $reference)->count(),
+            ];
+        }
+
+        \Queue::assertNothingPushed();
+
         $response = $this->actingAs($this->user)->json('POST', $this->uri, [
-            'customer'    => $this->visit->customer_id,
-            'date'        => $this->visit->date->format('d/m/Y'),
-            'annotations' => '',
+            'visit'    => $this->payroll->visit_id,
+            'products' => $products,
         ]);
+
+        \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
+            $job->handle();
+
+            return $job->status === ProductStatus::ON_CONSIGNMENT_STATUS;
+        });
 
         $response
             ->assertStatus(201)
@@ -183,18 +216,22 @@ class VisitControllerTest extends TestCase
     }
 
     /** @test */
-    public function create_visit_fails(): void
+    public function create_payroll_fails(): void
     {
+        \Queue::fake();
+
         $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
+
+        \Queue::assertNothingPushed();
     }
 
     /** @test */
-    public function get_visit(): void
+    public function get_payroll(): void
     {
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->visit->id)
+            ->json('GET', $this->uri.$this->payroll->id)
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -203,22 +240,22 @@ class VisitControllerTest extends TestCase
     }
 
     /** @test */
-    public function get_visit_fails(): void
+    public function get_payroll_fails(): void
     {
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->visit->id.'a')
+            ->json('GET', $this->uri.$this->payroll->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
     }
 
     /** @test */
-    public function get_visit_not_modified(): void
+    public function get_payroll_not_modified(): void
     {
         $this->persist();
 
-        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->visit->id);
+        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->payroll->id);
 
         $response
             ->assertOk()
@@ -229,12 +266,11 @@ class VisitControllerTest extends TestCase
 
         $this->actingAs($this->user)
             ->withHeaders(['If-None-Match' => $response->getEtag()])
-            ->json('GET', $this->uri.$this->visit->id)
+            ->json('GET', $this->uri.$this->payroll->id)
             ->assertStatus(304);
     }
 
-    /** @test */
-    public function update_visit(): void
+    public function update_payroll(): void
     {
         $this->persist();
 
@@ -248,37 +284,50 @@ class VisitControllerTest extends TestCase
             ->assertJsonStructure($this->jsonStructure);
     }
 
-    /**  @test */
-    public function update_visit_fails(): void
+    public function update_payroll_fails(): void
     {
         $this->persist();
 
         $this->actingAs($this->user)->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->visit->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         $this->actingAs($this->user)
-            ->json('PATCH', $this->uri.$this->visit->id, [])
+            ->json('PATCH', $this->uri.$this->payroll->id, [])
             ->assertStatus(422)
             ->assertJsonStructure($this->errorStructure);
     }
 
     /** @test */
-    public function delete_visit(): void
+    public function delete_payroll(): void
     {
         $this->persist();
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->visit->id)->assertStatus(204);
+        \Queue::fake();
+
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->payroll->id)->assertStatus(204);
+
+        \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
+            $job->handle();
+
+            return $job->status === ProductStatus::IN_TRANSIT_STATUS;
+        });
     }
 
     /** @test */
-    public function delete_visit_fails(): void
+    public function delete_payroll_fails(): void
     {
         $this->persist();
 
+        \Queue::fake();
+
         $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->visit->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        \Queue::assertNothingPushed();
+
+        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+
+        \Queue::assertNothingPushed();
     }
 
     /**
@@ -286,7 +335,10 @@ class VisitControllerTest extends TestCase
      */
     public function tearDown(): void
     {
+        Payroll::truncate();
+        Sale::truncate();
         Visit::truncate();
+        Customer::truncate();
         User::truncate();
         Product::truncate();
         Color::truncate();
@@ -299,11 +351,17 @@ class VisitControllerTest extends TestCase
     }
 
     /**
-     * @return \Modules\Sales\Tests\Feature\Http\Controllers\VisitControllerTest
+     * @return \Modules\Sales\Tests\Feature\Http\Controllers\PayrollControllerTest
      */
-    private function persist(): VisitControllerTest
+    private function persist(): PayrollControllerTest
     {
-        $this->visit->save();
+        $this->payroll->save();
+
+        $packing = Packing::where('seller_id', $this->payroll->seller_id)->where(function ($query) {
+            $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
+        })->first();
+
+        UpdateProductsStatus::dispatchNow($packing, $this->payroll->products->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
 
         return $this;
     }
@@ -313,10 +371,17 @@ class VisitControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->visit->id, [
-            'customer'    => $this->visit->customer_id,
-            'date'        => $this->visit->date->format('d/m/Y'),
-            'annotations' => $this->faker->sentence,
+        $products = [];
+        foreach ($this->payroll->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+            $products[] = [
+                'reference' => $reference,
+                'amount'    => $this->payroll->products()->where('reference', $reference)->count(),
+            ];
+        }
+
+        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->payroll->id, [
+            'visit'    => $this->payroll->visit_id,
+            'products' => $products,
         ]);
     }
 }
