@@ -23,12 +23,34 @@ class ProductRepository
      */
     public function all(int $limit = 30)
     {
-        return Product::raw(function ($collection) use ($limit){
+        if (\Request::filled('search')) {
+            return Product::raw(function ($collection) use ($limit) {
+                return $collection->aggregate([
+                    [
+                        '$match' => [
+                            'status'    => ProductStatus::AVAILABLE_STATUS,
+                            'reference' => '/'.\Request::query('search').'/i',
+                        ],
+                    ],
+                    [
+                        '$group' => [
+                            '_id'      => '$reference',
+                            'count'    => ['$sum' => 1],
+                            'products' => ['$push' => '$$ROOT'],
+                        ],
+                    ],
+                    ['$limit' => $limit],
+                ]);
+            });
+
+        }
+
+        return Product::raw(function ($collection) use ($limit) {
             return $collection->aggregate([
                 [
                     '$match' => [
                         'status' => ProductStatus::AVAILABLE_STATUS,
-                    ]
+                    ],
                 ],
                 [
                     '$group' => [
