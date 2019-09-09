@@ -4,6 +4,7 @@ namespace Modules\Sales\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Employee\Models\EmployeeTypes;
 
 class VisitRequest extends FormRequest
 {
@@ -24,6 +25,19 @@ class VisitRequest extends FormRequest
      */
     public function rules()
     {
+        if (\Auth::user()->type === EmployeeTypes::TYPE_ADMIN) {
+            return [
+                'seller'      => [
+                    'bail',
+                    'required',
+                    Rule::exists('users', '_id')->whereIn('type', [EmployeeTypes::TYPE_ADMIN, EmployeeTypes::TYPE_SELLER]),
+                ],
+                'customer'    => $this->getCustomerRules(),
+                'date'        => 'bail|required|date_format:d/m/Y|before_or_equal:today',
+                'annotations' => 'bail|nullable|string|min:3',
+            ];
+        }
+
         return [
             'customer'    => $this->getCustomerRules(),
             'date'        => 'bail|required|date_format:d/m/Y|before_or_equal:today',
@@ -38,6 +52,7 @@ class VisitRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            'seller'      => 'vendedor',
             'customer'    => 'cliente',
             'date'        => 'data',
             'annotations' => 'anotações',

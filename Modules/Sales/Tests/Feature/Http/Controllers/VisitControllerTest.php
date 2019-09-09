@@ -44,7 +44,7 @@ class VisitControllerTest extends TestCase
         'date',
         'annotations',
         'seller_id',
-        'seller' => [
+        'seller'   => [
             'id',
             'name',
             'document',
@@ -169,6 +169,7 @@ class VisitControllerTest extends TestCase
     public function create_visit(): void
     {
         $response = $this->actingAs($this->user)->json('POST', $this->uri, [
+            'seller'      => $this->visit->seller_id,
             'customer'    => $this->visit->customer_id,
             'date'        => $this->visit->date->format('d/m/Y'),
             'annotations' => '',
@@ -314,6 +315,7 @@ class VisitControllerTest extends TestCase
     private function update(): TestResponse
     {
         return $this->actingAs($this->user)->json('PUT', $this->uri.$this->visit->id, [
+            'seller'      => $this->visit->seller_id,
             'customer'    => $this->visit->customer_id,
             'date'        => $this->visit->date->format('d/m/Y'),
             'annotations' => $this->faker->sentence,

@@ -28,7 +28,11 @@ class VisitRepository
 
         $visit = new Visit($data);
 
-        $visit->seller()->associate(\Auth::id());
+        if (isset($data['seller'])) {
+            $visit->seller()->associate($data['seller']);
+        } else {
+            $visit->seller()->associate(\Auth::id());
+        }
         $visit->customer()->associate($data['customer']);
 
         $visit->save();
