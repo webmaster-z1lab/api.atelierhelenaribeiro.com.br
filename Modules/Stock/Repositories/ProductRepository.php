@@ -29,7 +29,7 @@ class ProductRepository
                     [
                         '$match' => [
                             'status'    => ProductStatus::AVAILABLE_STATUS,
-                            'reference' => '/'.\Request::query('search').'/i',
+                            'reference' => ['$regex' => \Request::query('search'), '$options' => 'i'],
                         ],
                     ],
                     [

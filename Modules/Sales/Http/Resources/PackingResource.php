@@ -38,9 +38,9 @@ class PackingResource extends Resource
             'total_price'    => $this->resource->total_price,
             'products'       => $this->getProducts(),
             'checked_out_at' => $this->when($is_closed, function () {
-                return $this->resource->checked_out_at->format('d/m/Y H:i');
+                return $this->resource->checked_out_at->toW3cString();
             }),
-            'created_at'     => $this->resource->created_at->format('d/m/Y H:i'),
+            'created_at'     => $this->resource->created_at->toW3cString(),
             'updated_at'     => $this->resource->updated_at->toW3cString(),
         ];
     }
