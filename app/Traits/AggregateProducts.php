@@ -14,7 +14,7 @@ trait AggregateProducts
     protected function getProducts(): array
     {
         $products = [];
-        foreach ($this->resource->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+        foreach ($this->resource->products()->pluck('reference')->unique()->all() as $reference) {
             /** @var \Modules\Sales\Models\Product $product */
             $product = $this->resource->products()->where('reference', $reference)->first();
             $products[] = [

@@ -311,7 +311,7 @@ class PackingControllerTest extends TestCase
     private function getProducts(): array
     {
         $products = [];
-        foreach ($this->packing->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+        foreach ($this->packing->products()->pluck('reference')->unique()->all() as $reference) {
             $products[] = [
                 'reference' => $reference,
                 'amount'    => $this->packing->products()->where('reference', $reference)->count(),

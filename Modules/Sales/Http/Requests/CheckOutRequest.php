@@ -26,7 +26,7 @@ class CheckOutRequest extends FormRequest
     {
         /** @var \Modules\Sales\Models\Packing $packing */
         $packing = $this->route('packing');
-        $size = $packing->products()->distinct()->get(['reference'])->count();
+        $size = $packing->products()->pluck('reference')->unique()->count();
 
         return [
             'checked'             => "bail|required|array|size:$size",

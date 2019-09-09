@@ -187,7 +187,7 @@ class SaleControllerTest extends TestCase
         \Queue::fake();
 
         $products = [];
-        foreach ($this->sale->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+        foreach ($this->sale->products()->pluck('reference')->unique()->all() as $reference) {
             $products[] = [
                 'reference' => $reference,
                 'amount'    => $this->sale->products()->where('reference', $reference)->count(),
@@ -373,7 +373,7 @@ class SaleControllerTest extends TestCase
     private function update(): TestResponse
     {
         $products = [];
-        foreach ($this->sale->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+        foreach ($this->sale->products()->pluck('reference')->unique()->all() as $reference) {
             $products[] = [
                 'reference' => $reference,
                 'amount'    => $this->sale->products()->where('reference', $reference)->count(),

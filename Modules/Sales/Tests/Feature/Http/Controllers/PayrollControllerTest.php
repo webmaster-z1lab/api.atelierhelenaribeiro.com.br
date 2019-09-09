@@ -187,7 +187,7 @@ class PayrollControllerTest extends TestCase
         \Queue::fake();
 
         $products = [];
-        foreach ($this->payroll->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+        foreach ($this->payroll->products()->pluck('reference')->unique()->all() as $reference) {
             $products[] = [
                 'reference' => $reference,
                 'amount'    => $this->payroll->products()->where('reference', $reference)->count(),
@@ -372,7 +372,7 @@ class PayrollControllerTest extends TestCase
     private function update(): TestResponse
     {
         $products = [];
-        foreach ($this->payroll->products()->distinct()->get(['reference'])->pluck('reference')->all() as $reference) {
+        foreach ($this->payroll->products()->pluck('reference')->unique()->all() as $reference) {
             $products[] = [
                 'reference' => $reference,
                 'amount'    => $this->payroll->products()->where('reference', $reference)->count(),
