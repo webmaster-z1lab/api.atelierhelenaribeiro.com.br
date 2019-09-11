@@ -91,4 +91,12 @@ class PackingController extends ApiController
     {
         return PackingResource::make($this->repository->checkOut($request->validated(), $packing));
     }
+
+    /**
+     * @return \Modules\Sales\Http\Resources\PackingResource
+     */
+    public function current(): PackingResource
+    {
+        return PackingResource::make($this->repository->current());
+    }
 }

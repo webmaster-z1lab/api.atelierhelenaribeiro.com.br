@@ -26,6 +26,21 @@ class PackingRepository
     }
 
     /**
+     * @return \Modules\Sales\Models\Packing
+     */
+    public function current(): Packing
+    {
+        $packing = Packing::where('seller_id', \Auth::id())
+            ->where(function ($query) {
+                $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
+            })->first();
+
+        abort_if(is_null($packing), 404);
+
+        return $packing;
+    }
+
+    /**
      * @param  array  $data
      *
      * @return \Modules\Sales\Models\Packing
@@ -92,7 +107,7 @@ class PackingRepository
 
         $packing->save();
 
-        return  $packing;
+        return $packing;
     }
 
     /**

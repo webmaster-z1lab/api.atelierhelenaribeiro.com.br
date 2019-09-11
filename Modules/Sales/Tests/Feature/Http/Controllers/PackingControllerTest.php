@@ -267,6 +267,20 @@ class PackingControllerTest extends TestCase
         \Queue::assertNothingPushed();
     }
 
+    /** @test */
+    public function get_current_packing(): void
+    {
+        $this->persist();
+
+        $this->actingAs($this->packing->seller)
+            ->json('GET', $this->uri . 'current')
+            ->assertOk()
+            ->assertHeader('ETag')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
+            ->assertJsonStructure($this->jsonStructure);
+    }
+
     /**
      * @throws \Throwable
      */
