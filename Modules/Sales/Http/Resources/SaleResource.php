@@ -44,7 +44,7 @@ class SaleResource extends Resource
             'total_price'  => $this->resource->total_price_float,
             'discount'     => $this->resource->discount_float,
             'final_price'  => $this->resource->final_price_float,
-            'products'     => $this->getProducts(),
+            'products'     => $this->getProducts(TRUE),
             'created_at'   => $this->resource->created_at->toW3cString(),
             'updated_at'   => $this->resource->updated_at->toW3cString(),
         ];

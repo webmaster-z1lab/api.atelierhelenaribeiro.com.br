@@ -26,7 +26,7 @@ use Jenssegers\Mongodb\Eloquent\Model;
  */
 class BaseModel extends Model
 {
-    use Cachable;
+    //use Cachable;
 
     /**
      * Retrieve the model for a bound value.

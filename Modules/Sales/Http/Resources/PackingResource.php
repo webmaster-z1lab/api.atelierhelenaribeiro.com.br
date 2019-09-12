@@ -36,7 +36,7 @@ class PackingResource extends Resource
             'seller'         => EmployeeResource::make($this->resource->seller),
             'total_amount'   => $this->resource->total_amount,
             'total_price'    => $this->resource->total_price,
-            'products'       => $this->getProducts(),
+            'products'       => $this->getProducts($request->route()->getName() !== 'packings.current'),
             'checked_out_at' => $this->when($is_closed, function () {
                 return $this->resource->checked_out_at->toW3cString();
             }),
