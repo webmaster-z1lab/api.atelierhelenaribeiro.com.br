@@ -17,6 +17,7 @@ use Modules\User\Models\User;
  * @property integer                                       $total_price
  * @property-read float                                    $discount_float
  * @property-read float                                    $total_price_float
+ * @property-read float                                    $final_price_float
  * @property-read \Modules\User\Models\User                $seller
  * @property-read string                                   $seller_id
  * @property-read \Modules\Customer\Models\Customer        $customer
@@ -96,5 +97,13 @@ class Sale extends BaseModel
     public function getTotalPriceFloatAttribute(): float
     {
         return floatval($this->attributes['total_price'] / 100.0);
+    }
+
+    /**
+     * @return float
+     */
+    public function getFinalPriceFloatAttribute(): float
+    {
+        return floatval(($this->attributes['total_price'] - $this->attributes['discount']) / 100.0);
     }
 }

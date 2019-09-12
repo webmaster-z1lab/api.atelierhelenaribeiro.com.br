@@ -134,6 +134,8 @@ class VisitControllerTest extends TestCase
             'created_at',
             'updated_at',
         ],
+        'created_at',
+        'updated_at',
     ];
 
     /**

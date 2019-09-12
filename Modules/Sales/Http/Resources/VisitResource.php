@@ -35,6 +35,16 @@ class VisitResource extends Resource
             'seller'      => EmployeeResource::make($this->resource->seller),
             'customer_id' => $this->resource->customer_id,
             'customer'    => CustomerResource::make($this->resource->customer),
+            $this->mergeWhen($this->resource->sale()->exists(), function () {
+                return [
+                    'sale' => SaleResource::make($this->resource->sale),
+                ];
+            }),
+            $this->mergeWhen($this->resource->payroll()->exists(), function () {
+                return [
+                    'payroll' => PayrollResource::make($this->resource->payroll),
+                ];
+            }),
             'created_at'  => $this->resource->created_at->toW3cString(),
             'updated_at'  => $this->resource->updated_at->toW3cString(),
         ];

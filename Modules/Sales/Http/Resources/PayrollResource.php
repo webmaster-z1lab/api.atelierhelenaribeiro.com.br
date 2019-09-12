@@ -30,14 +30,18 @@ class PayrollResource extends Resource
     {
         return [
             'id'           => $this->resource->id,
-            'date'         => $this->resource->date->format('d/m/Y'),
-            'visit_id'     => $this->resource->visit_id,
+            $this->mergeWhen(\Str::startsWith($request->route()->getName(), 'payrolls'), function () {
+                return [
+                    'date'         => $this->resource->date->format('d/m/Y'),
+                    'visit_id'     => $this->resource->visit_id,
+                    'seller_id'    => $this->resource->seller_id,
+                    'seller'       => EmployeeResource::make($this->resource->seller),
+                    'customer_id'  => $this->resource->customer_id,
+                    'customer'     => CustomerResource::make($this->resource->customer),
+                ];
+            }),
             'total_amount' => $this->resource->total_amount,
             'total_price'  => $this->resource->total_price_float,
-            'seller_id'    => $this->resource->seller_id,
-            'seller'       => EmployeeResource::make($this->resource->seller),
-            'customer_id'  => $this->resource->customer_id,
-            'customer'     => CustomerResource::make($this->resource->customer),
             'products'     => $this->getProducts(),
             'created_at'   => $this->resource->created_at->toW3cString(),
             'updated_at'   => $this->resource->updated_at->toW3cString(),
