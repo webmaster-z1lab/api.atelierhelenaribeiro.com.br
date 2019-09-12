@@ -22,15 +22,10 @@ $factory->afterMaking(Sale::class, function (Sale $sale, Faker $faker) {
     $sale->customer()->associate($visit->customer_id);
     $sale->seller()->associate($visit->seller_id);
 
-    /** @var \Modules\Sales\Models\Packing $packing */
-    $packing = factory(Packing::class)->create();
-    $packing->seller()->associate($visit->seller_id);
-    $packing->save();
-
-    $amount = rand(1, $packing->products()->count());
+    $amount = rand(1, $visit->packing->products()->count());
     $sale->total_amount = $amount;
     $total_price = 0;
-    $products = $packing->products->take($amount);
+    $products = $visit->packing->products->take($amount);
     foreach ($products as $product) {
         $sale->products()->associate(new Product([
             'product_id' => $product->product_id,

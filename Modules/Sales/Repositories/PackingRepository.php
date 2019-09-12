@@ -81,6 +81,8 @@ class PackingRepository
      */
     public function update(array $data, Packing $packing): Packing
     {
+        abort_if($packing->visits()->exists(), 400, 'Já existem visitas cadastradas para esse romaneio.');
+
         if (Packing::where('_id', '<>', $packing->id)
             ->where('seller_id', $data['seller'])
             ->where(function ($query) {
@@ -118,6 +120,8 @@ class PackingRepository
      */
     public function delete(Packing $packing)
     {
+        abort_if($packing->visits()->exists(), 400, 'Já existem visitas cadastradas para esse romaneio.');
+
         $this->releaseProducts($packing);
 
         return $packing->delete();

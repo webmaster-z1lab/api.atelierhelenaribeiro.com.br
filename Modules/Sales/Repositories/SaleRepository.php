@@ -38,7 +38,10 @@ class SaleRepository
     {
         $data['discount'] = intval(floatval($data['discount']) * 100);
         $visit = Visit::find($data['visit']);
-        $products = $this->prepareProducts($visit, $data['products']);
+
+        abort_if($visit->sale()->exists(), 400, 'Já existe uma venda para essa visita.');
+
+        $products = $this->prepareProducts($visit->packing, $data['products']);
 
         abort_if($data['discount'] > $this->total_price, 400, 'O desconto é maior do que o total da venda.');
 
@@ -58,7 +61,7 @@ class SaleRepository
 
         $sale->save();
 
-        UpdateProductsStatus::dispatch($this->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
+        UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
 
         return $sale;
     }
@@ -71,13 +74,9 @@ class SaleRepository
      */
     public function delete(Sale $sale)
     {
-        $packing = Packing::where('seller_id', $sale->seller_id)
-            ->where(function ($query) {
-                $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
-            })
-            ->first();
+        $packing = $sale->visit->packing;
 
-        abort_if(is_null($packing), 400, 'Não existe um romaneio em aberto para o vendedor.');
+        abort_if(!is_null($packing->checked_out_at), 400, 'Já foi dado baixa no romaneio.');
 
         UpdateProductsStatus::dispatch($packing, $sale->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
 

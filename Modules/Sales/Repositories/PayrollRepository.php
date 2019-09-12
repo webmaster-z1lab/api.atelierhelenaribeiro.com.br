@@ -32,7 +32,10 @@ class PayrollRepository
     public function create(array $data): Payroll
     {
         $visit = Visit::find($data['visit']);
-        $products = $this->prepareProducts($visit, $data['products']);
+
+        abort_if($visit->payroll()->exists(), 400, 'Já existe uma consignação para essa visita.');
+
+        $products = $this->prepareProducts($visit->packing, $data['products']);
 
         $payroll = new Payroll([
             'date'         => $visit->date,
@@ -49,7 +52,7 @@ class PayrollRepository
 
         $payroll->save();
 
-        UpdateProductsStatus::dispatch($this->packing, $payroll->products->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
+        UpdateProductsStatus::dispatch($visit->packing, $payroll->products->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
 
         return $payroll;
     }
@@ -62,13 +65,9 @@ class PayrollRepository
      */
     public function delete(Payroll $payroll)
     {
-        $packing = Packing::where('seller_id', $payroll->seller_id)
-            ->where(function ($query) {
-                $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
-            })
-            ->first();
+        $packing = $payroll->visit->packing;
 
-        abort_if(is_null($packing), 400, 'Não existe um romaneio em aberto para o vendedor.');
+        abort_if(!is_null($packing->checked_out_at), 400, 'Já foi dado baixa no romaneio.');
 
         UpdateProductsStatus::dispatch($packing, $payroll->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
 

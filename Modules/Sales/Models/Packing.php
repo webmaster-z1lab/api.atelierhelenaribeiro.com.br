@@ -13,6 +13,7 @@ use Modules\User\Models\User;
  * @property \Carbon\Carbon                                                                $checked_out_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Sales\Models\Product[] $products
  * @property-read \Modules\User\Models\User                                                $seller
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Sales\Models\Visit[]   $visits
  * @property-read \Carbon\Carbon                                                           $created_at
  * @property-read \Carbon\Carbon                                                           $updated_at
  * @property-read \Carbon\Carbon                                                           $deleted_at
@@ -49,6 +50,14 @@ class Packing extends BaseModel
     public function products()
     {
         return $this->embedsMany(Product::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function visits()
+    {
+        return $this->hasMany(Visit::class);
     }
 
     /**
