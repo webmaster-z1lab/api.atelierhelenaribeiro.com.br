@@ -272,8 +272,12 @@ class PackingControllerTest extends TestCase
     {
         $this->persist();
 
+        $query = http_build_query([
+            'seller' => $this->packing->seller_id
+        ]);
+
         $this->actingAs($this->packing->seller)
-            ->json('GET', $this->uri . 'current')
+            ->json('GET', $this->uri . "current?$query")
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')

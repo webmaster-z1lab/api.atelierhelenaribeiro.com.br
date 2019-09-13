@@ -4,6 +4,7 @@ namespace Modules\Sales\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Stock\Models\ProductStatus;
 
 class CheckOutRequest extends FormRequest
 {
@@ -26,7 +27,8 @@ class CheckOutRequest extends FormRequest
     {
         /** @var \Modules\Sales\Models\Packing $packing */
         $packing = $this->route('packing');
-        $size = $packing->products()->pluck('reference')->unique()->count();
+        $size = $packing->products()
+            ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])->pluck('reference')->unique()->count();
 
         return [
             'checked'             => "bail|required|array|size:$size",

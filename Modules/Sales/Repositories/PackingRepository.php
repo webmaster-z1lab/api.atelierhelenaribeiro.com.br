@@ -2,6 +2,7 @@
 
 namespace Modules\Sales\Repositories;
 
+use Illuminate\Validation\ValidationException;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\CheckOutProducts;
 use Modules\Sales\Models\Packing;
@@ -30,7 +31,15 @@ class PackingRepository
      */
     public function current(): Packing
     {
-        $packing = Packing::where('seller_id', \Auth::id())
+        if (!\Request::filled('seller')) {
+            throw ValidationException::withMessages([
+                'seller' => [
+                    'Vendedor não especificado.'
+                ]
+            ]);
+        }
+
+        $packing = Packing::where('seller_id',  \Request::query('seller'))
             ->where(function ($query) {
                 $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
             })->first();
@@ -135,6 +144,17 @@ class PackingRepository
      */
     public function checkOut(array $data, Packing $packing)
     {
+        $references = $packing->products()->pluck('reference')->unique()->all();
+        $checked_references = data_get($data['checked'], '*.reference');
+
+        foreach ($references as $reference) {
+            abort_if(!in_array($reference, $checked_references), 400, "Falta a baixa do produto $reference.");
+        }
+
+        foreach ($checked_references as $checked_reference) {
+            abort_if(!in_array($checked_reference, $references), 400, "O produto $checked_reference não deveria ter retornado.");
+        }
+
         foreach ($data['checked'] as $checked) {
             $expected = $packing->products()
                 ->where('reference', $checked['reference'])
