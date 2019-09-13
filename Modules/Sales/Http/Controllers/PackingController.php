@@ -3,6 +3,7 @@
 namespace Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
+use Illuminate\Http\JsonResponse;
 use Modules\Sales\Http\Requests\CheckOutRequest;
 use Modules\Sales\Http\Requests\PackingRequest;
 use Modules\Sales\Http\Requests\PackingUpdateRequest;
@@ -94,9 +95,20 @@ class PackingController extends ApiController
 
     /**
      * @return \Modules\Sales\Http\Resources\PackingResource
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function current(): PackingResource
     {
         return PackingResource::make($this->repository->current());
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Packing  $packing
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toReceive(Packing $packing): JsonResponse
+    {
+        return response()->json($this->repository->toReceiveFloat($packing));
     }
 }

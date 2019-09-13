@@ -6,6 +6,8 @@ use Illuminate\Validation\ValidationException;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\CheckOutProducts;
 use Modules\Sales\Models\Packing;
+use Modules\Sales\Models\PaymentMethods;
+use Modules\Sales\Models\Sale;
 use Modules\Stock\Models\Product;
 use Modules\Stock\Models\ProductStatus;
 
@@ -28,18 +30,19 @@ class PackingRepository
 
     /**
      * @return \Modules\Sales\Models\Packing
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function current(): Packing
     {
         if (!\Request::filled('seller')) {
             throw ValidationException::withMessages([
                 'seller' => [
-                    'Vendedor não especificado.'
-                ]
+                    'Vendedor não especificado.',
+                ],
             ]);
         }
 
-        $packing = Packing::where('seller_id',  \Request::query('seller'))
+        $packing = Packing::where('seller_id', \Request::query('seller'))
             ->where(function ($query) {
                 $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
             })->first();
@@ -144,6 +147,9 @@ class PackingRepository
      */
     public function checkOut(array $data, Packing $packing)
     {
+        $data[PaymentMethods::MONEY] = (int) ($data[PaymentMethods::MONEY] * 100);
+        $data[PaymentMethods::CHECK] = (int) ($data[PaymentMethods::CHECK] * 100);
+
         $references = $packing->products()->pluck('reference')->unique()->all();
         $checked_references = data_get($data['checked'], '*.reference');
 
@@ -165,12 +171,33 @@ class PackingRepository
             }
         }
 
+        $result = $this->toReceive($packing);
+
+        abort_if($result[PaymentMethods::MONEY] !== $data[PaymentMethods::MONEY], 400, 'O valor recebido em dinheiro é diferente do esperado.');
+
+        abort_if($result[PaymentMethods::CHECK] !== $data[PaymentMethods::CHECK], 400, 'O valor recebido em cheque é diferente do esperado.');
+
         $packing->checked_out_at = now();
         $packing->save();
 
         CheckOutProducts::dispatch($packing);
 
         return $packing;
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Packing  $packing
+     *
+     * @return array
+     */
+    public function toReceiveFloat(Packing $packing): array
+    {
+        $result = $this->toReceive($packing);
+
+        $result[PaymentMethods::MONEY] = (float) ($result[PaymentMethods::MONEY] / 100.0);
+        $result[PaymentMethods::CHECK] = (float) ($result[PaymentMethods::CHECK] / 100.0);
+
+        return $result;
     }
 
     /**
@@ -212,5 +239,29 @@ class PackingRepository
             ->update(['status' => ProductStatus::AVAILABLE_STATUS]);
 
         $packing->products()->dissociate($packing->products->modelKeys());
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Packing  $packing
+     *
+     * @return array
+     */
+    private function toReceive(Packing $packing): array
+    {
+        $visits = $packing->visits->modelKeys();
+
+        $sales = Sale::whereIn('visit_id', $visits)->whereIn('payment_methods.method', [PaymentMethods::MONEY, PaymentMethods::CHECK])->get();
+
+        $result = [
+            PaymentMethods::MONEY => 0,
+            PaymentMethods::CHECK => 0,
+        ];
+
+        $sales->each(function (Sale $sale, int $key) use (&$result) {
+            $result[PaymentMethods::MONEY] += $sale->payment_methods()->where('method', PaymentMethods::MONEY)->sum('value');
+            $result[PaymentMethods::CHECK] += $sale->payment_methods()->where('method', PaymentMethods::CHECK)->sum('value');
+        });
+
+        return $result;
     }
 }

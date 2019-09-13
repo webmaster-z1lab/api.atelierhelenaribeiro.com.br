@@ -4,6 +4,7 @@ namespace Modules\Sales\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Sales\Models\PaymentMethods;
 use Modules\Stock\Models\ProductStatus;
 
 class CheckOutRequest extends FormRequest
@@ -39,6 +40,8 @@ class CheckOutRequest extends FormRequest
                 'distinct',
                 Rule::exists('packings', 'products.reference')->where('_id', $packing->id),
             ],
+            PaymentMethods::MONEY => 'bail|required|numeric|min:0',
+            PaymentMethods::CHECK => 'bail|required|numeric|min:0',
         ];
     }
 
@@ -51,6 +54,8 @@ class CheckOutRequest extends FormRequest
             'checked'             => 'itens',
             'checked.*.amount'    => 'quantidade do item',
             'checked.*.reference' => 'referência do item',
+            PaymentMethods::MONEY => 'valor recebido em dinheiro',
+            PaymentMethods::CHECK => 'valor recebido em cheque',
         ];
     }
 }

@@ -9,6 +9,7 @@ use Modules\Catalog\Models\Template;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\CheckOutProducts;
 use Modules\Sales\Models\Packing;
+use Modules\Sales\Models\PaymentMethods;
 use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
 use Modules\Stock\Models\Size;
@@ -228,24 +229,30 @@ class PackingControllerTest extends TestCase
 
         $this->persist();
 
-        $checked = $this->getProducts();
+        $data = [];
+
+        $data['checked'] = $this->getProducts();
+
+        $data[PaymentMethods::MONEY] = 0;
+
+        $data[PaymentMethods::CHECK] = 0;
 
         \Queue::assertNothingPushed();
 
-        $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->packing->id, compact('checked'));
+        $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->packing->id, $data);
+
+        $response->dump()
+            ->assertOk()
+            ->assertHeader('ETag')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
+            ->assertJsonStructure($this->jsonStructure);
 
         \Queue::assertPushed(CheckOutProducts::class, function (CheckOutProducts $job) {
             $job->handle();
 
             return $job->packing->id === $this->packing->id;
         });
-
-        $response
-            ->assertOk()
-            ->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
     }
 
     /**  @test */
@@ -273,16 +280,30 @@ class PackingControllerTest extends TestCase
         $this->persist();
 
         $query = http_build_query([
-            'seller' => $this->packing->seller_id
+            'seller' => $this->packing->seller_id,
         ]);
 
         $this->actingAs($this->packing->seller)
-            ->json('GET', $this->uri . "current?$query")
+            ->json('GET', $this->uri."current?$query")
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
             //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
+    }
+
+    /** @test */
+    public function get_values_to_receive_from_packing(): void
+    {
+        $this->persist();
+
+        $this->actingAs($this->packing->seller)
+            ->json('GET', $this->uri.$this->packing->id.'/receive')
+            ->assertOk()
+            ->assertJsonStructure([
+                PaymentMethods::MONEY,
+                PaymentMethods::CHECK,
+            ]);
     }
 
     /**

@@ -42,11 +42,14 @@ class SaleRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'visit'                => 'visita',
-            'discount'             => 'desconto',
-            'products'             => 'produtos',
-            'products.*.reference' => 'referência do produto',
-            'products.*.amount'    => 'quantidade do produto',
+            'visit'                    => 'visita',
+            'discount'                 => 'desconto',
+            'products'                 => 'produtos',
+            'products.*.reference'     => 'referência do produto',
+            'products.*.amount'        => 'quantidade do produto',
+            'payment_methods'          => 'métodos de pagamento',
+            'payment_methods.*.method' => 'método de pagamento',
+            'payment_methods.*.value'  => 'valor pago',
         ];
     }
 
