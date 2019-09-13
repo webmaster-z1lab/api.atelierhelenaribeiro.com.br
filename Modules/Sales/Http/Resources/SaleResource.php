@@ -32,12 +32,13 @@ class SaleResource extends Resource
             'id'           => $this->resource->id,
             $this->mergeWhen(\Str::startsWith($request->route()->getName(), 'sales'), function () {
                 return [
-                    'date'        => $this->resource->date->format('d/m/Y'),
-                    'visit_id'    => $this->resource->visit_id,
-                    'seller_id'   => $this->resource->seller_id,
-                    'seller'      => EmployeeResource::make($this->resource->seller),
-                    'customer_id' => $this->resource->customer_id,
-                    'customer'    => CustomerResource::make($this->resource->customer),
+                    'date'            => $this->resource->date->format('d/m/Y'),
+                    'visit_id'        => $this->resource->visit_id,
+                    'seller_id'       => $this->resource->seller_id,
+                    'seller'          => EmployeeResource::make($this->resource->seller),
+                    'customer_id'     => $this->resource->customer_id,
+                    'customer'        => CustomerResource::make($this->resource->customer),
+                    'payment_methods' => PaymentMethodResource::collection($this->resource->payment_methods),
                 ];
             }),
             'total_amount' => $this->resource->total_amount,

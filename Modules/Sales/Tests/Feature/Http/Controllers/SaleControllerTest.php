@@ -10,6 +10,7 @@ use Modules\Customer\Models\Customer;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\UpdateProductsStatus;
 use Modules\Sales\Models\Packing;
+use Modules\Sales\Models\PaymentMethod;
 use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\Color;
@@ -51,7 +52,7 @@ class SaleControllerTest extends TestCase
         'total_price',
         'discount',
         'seller_id',
-        'seller'   => [
+        'seller'          => [
             'id',
             'name',
             'document',
@@ -86,7 +87,7 @@ class SaleControllerTest extends TestCase
             ],
         ],
         'customer_id',
-        'customer' => [
+        'customer'        => [
             'id',
             'company_name',
             'trading_name',
@@ -139,13 +140,19 @@ class SaleControllerTest extends TestCase
                 ],
             ],
         ],
-        'products' => [
+        'products'        => [
             [
                 'thumbnail',
                 'size',
                 'color',
                 'price',
                 'amount',
+            ],
+        ],
+        'payment_methods' => [
+            [
+                'method',
+                'value',
             ],
         ],
         'created_at',
@@ -193,13 +200,21 @@ class SaleControllerTest extends TestCase
                 'amount'    => $this->sale->products()->where('reference', $reference)->count(),
             ];
         }
+        $methods = [];
+        $this->sale->payment_methods->each(function (PaymentMethod $method, int $key) use (&$methods) {
+            $methods[] = [
+                'method' => $method->method,
+                'value'  => $method->value_float,
+            ];
+        });
 
         \Queue::assertNothingPushed();
 
         $response = $this->actingAs($this->user)->json('POST', $this->uri, [
-            'visit'    => $this->sale->visit_id,
-            'discount' => $this->sale->discount_float,
-            'products' => $products,
+            'visit'           => $this->sale->visit_id,
+            'discount'        => $this->sale->discount_float,
+            'products'        => $products,
+            'payment_methods' => $methods,
         ]);
 
         \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
@@ -278,7 +293,7 @@ class SaleControllerTest extends TestCase
 
         $response = $this->update();
 
-        $response
+        $response->dump()
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -287,7 +302,7 @@ class SaleControllerTest extends TestCase
     }
 
     /** @test */
-    public function update_visit_fails(): void
+    public function update_sale_fails(): void
     {
         $this->persist();
 
@@ -382,9 +397,18 @@ class SaleControllerTest extends TestCase
             ];
         }
 
+        $methods = [];
+        $this->sale->payment_methods->each(function (PaymentMethod $method, int $key) use (&$methods) {
+            $methods[] = [
+                'method' => $method->method,
+                'value'  => $method->value_float,
+            ];
+        });
+
         return $this->actingAs($this->user)->json('PUT', $this->uri.$this->sale->id, [
-            'discount' => $this->faker->randomFloat(2, 0, $this->sale->total_price_float),
-            'products' => $products,
+            'discount'        => $this->sale->discount_float,
+            'products'        => $products,
+            'payment_methods' => $methods,
         ]);
     }
 }

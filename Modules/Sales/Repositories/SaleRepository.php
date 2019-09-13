@@ -5,6 +5,7 @@ namespace Modules\Sales\Repositories;
 use App\Traits\PrepareProducts;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\UpdateProductsStatus;
+use Modules\Sales\Models\PaymentMethod;
 use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\ProductStatus;
@@ -44,6 +45,8 @@ class SaleRepository
 
         abort_if($data['discount'] > $this->total_price, 400, 'O desconto é maior do que o total da venda.');
 
+        $methods = $this->createPaymentMethods($data['payment_methods'], $this->total_price - $data['discount']);
+
         $sale = new Sale([
             'date'         => $visit->date,
             'discount'     => $data['discount'],
@@ -56,6 +59,9 @@ class SaleRepository
         $sale->customer()->associate($visit->customer_id);
         foreach ($products as $product) {
             $sale->products()->associate($product);
+        }
+        foreach ($methods as $method) {
+            $sale->payment_methods()->associate($method);
         }
 
         $sale->save();
@@ -75,26 +81,18 @@ class SaleRepository
     {
         $data['discount'] = intval(floatval($data['discount']) * 100);
 
-        $packing = $sale->visit->packing;
-
-        foreach ($data['products'] as $item) {
-            $packing_amount = $packing->products()->where('reference', $item['reference'])
-                ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])->count();
-            $sale_amount = $sale->products()->where('reference', $item['reference'])->count();
-            if ($packing_amount + $sale_amount < (int) $item['amount']) {
-                abort(400, "A quantidade do produto {$item['reference']} é maior do que a disponível.");
-            }
-        }
-
-        UpdateProductsStatus::dispatchNow($packing, $sale->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
-        $sale->products()->dissociate();
-
-        $products = $this->prepareProducts($packing->fresh(), $data['products']);
+        $products = $this->updateProducts($sale, $data['products']);
 
         abort_if($data['discount'] > $this->total_price, 400, 'O desconto é maior do que o total da venda.');
 
+        $methods = $this->createPaymentMethods($data['payment_methods'], $this->total_price - $data['discount']);
+        $sale->payment_methods()->dissociate($sale->payment_methods->modelKeys());
+
         foreach ($products as $product) {
             $sale->products()->associate($product);
+        }
+        foreach ($methods as $method) {
+            $sale->payment_methods()->associate($method);
         }
 
         $sale->update([
@@ -103,7 +101,7 @@ class SaleRepository
             'total_price'  => $this->total_price,
         ]);
 
-        UpdateProductsStatus::dispatch($packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
+        UpdateProductsStatus::dispatch($sale->visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
 
         return $sale;
     }
@@ -123,5 +121,26 @@ class SaleRepository
         UpdateProductsStatus::dispatch($packing, $sale->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
 
         return $sale->delete();
+    }
+
+    /**
+     * @param  array  $methods
+     * @param  int    $expected_total
+     *
+     * @return array
+     */
+    private function createPaymentMethods(array $methods, int $expected_total): array
+    {
+        $total = 0;
+        $result = [];
+        foreach ($methods as $method) {
+            $method['value'] = (int) ((float) $method['value'] * 100);
+            $result[] = new PaymentMethod($method);
+            $total += $method['value'];
+        }
+
+        abort_if($expected_total !== $total, 400, 'Os valores de pagamentos informados não coincidem com o valor da venda.');
+
+        return  $result;
     }
 }

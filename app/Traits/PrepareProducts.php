@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Modules\Sales\Jobs\UpdateProductsStatus;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\Product;
 use Modules\Stock\Models\ProductStatus;
@@ -48,5 +49,30 @@ trait PrepareProducts
         }
 
         return $products;
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Sale|\Modules\Sales\Models\Payroll  $reserved
+     * @param  array                                                     $items
+     *
+     * @return array
+     */
+    protected function updateProducts(&$reserved, array $items): array
+    {
+        $packing = $reserved->visit->packing;
+
+        foreach ($items as $item) {
+            $packing_amount = $packing->products()->where('reference', $item['reference'])
+                ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])->count();
+            $reserved_amount = $reserved->products()->where('reference', $item['reference'])->count();
+            if ($packing_amount + $reserved_amount < (int) $item['amount']) {
+                abort(400, "A quantidade do produto {$item['reference']} é maior do que a disponível.");
+            }
+        }
+
+        UpdateProductsStatus::dispatchNow($packing, $reserved->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
+        $reserved->products()->dissociate($reserved->products->modelKeys());
+
+        return  $this->prepareProducts($packing->fresh(), $items);
     }
 }
