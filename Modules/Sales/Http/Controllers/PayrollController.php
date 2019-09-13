@@ -4,6 +4,7 @@ namespace Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
 use Modules\Sales\Http\Requests\PayrollRequest;
+use Modules\Sales\Http\Requests\PayrollUpdateRequest;
 use Modules\Sales\Http\Resources\PayrollResource;
 use Modules\Sales\Models\Payroll;
 use Modules\Sales\Repositories\PayrollRepository;
@@ -53,6 +54,17 @@ class PayrollController extends ApiController
         if ($this->ETagNotChanged($payroll)) return $this->notModifiedResponse();
 
         return PayrollResource::make($payroll);
+    }
+
+    /**
+     * @param  \Modules\Sales\Http\Requests\PayrollUpdateRequest  $request
+     * @param  \Modules\Sales\Models\Payroll                      $payroll
+     *
+     * @return \Modules\Sales\Http\Resources\PayrollResource
+     */
+    public function update(PayrollUpdateRequest $request, Payroll $payroll): PayrollResource
+    {
+        return PayrollResource::make($this->repository->update($request->validated(), $payroll));
     }
 
     /**

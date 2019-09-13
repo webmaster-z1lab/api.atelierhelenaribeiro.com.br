@@ -270,6 +270,7 @@ class PayrollControllerTest extends TestCase
             ->assertStatus(304);
     }
 
+    /** @test */
     public function update_payroll(): void
     {
         $this->persist();
@@ -284,6 +285,7 @@ class PayrollControllerTest extends TestCase
             ->assertJsonStructure($this->jsonStructure);
     }
 
+    /** @test */
     public function update_payroll_fails(): void
     {
         $this->persist();

@@ -4,6 +4,7 @@ namespace Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
 use Modules\Sales\Http\Requests\SaleRequest;
+use Modules\Sales\Http\Requests\SaleUpdateRequest;
 use Modules\Sales\Http\Resources\SaleResource;
 use Modules\Sales\Models\Sale;
 use Modules\Sales\Repositories\SaleRepository;
@@ -48,6 +49,17 @@ class SaleController extends ApiController
         if ($this->ETagNotChanged($sale)) return $this->notModifiedResponse();
 
         return SaleResource::make($sale);
+    }
+
+    /**
+     * @param  \Modules\Sales\Http\Requests\SaleUpdateRequest  $request
+     * @param  \Modules\Sales\Models\Sale                      $sale
+     *
+     * @return \Modules\Sales\Http\Resources\SaleResource
+     */
+    public function update(SaleUpdateRequest $request, Sale $sale): SaleResource
+    {
+        return SaleResource::make($this->repository->update($request->validated(), $sale));
     }
 
     /**

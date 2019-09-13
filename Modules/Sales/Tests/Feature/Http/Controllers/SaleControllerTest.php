@@ -271,6 +271,7 @@ class SaleControllerTest extends TestCase
             ->assertStatus(304);
     }
 
+    /** @test */
     public function update_sale(): void
     {
         $this->persist();
@@ -285,6 +286,7 @@ class SaleControllerTest extends TestCase
             ->assertJsonStructure($this->jsonStructure);
     }
 
+    /** @test */
     public function update_visit_fails(): void
     {
         $this->persist();
@@ -381,8 +383,7 @@ class SaleControllerTest extends TestCase
         }
 
         return $this->actingAs($this->user)->json('PUT', $this->uri.$this->sale->id, [
-            'visit'    => $this->sale->visit_id,
-            'discount' => $this->faker->randomFloat(2, 0, $this->sale->total_price),
+            'discount' => $this->faker->randomFloat(2, 0, $this->sale->total_price_float),
             'products' => $products,
         ]);
     }
