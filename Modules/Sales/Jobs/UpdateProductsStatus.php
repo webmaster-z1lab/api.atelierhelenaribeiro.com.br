@@ -8,11 +8,10 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Modules\Sales\Models\Packing;
-use Modules\Stock\Models\Product;
 
 class UpdateProductsStatus implements ShouldQueue
 {
-    use Dispatchable, Queueable, SerializesModels;
+    use Dispatchable, Queueable, SerializesModels, \App\Traits\UpdateProductsStatus;
 
     /**
      * @var \Modules\Sales\Models\Packing
@@ -50,13 +49,6 @@ class UpdateProductsStatus implements ShouldQueue
      */
     public function handle()
     {
-        $this->packing->products()->whereIn('product_id', $this->products)->each(function (\Modules\Sales\Models\Product $product, int $key) {
-            $product->forceFill(['status' => $this->status]);
-            $this->packing->products()->associate($product);
-        });
-
-        $this->packing->save();
-
-        Product::whereIn('_id', $this->products)->update(['status' => $this->status]);
+        $this->update($this->packing, $this->products, $this->status);
     }
 }

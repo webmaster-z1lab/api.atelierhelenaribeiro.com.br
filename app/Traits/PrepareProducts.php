@@ -2,13 +2,13 @@
 
 namespace App\Traits;
 
-use Modules\Sales\Jobs\UpdateProductsStatus;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\Product;
 use Modules\Stock\Models\ProductStatus;
 
 trait PrepareProducts
 {
+    use UpdateProductsStatus;
     /**
      * @var int
      */
@@ -70,7 +70,7 @@ trait PrepareProducts
             }
         }
 
-        UpdateProductsStatus::dispatchNow($packing, $reserved->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
+        $this->update($packing, $reserved->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
         $reserved->products()->dissociate($reserved->products->modelKeys());
 
         return  $this->prepareProducts($packing->fresh(), $items);
