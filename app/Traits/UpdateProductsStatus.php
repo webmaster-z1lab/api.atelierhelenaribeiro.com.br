@@ -12,7 +12,7 @@ trait UpdateProductsStatus
      * @param  array                          $products
      * @param  string                         $status
      */
-    public function update(Packing $packing, array $products, string $status)
+    public function updateStatus(Packing $packing, array $products, string $status)
     {
         $packing->products()->whereIn('product_id', $products)->each(function (\Modules\Sales\Models\Product $product, int $key) use ($packing, $status) {
             $product->forceFill(['status' => $status]);

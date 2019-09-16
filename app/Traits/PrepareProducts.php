@@ -70,7 +70,7 @@ trait PrepareProducts
             }
         }
 
-        $this->update($packing, $reserved->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
+        $this->updateStatus($packing, $reserved->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
         $reserved->products()->dissociate($reserved->products->modelKeys());
 
         return  $this->prepareProducts($packing->fresh(), $items);

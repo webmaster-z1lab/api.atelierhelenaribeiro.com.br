@@ -49,6 +49,6 @@ class UpdateProductsStatus implements ShouldQueue
      */
     public function handle()
     {
-        $this->update($this->packing, $this->products, $this->status);
+        $this->updateStatus($this->packing, $this->products, $this->status);
     }
 }
