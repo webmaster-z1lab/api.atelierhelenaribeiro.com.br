@@ -150,7 +150,12 @@ class PackingRepository
         $data[PaymentMethods::MONEY] = (int) ($data[PaymentMethods::MONEY] * 100);
         $data[PaymentMethods::CHECK] = (int) ($data[PaymentMethods::CHECK] * 100);
 
-        $references = $packing->products()->pluck('reference')->unique()->all();
+        $references = $packing->products()
+            ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
+            ->pluck('reference')
+            ->unique()
+            ->all();
+
         $checked_references = data_get($data['checked'], '*.reference');
 
         foreach ($references as $reference) {
