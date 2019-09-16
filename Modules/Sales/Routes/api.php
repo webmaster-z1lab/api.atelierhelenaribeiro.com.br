@@ -8,6 +8,8 @@ Route::post('packings/{packing}', 'PackingController@checkOut')->name('packings.
 
 Route::get('packings/{packing}/receive', 'PackingController@toReceive')->name('packings.receive');
 
+Route::get('packings/{packing}/excel', 'PackingController@excel')->name('packings.excel');
+
 Route::apiResource('visits', 'VisitController');
 
 Route::apiResource('sales', 'SaleController');

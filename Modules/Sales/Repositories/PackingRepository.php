@@ -201,6 +201,31 @@ class PackingRepository
     }
 
     /**
+     * @param  \Modules\Sales\Models\Packing  $packing
+     *
+     * @return array
+     */
+    public function excel(Packing $packing): array
+    {
+        $products = [];
+        foreach ($packing->products()->pluck('reference')->unique()->all() as $reference) {
+            /** @var \Modules\Sales\Models\Product $product */
+            $product = $packing->products()->where('reference', $reference)->first();
+            $amount = $packing->products()->where('reference', $reference)->count();
+            $products[] = [
+                $reference,
+                $product->size,
+                $product->color,
+                'R$'.number_format((float) ($product->price / 100.0), 2, ',', '.'),
+                $amount,
+                'R$'.number_format((float) ($product->price * $amount / 100.0), 2, ',', '.'),
+            ];
+        }
+
+        return $products;
+    }
+
+    /**
      * @param  array  $data
      *
      * @return array

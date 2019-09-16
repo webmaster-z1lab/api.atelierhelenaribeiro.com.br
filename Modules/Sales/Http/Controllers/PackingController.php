@@ -4,12 +4,14 @@ namespace Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
+use Modules\Sales\Exports\PackingExport;
 use Modules\Sales\Http\Requests\CheckOutRequest;
 use Modules\Sales\Http\Requests\PackingRequest;
 use Modules\Sales\Http\Requests\PackingUpdateRequest;
 use Modules\Sales\Http\Resources\PackingResource;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Repositories\PackingRepository;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PackingController extends ApiController
 {
@@ -110,5 +112,15 @@ class PackingController extends ApiController
     public function toReceive(Packing $packing): JsonResponse
     {
         return response()->json($this->repository->toReceiveFloat($packing));
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Packing  $packing
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function excel(Packing $packing): BinaryFileResponse
+    {
+        return \Excel::download(new PackingExport($this->repository->excel($packing)), 'romaneio.xlsx');
     }
 }
