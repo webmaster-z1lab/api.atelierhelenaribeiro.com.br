@@ -38,7 +38,6 @@ class SaleResource extends Resource
                     'seller'          => EmployeeResource::make($this->resource->seller),
                     'customer_id'     => $this->resource->customer_id,
                     'customer'        => CustomerResource::make($this->resource->customer),
-                    'payment_methods' => PaymentMethodResource::collection($this->resource->payment_methods),
                 ];
             }),
             'total_amount' => $this->resource->total_amount,
@@ -46,6 +45,7 @@ class SaleResource extends Resource
             'discount'     => $this->resource->discount_float,
             'final_price'  => $this->resource->final_price_float,
             'products'     => $this->getProducts(TRUE),
+            'payment_methods' => PaymentMethodResource::collection($this->resource->payment_methods),
             'created_at'   => $this->resource->created_at->toW3cString(),
             'updated_at'   => $this->resource->updated_at->toW3cString(),
         ];
