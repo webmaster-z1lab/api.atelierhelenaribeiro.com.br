@@ -18,7 +18,7 @@ class EmployeeUpdateRequest extends EmployeeRequest
             'name'           => 'bail|required|string',
             'birth_date'     => 'bail|required|date_format:d/m/Y|before_or_equal:today - 18 years',
             'admission_date' => 'bail|required|date_format:d/m/Y|before_or_equal:today',
-            'email'          => $this->getEmailRules($employee. FALSE),
+            'email'          => $this->getEmailRules($employee, FALSE),
             'document'       => $this->getDocumentRules('cpf', $employee),
             'type'           => $this->getTypeRules(),
             'identity'       => $this->getIdentityRules($employee),
