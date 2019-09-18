@@ -3,6 +3,7 @@
 namespace Modules\Sales\Models;
 
 use App\Models\BaseModel;
+use App\Traits\FileUrl;
 use Modules\Stock\Models\ProductStatus;
 
 /**
@@ -12,6 +13,7 @@ use Modules\Stock\Models\ProductStatus;
  * @property-read string   $product_id
  * @property-read string   $reference
  * @property-read string   $thumbnail
+ * @property-read string   $thumbnail_url
  * @property-read string   $size
  * @property-read string   $color
  * @property-read integer  $price
@@ -27,6 +29,8 @@ use Modules\Stock\Models\ProductStatus;
  */
 class Product extends BaseModel
 {
+    use FileUrl;
+
     public $timestamps = FALSE;
 
     protected $fillable = [
@@ -46,4 +50,14 @@ class Product extends BaseModel
     protected $attributes = [
         'status'   => ProductStatus::IN_TRANSIT_STATUS,
     ];
+
+    /**
+     * @return string
+     */
+    public function getThumbnailUrlAttribute()
+    {
+        return (isset($this->attributes['thumbnail']))
+            ? $this->fileUrl($this->attributes['thumbnail'])
+            : config('image.sizes.thumbnail.placeholder');
+    }
 }

@@ -60,7 +60,7 @@ class ProcessImage implements ShouldQueue
         $template = $this->image->template;
 
         if (NULL !== $template && !$template->is_processed) {
-            $template->thumbnail = $this->image->thumbnail_url;
+            $template->thumbnail = $this->image->thumbnail;
             $template->is_processed = TRUE;
             $template->save();
         }
@@ -76,7 +76,7 @@ class ProcessImage implements ShouldQueue
         if ($products->isNotEmpty()) {
             foreach ($products as $product) {
                 if (!$product->is_processed) {
-                    $product->thumbnail = $this->image->thumbnail_url;
+                    $product->thumbnail = $this->image->thumbnail;
                     $product->is_processed = TRUE;
                     $product->save();
                 }

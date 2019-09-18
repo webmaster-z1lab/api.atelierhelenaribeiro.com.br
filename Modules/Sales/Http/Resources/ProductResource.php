@@ -25,7 +25,7 @@ class ProductResource extends Resource
             'id'         => $this->resource->id,
             'product_id' => $this->resource->product_id,
             'reference'  => $this->resource->reference,
-            'thumbnail'  => $this->resource->thumbnail,
+            'thumbnail'  => $this->resource->thumbnail_url,
             'size'       => $this->resource->size,
             'color'      => $this->resource->color,
             'price'      => $this->resource->price,

@@ -32,7 +32,7 @@ class CheckOutRequest extends FormRequest
             ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])->pluck('reference')->unique()->count();
 
         return [
-            'checked'             => "bail|required|array|size:$size",
+            'checked'             => "bail|present|array|size:$size",
             'checked.*.amount'    => 'bail|required|integer|min:0',
             'checked.*.reference' => [
                 'bail',
