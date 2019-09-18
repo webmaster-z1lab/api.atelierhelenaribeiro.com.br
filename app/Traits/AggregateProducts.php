@@ -28,7 +28,7 @@ trait AggregateProducts
 
             $products[] = [
                 'reference' => $reference,
-                'thumbnail' => $product->thumbnail,
+                'thumbnail' => $product->thumbnail_url,
                 'size'      => $product->size,
                 'color'     => $product->color,
                 'price'     => floatval($product->price / 100.0),
