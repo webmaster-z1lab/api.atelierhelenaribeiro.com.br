@@ -4,6 +4,7 @@ namespace Modules\Stock\Models;
 
 use App\Models\Image;
 use App\Models\Price;
+use App\Traits\FileUrl;
 use Jenssegers\Mongodb\Eloquent\Model;
 use Jenssegers\Mongodb\Eloquent\SoftDeletes;
 use Modules\Catalog\Models\Template;
@@ -15,6 +16,7 @@ use Modules\Catalog\Models\Template;
  * @property-read string                                                       $template_id
  * @property string                                                            $status
  * @property string                                                            $thumbnail
+ * @property string                                                            $thumbnail_url
  * @property string                                                            $barcode
  * @property string                                                            $reference
  * @property string                                                            $size
@@ -34,7 +36,7 @@ use Modules\Catalog\Models\Template;
  */
 class Product extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, FileUrl;
 
     private const PROCESSED_STATUS = FALSE;
 
@@ -65,6 +67,16 @@ class Product extends Model
     public function getPriceAttribute()
     {
         return $this->prices->sortByDesc('started_at')->first();
+    }
+
+    /**
+     * @return string
+     */
+    public function getThumbnailUrlAttribute()
+    {
+        return (isset($this->attributes['thumbnail']))
+            ? $this->fileUrl($this->attributes['thumbnail'])
+            : config('image.sizes.thumbnail.placeholder');
     }
 
     /**
