@@ -154,6 +154,8 @@ class ProductRepository
                 /** @var \App\Models\Image $item */
                 $item->products()->attach($product);
             });
+
+            $product->update(['thumbnail' => $template->thumbnail]);
         }
 
         return $product;
