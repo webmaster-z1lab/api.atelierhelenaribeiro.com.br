@@ -32,16 +32,16 @@ class CheckOutRequest extends FormRequest
             ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])->pluck('reference')->unique()->count();
 
         return [
-            'checked'             => "bail|present|array|size:$size",
-            'checked.*.amount'    => 'bail|required|integer|min:0',
-            'checked.*.reference' => [
+            'checked'                => "bail|present|array|size:$size",
+            'checked.*.amount'       => 'bail|required|integer|min:0',
+            'checked.*.reference'    => [
                 'bail',
                 'required',
                 'distinct',
                 Rule::exists('packings', 'products.reference')->where('_id', $packing->id),
             ],
-            PaymentMethods::MONEY => 'bail|required|numeric|min:0',
-            PaymentMethods::CHECK => 'bail|required|numeric|min:0',
+            PaymentMethods::MONEY    => 'bail|required|numeric|min:0',
+            PaymentMethods::PAYCHECK => 'bail|required|numeric|min:0',
         ];
     }
 
@@ -51,11 +51,11 @@ class CheckOutRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'checked'             => 'itens',
-            'checked.*.amount'    => 'quantidade do item',
-            'checked.*.reference' => 'referência do item',
-            PaymentMethods::MONEY => 'valor recebido em dinheiro',
-            PaymentMethods::CHECK => 'valor recebido em cheque',
+            'checked'                => 'itens',
+            'checked.*.amount'       => 'quantidade do item',
+            'checked.*.reference'    => 'referência do item',
+            PaymentMethods::MONEY    => 'valor recebido em dinheiro',
+            PaymentMethods::PAYCHECK => 'valor recebido em cheque',
         ];
     }
 }

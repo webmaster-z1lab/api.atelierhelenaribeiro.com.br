@@ -2,6 +2,8 @@
 
 namespace Modules\Customer\Http\Requests;
 
+use Modules\Employee\Models\EmployeeTypes;
+
 class CustomerUpdateRequest extends CustomerRequest
 {
     /**
@@ -25,6 +27,8 @@ class CustomerUpdateRequest extends CustomerRequest
             'seller'                 => $this->getSellerRules(),
             'status'                 => $this->getStatusRules(),
         ];
+
+        if (\Auth::user()->type !== EmployeeTypes::TYPE_ADMIN) unset($rules['seller']);
 
         return $this->mergeRules(
             $rules,

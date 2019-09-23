@@ -148,7 +148,7 @@ class PackingRepository
     public function checkOut(array $data, Packing $packing)
     {
         $data[PaymentMethods::MONEY] = (int) ($data[PaymentMethods::MONEY] * 100);
-        $data[PaymentMethods::CHECK] = (int) ($data[PaymentMethods::CHECK] * 100);
+        $data[PaymentMethods::PAYCHECK] = (int) ($data[PaymentMethods::PAYCHECK] * 100);
 
         $references = $packing->products()
             ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
@@ -180,7 +180,7 @@ class PackingRepository
 
         abort_if($result[PaymentMethods::MONEY] !== $data[PaymentMethods::MONEY], 400, 'O valor recebido em dinheiro é diferente do esperado.');
 
-        abort_if($result[PaymentMethods::CHECK] !== $data[PaymentMethods::CHECK], 400, 'O valor recebido em cheque é diferente do esperado.');
+        abort_if($result[PaymentMethods::PAYCHECK] !== $data[PaymentMethods::PAYCHECK], 400, 'O valor recebido em cheque é diferente do esperado.');
 
         $packing->checked_out_at = now();
         $packing->save();
@@ -200,7 +200,7 @@ class PackingRepository
         $result = $this->toReceive($packing);
 
         $result[PaymentMethods::MONEY] = (float) ($result[PaymentMethods::MONEY] / 100.0);
-        $result[PaymentMethods::CHECK] = (float) ($result[PaymentMethods::CHECK] / 100.0);
+        $result[PaymentMethods::PAYCHECK] = (float) ($result[PaymentMethods::PAYCHECK] / 100.0);
 
         return $result;
     }
@@ -280,16 +280,16 @@ class PackingRepository
     {
         $visits = $packing->visits->modelKeys();
 
-        $sales = Sale::whereIn('visit_id', $visits)->whereIn('payment_methods.method', [PaymentMethods::MONEY, PaymentMethods::CHECK])->get();
+        $sales = Sale::whereIn('visit_id', $visits)->whereIn('payment_methods.method', [PaymentMethods::MONEY, PaymentMethods::PAYCHECK])->get();
 
         $result = [
-            PaymentMethods::MONEY => 0,
-            PaymentMethods::CHECK => 0,
+            PaymentMethods::MONEY    => 0,
+            PaymentMethods::PAYCHECK => 0,
         ];
 
         $sales->each(function (Sale $sale, int $key) use (&$result) {
             $result[PaymentMethods::MONEY] += $sale->payment_methods()->where('method', PaymentMethods::MONEY)->sum('value');
-            $result[PaymentMethods::CHECK] += $sale->payment_methods()->where('method', PaymentMethods::CHECK)->sum('value');
+            $result[PaymentMethods::PAYCHECK] += $sale->payment_methods()->where('method', PaymentMethods::PAYCHECK)->sum('value');
         });
 
         return $result;

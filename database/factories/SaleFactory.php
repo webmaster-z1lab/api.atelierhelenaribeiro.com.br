@@ -42,7 +42,7 @@ $factory->afterMaking(Sale::class, function (Sale $sale, Faker $faker) {
     $sale->total_price = $total_price;
     $sale->discount = rand(0, $total_price);
     $sale->payment_methods()->associate(new PaymentMethod([
-        'method' => $faker->randomElement([PaymentMethods::MONEY, PaymentMethods::CREDIT_CARD, PaymentMethods::CHECK]),
+        'method' => $faker->randomElement([PaymentMethods::MONEY, PaymentMethods::CREDIT_CARD, PaymentMethods::PAYCHECK]),
         'value'  => $sale->total_price - $sale->discount,
     ]));
 });

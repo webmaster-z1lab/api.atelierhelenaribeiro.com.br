@@ -6,6 +6,7 @@ use App\Traits\CommonRulesValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Customer\Models\CustomerStatus;
+use Modules\Employee\Models\EmployeeTypes;
 
 class CustomerRequest extends FormRequest
 {
@@ -30,6 +31,8 @@ class CustomerRequest extends FormRequest
             'seller'                 => $this->getSellerRules(),
             'status'                 => $this->getStatusRules(),
         ];
+
+        if (\Auth::user()->type !== EmployeeTypes::TYPE_ADMIN) unset($rules['seller']);
 
         return $this->mergeRules(
             $rules,

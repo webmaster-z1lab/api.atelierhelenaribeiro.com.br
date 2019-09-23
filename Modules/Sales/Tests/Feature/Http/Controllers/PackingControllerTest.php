@@ -235,7 +235,7 @@ class PackingControllerTest extends TestCase
 
         $data[PaymentMethods::MONEY] = 0;
 
-        $data[PaymentMethods::CHECK] = 0;
+        $data[PaymentMethods::PAYCHECK] = 0;
 
         \Queue::assertNothingPushed();
 
@@ -302,7 +302,7 @@ class PackingControllerTest extends TestCase
             ->assertOk()
             ->assertJsonStructure([
                 PaymentMethods::MONEY,
-                PaymentMethods::CHECK,
+                PaymentMethods::PAYCHECK,
             ]);
     }
 

@@ -40,6 +40,7 @@ class CustomerRepository
     {
         $customer = new Customer($data);
 
+        if (!isset($data['seller'])) $data['seller'] = \Auth::id();
         $customer->seller()->associate($data['seller']);
         $customer->address()->associate($this->createAddress($data));
         $this->createPhones($data, $customer);
@@ -58,6 +59,7 @@ class CustomerRepository
      */
     public function update(array $data, Customer $customer): Customer
     {
+        if (!isset($data['seller'])) $data['seller'] = \Auth::id();
         $customer->seller()->associate($data['seller']);
         $customer->address()->associate($this->createAddress($data));
 

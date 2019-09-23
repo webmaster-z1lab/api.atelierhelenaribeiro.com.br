@@ -25,7 +25,7 @@ class SaleRequest extends FormRequest
      */
     public function rules()
     {
-        $methods = implode(',', [PaymentMethods::MONEY, PaymentMethods::CHECK, PaymentMethods::CREDIT_CARD]);
+        $methods = implode(',', [PaymentMethods::MONEY, PaymentMethods::PAYCHECK, PaymentMethods::CREDIT_CARD]);
 
         return [
             'visit'                    => $this->getVisitRules(),
