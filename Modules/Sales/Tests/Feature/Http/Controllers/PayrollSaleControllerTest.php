@@ -9,6 +9,7 @@ use Modules\Catalog\Models\Template;
 use Modules\Customer\Models\Customer;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\UpdateProductsStatus;
+use Modules\Sales\Models\Information;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\Payroll;
 use Modules\Sales\Models\Sale;
@@ -22,7 +23,7 @@ use Tests\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 
-class PayrollControllerTest extends TestCase
+class PayrollSaleControllerTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
@@ -31,7 +32,7 @@ class PayrollControllerTest extends TestCase
      */
     private function uri(): string
     {
-        return "visits/{$this->payroll->visit_id}/payrolls/";
+        return "visits/{$this->payroll->visit_id}/payrolls/sales/";
     }
 
     /**
@@ -53,7 +54,7 @@ class PayrollControllerTest extends TestCase
         'date',
         'annotations',
         'seller_id',
-        'seller'       => [
+        'seller'        => [
             'id',
             'name',
             'document',
@@ -88,7 +89,7 @@ class PayrollControllerTest extends TestCase
             ],
         ],
         'customer_id',
-        'customer'     => [
+        'customer'      => [
             'id',
             'company_name',
             'trading_name',
@@ -147,15 +148,20 @@ class PayrollControllerTest extends TestCase
         'total_amount',
         'discount',
         'total_price',
-        'sale'         => [
+        'sale'          => [
             'amount',
             'price',
         ],
-        'payroll'      => [
+        'payroll'       => [
             'amount',
             'price',
         ],
-        'payrolls'     => [
+        'payrolls',
+        'payroll_sale'  => [
+            'amount',
+            'price',
+        ],
+        'payroll_sales' => [
             [
                 'reference',
                 'thumbnail',
@@ -164,10 +170,6 @@ class PayrollControllerTest extends TestCase
                 'price',
                 'amount',
             ],
-        ],
-        'payroll_sale' => [
-            'amount',
-            'price',
         ],
         'created_at',
         'updated_at',
@@ -195,19 +197,13 @@ class PayrollControllerTest extends TestCase
     }
 
     /** @test */
-    public function get_payrolls(): void
-    {
-        $this->persist();
-
-        $this->actingAs($this->user)->json('GET', $this->uri())->assertOk()->assertJsonStructure($this->jsonStructure['payrolls']);
-    }
-
-    /** @test */
-    public function create_payroll(): void
+    public function create_payroll_sale(): void
     {
         \Queue::fake();
 
         \Queue::assertNothingPushed();
+
+        $this->payroll->save();
 
         $response = $this->actingAs($this->user)->json('POST', $this->uri(), [
             'products' => [
@@ -221,7 +217,7 @@ class PayrollControllerTest extends TestCase
         \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
             $job->handle();
 
-            return $job->status === ProductStatus::ON_CONSIGNMENT_STATUS;
+            return $job->status === ProductStatus::SOLD_STATUS;
         });
 
         $response
@@ -233,9 +229,11 @@ class PayrollControllerTest extends TestCase
     }
 
     /** @test */
-    public function create_payroll_fails(): void
+    public function create_payroll_sale_fails(): void
     {
         \Queue::fake();
+
+        $this->payroll->save();
 
         $this->actingAs($this->user)->json('POST', $this->uri(), [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
 
@@ -243,18 +241,18 @@ class PayrollControllerTest extends TestCase
     }
 
     /** @test */
-    public function get_payroll(): void
+    public function get_payroll_sale(): void
     {
         $this->persist();
 
         $this->actingAs($this->user)
             ->json('GET', $this->uri())
             ->assertOk()
-            ->assertJsonStructure($this->jsonStructure['payrolls']);
+            ->assertJsonStructure($this->jsonStructure['payroll_sales']);
     }
 
     /** @test */
-    public function get_payroll_fails(): void
+    public function get_payroll_sale_fails(): void
     {
         $this->persist();
 
@@ -285,7 +283,7 @@ class PayrollControllerTest extends TestCase
 //    }
 
     /** @test */
-    public function update_payroll(): void
+    public function update_payroll_sale(): void
     {
         $this->persist();
 
@@ -300,7 +298,7 @@ class PayrollControllerTest extends TestCase
     }
 
     /** @test */
-    public function update_payroll_fails(): void
+    public function update_payroll_sale_fails(): void
     {
         $this->persist();
 
@@ -315,7 +313,7 @@ class PayrollControllerTest extends TestCase
     }
 
     /** @test */
-    public function delete_payroll(): void
+    public function delete_payroll_sale(): void
     {
         $this->persist();
 
@@ -326,12 +324,12 @@ class PayrollControllerTest extends TestCase
         \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
             $job->handle();
 
-            return $job->status === ProductStatus::IN_TRANSIT_STATUS;
+            return $job->status === ProductStatus::ON_CONSIGNMENT_STATUS;
         });
     }
 
     /** @test */
-    public function delete_payroll_fails(): void
+    public function delete_payroll_sale_fails(): void
     {
         $this->persist();
 
@@ -344,26 +342,6 @@ class PayrollControllerTest extends TestCase
         $this->actingAs($this->user)->json('DELETE', $this->uri().$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         \Queue::assertNothingPushed();
-    }
-
-    /** @test */
-    public function get_payroll_by_status(): void
-    {
-        $this->persist();
-
-        $this->actingAs($this->user)->json('GET', $this->uri().'available')->assertOk()->assertJsonStructure($this->jsonStructure['payrolls']);
-
-        $this->payroll->completion_visit()->associate($this->payroll->visit_id);
-        $this->payroll->update([
-            'completion_date' => $this->payroll->visit->date,
-            'status'          => ProductStatus::SOLD_STATUS,
-        ]);
-
-        $this->actingAs($this->user)->json('GET', $this->uri().'sold')->assertOk()->assertJsonStructure($this->jsonStructure['payrolls']);
-
-        $this->payroll->update(['status' => ProductStatus::RETURNED_STATUS]);
-
-        $this->actingAs($this->user)->json('GET', $this->uri().'returned')->assertOk()->assertJsonStructure($this->jsonStructure['payrolls']);
     }
 
     /**
@@ -387,28 +365,27 @@ class PayrollControllerTest extends TestCase
     }
 
     /**
-     * @return \Modules\Sales\Tests\Feature\Http\Controllers\PayrollControllerTest
+     * @return \Modules\Sales\Tests\Feature\Http\Controllers\PayrollSaleControllerTest
      */
-    private function persist(): PayrollControllerTest
+    private function persist(): PayrollSaleControllerTest
     {
-        $this->payroll->save();
-
-        $packing = Packing::where('seller_id', $this->payroll->seller_id)->where(function ($query) {
-            $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
-        })->first();
-
-        $visit = $this->payroll->visit;
-
-        $visit->payroll->fill([
-            'amount' => 1,
-            'price'  => $this->payroll->price,
+        $this->payroll->completion_visit()->associate($this->payroll->visit_id);
+        $this->payroll->fill([
+            'status' => ProductStatus::SOLD_STATUS,
+            'completion_date' => $this->payroll->visit->date,
         ]);
 
-        $visit->payroll->save();
+        $this->payroll->save();
+        $visit = $this->payroll->visit;
+
+        $visit->payroll_sale()->associate(new Information([
+            'amount' => 1,
+            'price'  => $this->payroll->price,
+        ]));
 
         $visit->save();
 
-        UpdateProductsStatus::dispatchNow($packing, [$this->payroll->product_id], ProductStatus::ON_CONSIGNMENT_STATUS);
+        UpdateProductsStatus::dispatchNow($visit->packing, [$this->payroll->product_id], ProductStatus::SOLD_STATUS, FALSE);
 
         return $this;
     }
@@ -419,6 +396,22 @@ class PayrollControllerTest extends TestCase
     private function update(): TestResponse
     {
         $product = $this->payroll->visit->packing->products()->last();
+
+        $payroll = new Payroll([
+            'date' => $this->payroll->visit->date,
+            'reference' => $product->reference,
+            'thumbnail' => $product->thumbnail,
+            'size' => $product->size,
+            'color' => $product->color,
+            'price'  => $product->price
+        ]);
+
+        $payroll->product()->associate($product->product_id);
+        $payroll->visit()->associate($this->payroll->visit_id);
+        $payroll->customer()->associate($this->payroll->customer_id);
+        $payroll->seller()->associate($this->payroll->seller_id);
+
+        $payroll->save();
 
         return $this->actingAs($this->user)->json('PUT', $this->uri(), [
             'products' => [

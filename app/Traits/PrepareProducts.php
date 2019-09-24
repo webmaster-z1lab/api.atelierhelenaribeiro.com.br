@@ -38,7 +38,8 @@ trait PrepareProducts
             $merchandises = $packing->products()
                 ->where('reference', $item['reference'])
                 ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
-                ->take($item['amount']);
+                ->take($item['amount'])
+                ->get();
             foreach ($merchandises as $merchandise) {
                 /** @var \Modules\Sales\Models\Product $merchandise */
                 $products[] = [
@@ -102,12 +103,11 @@ trait PrepareProducts
                 abort(400, "A quantidade do produto {$item['reference']} é maior do que a disponível.");
             }
 
-            /** @var \Illuminate\Database\Eloquent\Collection $merchandises */
             $merchandises = Payroll::where('customer_id', $visit->customer_id)
                 ->where('reference', $item['reference'])
                 ->where('status', ProductStatus::ON_CONSIGNMENT_STATUS)
                 ->orderBy('date')
-                ->take($item['amount']);
+                ->take($item['amount'])->get();
 
             $products = array_merge($products, $merchandises->modelKeys());
         }
