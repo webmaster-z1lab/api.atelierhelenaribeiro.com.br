@@ -128,9 +128,7 @@ class VisitRepository
             throw ValidationException::withMessages(['payment_methods' => [trans('validation.required', ['attribute' => 'métodos de pagamentos'])]]);
         }
 
-        $data['status'] = Visit::CLOSED_STATUS;
-
-        $visit->update($data);
+        $visit->update(['status' => Visit::CLOSED_STATUS]);
 
         return $visit;
     }

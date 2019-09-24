@@ -15,15 +15,13 @@ trait PrepareProducts
      */
     protected $total_price;
 
-    protected function prepareProducts(Packing $packing, array $items): array
+    protected function prepareProducts(Packing $packing, array $items, bool $test_amount = TRUE): array
     {
-        abort_if($packing->checked_out_at !== NULL, 400, 'Não existe romaneio em aberto para o vendedor.');
-
         $products = [];
         $this->total_price = 0;
         foreach ($items as $item) {
-            $item['amount'] = intval($item['amount']);
-            if ($packing->products()
+            $item['amount'] = (int) $item['amount'];
+            if ($test_amount && $packing->products()
                     ->where('reference', $item['reference'])
                     ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
                     ->count() < $item['amount']) {
@@ -75,6 +73,6 @@ trait PrepareProducts
         $this->updateStatus($packing, $class::where('visit_id', $visit->id)->get()->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
         $class::where('visit_id', $visit->id)->delete();
 
-        return  $this->prepareProducts($packing->fresh(), $items);
+        return  $this->prepareProducts($packing->fresh(), $items, FALSE);
     }
 }
