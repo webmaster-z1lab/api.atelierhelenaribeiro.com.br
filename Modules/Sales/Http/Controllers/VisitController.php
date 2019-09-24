@@ -3,6 +3,7 @@
 namespace Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
+use Modules\Sales\Http\Requests\CloseVisitRequest;
 use Modules\Sales\Http\Requests\VisitRequest;
 use Modules\Sales\Http\Requests\VisitUpdateRequest;
 use Modules\Sales\Http\Resources\VisitResource;
@@ -78,5 +79,17 @@ class VisitController extends ApiController
         $this->repository->delete($visit);
 
         return $this->noContentResponse();
+    }
+
+    /**
+     * @param  \Modules\Sales\Http\Requests\CloseVisitRequest  $request
+     * @param  \Modules\Sales\Models\Visit                     $visit
+     *
+     * @return \Modules\Sales\Http\Resources\VisitResource
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function close(CloseVisitRequest $request, Visit $visit): VisitResource
+    {
+        return VisitResource::make($this->repository->close($request->validated(), $visit));
     }
 }

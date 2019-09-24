@@ -41,10 +41,11 @@ class VisitControllerTest extends TestCase
      */
     private $jsonStructure = [
         'id',
+        'status',
         'date',
         'annotations',
         'seller_id',
-        'seller'   => [
+        'seller'       => [
             'id',
             'name',
             'document',
@@ -79,7 +80,7 @@ class VisitControllerTest extends TestCase
             ],
         ],
         'customer_id',
-        'customer' => [
+        'customer'     => [
             'id',
             'company_name',
             'trading_name',
@@ -134,6 +135,22 @@ class VisitControllerTest extends TestCase
             'created_at',
             'updated_at',
         ],
+        'customer_credit',
+        'amount',
+        'discount',
+        'total_price',
+        'sale'         => [
+            'amount',
+            'price',
+        ],
+        'payroll'      => [
+            'amount',
+            'price',
+        ],
+        'payroll_sale' => [
+            'amount',
+            'price',
+        ],
         'created_at',
         'updated_at',
     ];
@@ -174,7 +191,7 @@ class VisitControllerTest extends TestCase
             'seller'      => $this->visit->seller_id,
             'customer'    => $this->visit->customer_id,
             'date'        => $this->visit->date->format('d/m/Y'),
-            'annotations' => '',
+            'annotations' => $this->visit->annotations,
         ]);
 
         $response
@@ -275,6 +292,39 @@ class VisitControllerTest extends TestCase
     }
 
     /** @test */
+    public function close_visit(): void
+    {
+        $this->persist();
+
+        $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->visit->id, [
+            'payment_methods' => [],
+        ]);
+
+        $response->dump()
+            ->assertOk()
+            ->assertHeader('ETag')
+            //->assertHeader('Content-Length')
+            //->assertHeader('Cache-Control')
+            ->assertJsonStructure($this->jsonStructure);
+    }
+
+    /** @test */
+    public function close_visit_fail(): void
+    {
+        $this->persist();
+
+        $this->actingAs($this->user)
+            ->json('POST', $this->uri.$this->visit->id, [
+                'payment_methods' => [
+                    'method' => 'money',
+                    'value'  => 0,
+                ],
+            ])
+            ->assertStatus(422)
+            ->assertJsonStructure($this->errorStructure);
+    }
+
+    /** @test */
     public function delete_visit_fails(): void
     {
         $this->persist();
@@ -320,7 +370,7 @@ class VisitControllerTest extends TestCase
             'seller'      => $this->visit->seller_id,
             'customer'    => $this->visit->customer_id,
             'date'        => $this->visit->date->format('d/m/Y'),
-            'annotations' => $this->faker->sentence,
+            'annotations' => $this->faker->text,
         ]);
     }
 }

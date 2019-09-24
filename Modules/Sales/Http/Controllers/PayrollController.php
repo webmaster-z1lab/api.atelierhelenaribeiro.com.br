@@ -6,7 +6,10 @@ use App\Http\Controllers\ApiController;
 use Modules\Sales\Http\Requests\PayrollRequest;
 use Modules\Sales\Http\Requests\PayrollUpdateRequest;
 use Modules\Sales\Http\Resources\PayrollResource;
+use Modules\Sales\Http\Resources\ProductResource;
+use Modules\Sales\Http\Resources\VisitResource;
 use Modules\Sales\Models\Payroll;
+use Modules\Sales\Models\Visit;
 use Modules\Sales\Repositories\PayrollRepository;
 
 class PayrollController extends ApiController
@@ -27,55 +30,54 @@ class PayrollController extends ApiController
     }
 
     /**
+     * @param  \Modules\Sales\Models\Visit  $visit
+     *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(Visit $visit)
     {
-        return PayrollResource::collection($this->repository->all());
+        return ProductResource::collection($this->repository->all($visit));
     }
 
     /**
      * @param  \Modules\Sales\Http\Requests\PayrollRequest  $request
      *
-     * @return \Modules\Sales\Http\Resources\PayrollResource
+     * @return \Modules\Sales\Http\Resources\VisitResource
      */
-    public function store(PayrollRequest $request): PayrollResource
+    public function store(PayrollRequest $request, Visit $visit): VisitResource
     {
-        return PayrollResource::make($this->repository->create($request->validated()));
+        return VisitResource::make($this->repository->create($request->validated(), $visit));
     }
 
     /**
-     * @param  \Modules\Sales\Models\Payroll  $payroll
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
-     * @return \Illuminate\Http\JsonResponse|\Modules\Sales\Http\Resources\PayrollResource
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function show(Payroll $payroll)
+    public function show(Visit $visit)
     {
-        if ($this->ETagNotChanged($payroll)) return $this->notModifiedResponse();
-
-        return PayrollResource::make($payroll);
+        return ProductResource::collection($this->repository->all($visit));
     }
 
     /**
      * @param  \Modules\Sales\Http\Requests\PayrollUpdateRequest  $request
-     * @param  \Modules\Sales\Models\Payroll                      $payroll
+     * @param  \Modules\Sales\Models\Visit                        $visit
      *
-     * @return \Modules\Sales\Http\Resources\PayrollResource
+     * @return \Modules\Sales\Http\Resources\VisitResource
      */
-    public function update(PayrollUpdateRequest $request, Payroll $payroll): PayrollResource
+    public function update(PayrollUpdateRequest $request, Visit $visit): VisitResource
     {
-        return PayrollResource::make($this->repository->update($request->validated(), $payroll));
+        return VisitResource::make($this->repository->update($request->validated(), $visit));
     }
 
     /**
-     * @param  \Modules\Sales\Models\Payroll  $payroll
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
      * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
      */
-    public function destroy(Payroll $payroll)
+    public function destroy(Visit $visit)
     {
-        $this->repository->delete($payroll);
+        $this->repository->delete($visit);
 
         return $this->noContentResponse();
     }

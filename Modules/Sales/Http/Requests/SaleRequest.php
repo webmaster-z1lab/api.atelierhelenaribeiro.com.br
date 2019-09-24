@@ -28,14 +28,10 @@ class SaleRequest extends FormRequest
         $methods = implode(',', [PaymentMethods::MONEY, PaymentMethods::PAYCHECK, PaymentMethods::CREDIT_CARD]);
 
         return [
-            'visit'                    => $this->getVisitRules(),
-            'discount'                 => 'bail|required|numeric|min:0',
+//            'visit'                    => $this->getVisitRules(),
             'products'                 => 'bail|required|array|min:1',
             'products.*.reference'     => 'bail|required|distinct|exists:products,reference',
             'products.*.amount'        => 'bail|required|integer|min:1',
-            'payment_methods'          => 'bail|required|array|min:1',
-            'payment_methods.*.method' => "bail|required|in:$methods",
-            'payment_methods.*.value'  => 'bail|required|numeric|min:0.01',
         ];
     }
 
@@ -43,13 +39,9 @@ class SaleRequest extends FormRequest
     {
         return [
             'visit'                    => 'visita',
-            'discount'                 => 'desconto',
             'products'                 => 'produtos',
             'products.*.reference'     => 'referência do produto',
             'products.*.amount'        => 'quantidade do produto',
-            'payment_methods'          => 'métodos de pagamento',
-            'payment_methods.*.method' => 'método de pagamento',
-            'payment_methods.*.value'  => 'valor pago',
         ];
     }
 

@@ -8,8 +8,6 @@ use Illuminate\Http\Resources\Json\Resource;
  * Class ProductResource
  *
  * @package Modules\Sales\Http\Resources
- *
- * @property-read \Modules\Sales\Models\Product $resource
  */
 class ProductResource extends Resource
 {
@@ -22,14 +20,12 @@ class ProductResource extends Resource
     public function toArray($request)
     {
         return [
-            'id'         => $this->resource->id,
-            'product_id' => $this->resource->product_id,
-            'reference'  => $this->resource->reference,
-            'thumbnail'  => $this->resource->thumbnail_url,
-            'size'       => $this->resource->size,
-            'color'      => $this->resource->color,
-            'price'      => $this->resource->price,
-            'status'     => $this->resource->status,
+            'reference' => $this->resource->_id,
+            'thumbnail' => $this->resource->thumbnail,
+            'size'      => $this->resource->size,
+            'color'     => $this->resource->color,
+            'price'     => floatval($this->resource->price / 100.0),
+            'amount'    => $this->resource->amount,
         ];
     }
 }

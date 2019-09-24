@@ -10,7 +10,6 @@ use Modules\Customer\Models\Customer;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\UpdateProductsStatus;
 use Modules\Sales\Models\Packing;
-use Modules\Sales\Models\PaymentMethod;
 use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\Color;
@@ -27,9 +26,12 @@ class SaleControllerTest extends TestCase
     use WithFaker, RefreshDatabase;
 
     /**
-     * @var string
+     * @return string
      */
-    private $uri = '/sales/';
+    private function uri(): string
+    {
+        return "visits/{$this->sale->visit_id}/sales/";
+    }
 
     /**
      * @var \Modules\Sales\Models\Sale
@@ -46,13 +48,11 @@ class SaleControllerTest extends TestCase
      */
     private $jsonStructure = [
         'id',
+        'status',
         'date',
-        'visit_id',
-        'total_amount',
-        'total_price',
-        'discount',
+        'annotations',
         'seller_id',
-        'seller'          => [
+        'seller'       => [
             'id',
             'name',
             'document',
@@ -87,7 +87,7 @@ class SaleControllerTest extends TestCase
             ],
         ],
         'customer_id',
-        'customer'        => [
+        'customer'     => [
             'id',
             'company_name',
             'trading_name',
@@ -139,9 +139,20 @@ class SaleControllerTest extends TestCase
                     ],
                 ],
             ],
+            'created_at',
+            'updated_at',
         ],
-        'products'        => [
+        'customer_credit',
+        'amount',
+        'discount',
+        'total_price',
+        'sale'         => [
+            'amount',
+            'price',
+        ],
+        'sales'        => [
             [
+                'reference',
                 'thumbnail',
                 'size',
                 'color',
@@ -149,11 +160,13 @@ class SaleControllerTest extends TestCase
                 'amount',
             ],
         ],
-        'payment_methods' => [
-            [
-                'method',
-                'value',
-            ],
+        'payroll'      => [
+            'amount',
+            'price',
+        ],
+        'payroll_sale' => [
+            'amount',
+            'price',
         ],
         'created_at',
         'updated_at',
@@ -185,7 +198,7 @@ class SaleControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->actingAs($this->user)->json('GET', $this->uri)->assertOk()->assertJsonStructure([$this->jsonStructure]);
+        $this->actingAs($this->user)->json('GET', $this->uri())->assertOk()->assertJsonStructure($this->jsonStructure['sales']);
     }
 
     /** @test */
@@ -193,28 +206,15 @@ class SaleControllerTest extends TestCase
     {
         \Queue::fake();
 
-        $products = [];
-        foreach ($this->sale->products()->pluck('reference')->unique()->all() as $reference) {
-            $products[] = [
-                'reference' => $reference,
-                'amount'    => $this->sale->products()->where('reference', $reference)->count(),
-            ];
-        }
-        $methods = [];
-        $this->sale->payment_methods->each(function (PaymentMethod $method, int $key) use (&$methods) {
-            $methods[] = [
-                'method' => $method->method,
-                'value'  => $method->value_float,
-            ];
-        });
-
         \Queue::assertNothingPushed();
 
-        $response = $this->actingAs($this->user)->json('POST', $this->uri, [
-            'visit'           => $this->sale->visit_id,
-            'discount'        => $this->sale->discount_float,
-            'products'        => $products,
-            'payment_methods' => $methods,
+        $response = $this->actingAs($this->user)->json('POST', $this->uri(), [
+            'products' => [
+                [
+                    'reference' => $this->sale->reference,
+                    'amount'    => 1,
+                ],
+            ],
         ]);
 
         \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
@@ -224,7 +224,7 @@ class SaleControllerTest extends TestCase
         });
 
         $response
-            ->assertStatus(201)
+            ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
             //->assertHeader('Cache-Control')
@@ -236,7 +236,7 @@ class SaleControllerTest extends TestCase
     {
         \Queue::fake();
 
-        $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('POST', $this->uri(), [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
 
         \Queue::assertNothingPushed();
     }
@@ -247,12 +247,9 @@ class SaleControllerTest extends TestCase
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->sale->id)
+            ->json('GET', $this->uri())
             ->assertOk()
-            ->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
+            ->assertJsonStructure($this->jsonStructure['sales']);
     }
 
     /** @test */
@@ -261,30 +258,30 @@ class SaleControllerTest extends TestCase
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->sale->id.'a')
+            ->json('GET', $this->uri().$this->sale->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
     }
 
     /** @test */
-    public function get_sale_not_modified(): void
-    {
-        $this->persist();
-
-        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->sale->id);
-
-        $response
-            ->assertOk()
-            ->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
-
-        $this->actingAs($this->user)
-            ->withHeaders(['If-None-Match' => $response->getEtag()])
-            ->json('GET', $this->uri.$this->sale->id)
-            ->assertStatus(304);
-    }
+//    public function get_sale_not_modified(): void
+//    {
+//        $this->persist();
+//
+//        $response = $this->actingAs($this->user)->json('GET', $this->uri().$this->sale->id);
+//
+//        $response
+//            ->assertOk()
+//            ->assertHeader('ETag')
+//            //->assertHeader('Content-Length')
+//            //->assertHeader('Cache-Control')
+//            ->assertJsonStructure($this->jsonStructure);
+//
+//        $this->actingAs($this->user)
+//            ->withHeaders(['If-None-Match' => $response->getEtag()])
+//            ->json('GET', $this->uri.$this->sale->id)
+//            ->assertStatus(304);
+//    }
 
     /** @test */
     public function update_sale(): void
@@ -293,7 +290,7 @@ class SaleControllerTest extends TestCase
 
         $response = $this->update();
 
-        $response->dump()
+        $response
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
@@ -306,12 +303,12 @@ class SaleControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->actingAs($this->user)->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+        //$this->actingAs($this->user)->json('PATCH', $this->uri())->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->sale->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri().$this->sale->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         $this->actingAs($this->user)
-            ->json('PATCH', $this->uri.$this->sale->id, [])
+            ->json('PATCH', $this->uri(), [])
             ->assertStatus(422)
             ->assertJsonStructure($this->errorStructure);
     }
@@ -324,7 +321,7 @@ class SaleControllerTest extends TestCase
         \Queue::fake();
 
         \Queue::assertNothingPushed();
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->sale->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', $this->uri())->assertStatus(204);
 
         \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
             $job->handle();
@@ -340,11 +337,11 @@ class SaleControllerTest extends TestCase
 
         \Queue::fake();
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+//        $this->actingAs($this->user)->json('DELETE', $this->uri())->assertStatus(405)->assertJsonStructure($this->errorStructure);
+//
+//        \Queue::assertNothingPushed();
 
-        \Queue::assertNothingPushed();
-
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->sale->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri().$this->sale->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         \Queue::assertNothingPushed();
     }
@@ -379,7 +376,7 @@ class SaleControllerTest extends TestCase
             $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
         })->first();
 
-        UpdateProductsStatus::dispatchNow($packing, $this->sale->products->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
+        UpdateProductsStatus::dispatchNow($packing, [$this->sale->product_id], ProductStatus::SOLD_STATUS);
 
         return $this;
     }
@@ -389,26 +386,15 @@ class SaleControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        $products = [];
-        foreach ($this->sale->products()->pluck('reference')->unique()->all() as $reference) {
-            $products[] = [
-                'reference' => $reference,
-                'amount'    => $this->sale->products()->where('reference', $reference)->count(),
-            ];
-        }
+        $product = $this->sale->visit->packing->products()->last();
 
-        $methods = [];
-        $this->sale->payment_methods->each(function (PaymentMethod $method, int $key) use (&$methods) {
-            $methods[] = [
-                'method' => $method->method,
-                'value'  => $method->value_float,
-            ];
-        });
-
-        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->sale->id, [
-            'discount'        => $this->sale->discount_float,
-            'products'        => $products,
-            'payment_methods' => $methods,
+        return $this->actingAs($this->user)->json('PUT', $this->uri(), [
+            'products' => [
+                [
+                    'reference' => $product->reference,
+                    'amount'    => 1,
+                ],
+            ],
         ]);
     }
 }

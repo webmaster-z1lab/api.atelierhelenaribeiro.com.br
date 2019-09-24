@@ -30,6 +30,7 @@ class ProductRepository
                         '$match' => [
                             'status'    => ProductStatus::AVAILABLE_STATUS,
                             'reference' => ['$regex' => \Request::query('search'), '$options' => 'i'],
+                            '$or' => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]]
                         ],
                     ],
                     [
@@ -50,6 +51,7 @@ class ProductRepository
                 [
                     '$match' => [
                         'status' => ProductStatus::AVAILABLE_STATUS,
+                        '$or' => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]]
                     ],
                 ],
                 [

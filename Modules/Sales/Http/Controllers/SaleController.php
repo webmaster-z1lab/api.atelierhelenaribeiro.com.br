@@ -5,8 +5,11 @@ namespace Modules\Sales\Http\Controllers;
 use App\Http\Controllers\ApiController;
 use Modules\Sales\Http\Requests\SaleRequest;
 use Modules\Sales\Http\Requests\SaleUpdateRequest;
+use Modules\Sales\Http\Resources\ProductResource;
 use Modules\Sales\Http\Resources\SaleResource;
+use Modules\Sales\Http\Resources\VisitResource;
 use Modules\Sales\Models\Sale;
+use Modules\Sales\Models\Visit;
 use Modules\Sales\Repositories\SaleRepository;
 
 class SaleController extends ApiController
@@ -22,55 +25,55 @@ class SaleController extends ApiController
     }
 
     /**
+     * @param  \Modules\Sales\Models\Visit  $visit
+     *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(Visit $visit)
     {
-        return SaleResource::collection($this->repository->all());
+        return ProductResource::collection($this->repository->all($visit));
     }
 
     /**
      * @param  \Modules\Sales\Http\Requests\SaleRequest  $request
+     * @param  \Modules\Sales\Models\Visit               $visit
      *
-     * @return \Modules\Sales\Http\Resources\SaleResource
+     * @return \Modules\Sales\Http\Resources\VisitResource
      */
-    public function store(SaleRequest $request): SaleResource
+    public function store(SaleRequest $request, Visit $visit): VisitResource
     {
-        return SaleResource::make($this->repository->create($request->validated()));
+        return VisitResource::make($this->repository->create($request->validated(), $visit));
     }
 
     /**
-     * @param  \Modules\Sales\Models\Sale  $sale
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
-     * @return \Illuminate\Http\JsonResponse|\Modules\Sales\Http\Resources\SaleResource
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function show(Sale $sale)
+    public function show(Visit $visit)
     {
-        if ($this->ETagNotChanged($sale)) return $this->notModifiedResponse();
-
-        return SaleResource::make($sale);
+        return ProductResource::collection($this->repository->all($visit));
     }
 
     /**
      * @param  \Modules\Sales\Http\Requests\SaleUpdateRequest  $request
-     * @param  \Modules\Sales\Models\Sale                      $sale
+     * @param  \Modules\Sales\Models\Visit                     $visit
      *
-     * @return \Modules\Sales\Http\Resources\SaleResource
+     * @return \Modules\Sales\Http\Resources\VisitResource
      */
-    public function update(SaleUpdateRequest $request, Sale $sale): SaleResource
+    public function update(SaleUpdateRequest $request, Visit $visit): VisitResource
     {
-        return SaleResource::make($this->repository->update($request->validated(), $sale));
+        return VisitResource::make($this->repository->update($request->validated(), $visit));
     }
 
     /**
-     * @param  \Modules\Sales\Models\Sale  $sale
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
      * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
      */
-    public function destroy(Sale $sale)
+    public function destroy(Visit $visit)
     {
-        $this->repository->delete($sale);
+        $this->repository->delete($visit);
 
         return $this->noContentResponse();
     }

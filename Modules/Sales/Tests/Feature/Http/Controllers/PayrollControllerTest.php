@@ -27,9 +27,12 @@ class PayrollControllerTest extends TestCase
     use WithFaker, RefreshDatabase;
 
     /**
-     * @var string
+     * @return string
      */
-    private $uri = '/payrolls/';
+    private function uri(): string
+    {
+        return "visits/{$this->payroll->visit_id}/payrolls/";
+    }
 
     /**
      * @var \Modules\Sales\Models\Payroll
@@ -46,12 +49,11 @@ class PayrollControllerTest extends TestCase
      */
     private $jsonStructure = [
         'id',
+        'status',
         'date',
-        'visit_id',
-        'total_amount',
-        'total_price',
+        'annotations',
         'seller_id',
-        'seller'   => [
+        'seller'       => [
             'id',
             'name',
             'document',
@@ -86,7 +88,7 @@ class PayrollControllerTest extends TestCase
             ],
         ],
         'customer_id',
-        'customer' => [
+        'customer'     => [
             'id',
             'company_name',
             'trading_name',
@@ -138,15 +140,34 @@ class PayrollControllerTest extends TestCase
                     ],
                 ],
             ],
+            'created_at',
+            'updated_at',
         ],
-        'products' => [
+        'customer_credit',
+        'amount',
+        'discount',
+        'total_price',
+        'sale'         => [
+            'amount',
+            'price',
+        ],
+        'payroll'      => [
+            'amount',
+            'price',
+        ],
+        'payrolls'     => [
             [
+                'reference',
                 'thumbnail',
                 'size',
                 'color',
                 'price',
                 'amount',
             ],
+        ],
+        'payroll_sale' => [
+            'amount',
+            'price',
         ],
         'created_at',
         'updated_at',
@@ -178,7 +199,7 @@ class PayrollControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->actingAs($this->user)->json('GET', $this->uri)->assertOk()->assertJsonStructure([$this->jsonStructure]);
+        $this->actingAs($this->user)->json('GET', $this->uri())->assertOk()->assertJsonStructure($this->jsonStructure['payrolls']);
     }
 
     /** @test */
@@ -186,19 +207,15 @@ class PayrollControllerTest extends TestCase
     {
         \Queue::fake();
 
-        $products = [];
-        foreach ($this->payroll->products()->pluck('reference')->unique()->all() as $reference) {
-            $products[] = [
-                'reference' => $reference,
-                'amount'    => $this->payroll->products()->where('reference', $reference)->count(),
-            ];
-        }
-
         \Queue::assertNothingPushed();
 
-        $response = $this->actingAs($this->user)->json('POST', $this->uri, [
-            'visit'    => $this->payroll->visit_id,
-            'products' => $products,
+        $response = $this->actingAs($this->user)->json('POST', $this->uri(), [
+            'products' => [
+                [
+                    'reference' => $this->payroll->reference,
+                    'amount'    => 1,
+                ],
+            ],
         ]);
 
         \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
@@ -208,7 +225,7 @@ class PayrollControllerTest extends TestCase
         });
 
         $response
-            ->assertStatus(201)
+            ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
             //->assertHeader('Cache-Control')
@@ -220,7 +237,7 @@ class PayrollControllerTest extends TestCase
     {
         \Queue::fake();
 
-        $this->actingAs($this->user)->json('POST', $this->uri, [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('POST', $this->uri(), [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
 
         \Queue::assertNothingPushed();
     }
@@ -231,12 +248,9 @@ class PayrollControllerTest extends TestCase
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->payroll->id)
+            ->json('GET', $this->uri())
             ->assertOk()
-            ->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
+            ->assertJsonStructure($this->jsonStructure['payrolls']);
     }
 
     /** @test */
@@ -245,30 +259,30 @@ class PayrollControllerTest extends TestCase
         $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri.$this->payroll->id.'a')
+            ->json('GET', $this->uri().$this->payroll->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
     }
 
     /** @test */
-    public function get_payroll_not_modified(): void
-    {
-        $this->persist();
-
-        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->payroll->id);
-
-        $response
-            ->assertOk()
-            ->assertHeader('ETag')
-            //->assertHeader('Content-Length')
-            //->assertHeader('Cache-Control')
-            ->assertJsonStructure($this->jsonStructure);
-
-        $this->actingAs($this->user)
-            ->withHeaders(['If-None-Match' => $response->getEtag()])
-            ->json('GET', $this->uri.$this->payroll->id)
-            ->assertStatus(304);
-    }
+//    public function get_payroll_not_modified(): void
+//    {
+//        $this->persist();
+//
+//        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->payroll->id);
+//
+//        $response
+//            ->assertOk()
+//            ->assertHeader('ETag')
+//            //->assertHeader('Content-Length')
+//            //->assertHeader('Cache-Control')
+//            ->assertJsonStructure($this->jsonStructure);
+//
+//        $this->actingAs($this->user)
+//            ->withHeaders(['If-None-Match' => $response->getEtag()])
+//            ->json('GET', $this->uri.$this->payroll->id)
+//            ->assertStatus(304);
+//    }
 
     /** @test */
     public function update_payroll(): void
@@ -290,12 +304,12 @@ class PayrollControllerTest extends TestCase
     {
         $this->persist();
 
-        $this->actingAs($this->user)->json('PATCH', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+//        $this->actingAs($this->user)->json('PATCH', $this->uri())->assertStatus(405)->assertJsonStructure($this->errorStructure);
 
-        $this->actingAs($this->user)->json('PATCH', $this->uri.$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('PATCH', $this->uri().$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         $this->actingAs($this->user)
-            ->json('PATCH', $this->uri.$this->payroll->id, [])
+            ->json('PATCH', $this->uri(), [])
             ->assertStatus(422)
             ->assertJsonStructure($this->errorStructure);
     }
@@ -307,7 +321,7 @@ class PayrollControllerTest extends TestCase
 
         \Queue::fake();
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->payroll->id)->assertStatus(204);
+        $this->actingAs($this->user)->json('DELETE', $this->uri())->assertStatus(204);
 
         \Queue::assertPushed(UpdateProductsStatus::class, function (UpdateProductsStatus $job) {
             $job->handle();
@@ -323,11 +337,11 @@ class PayrollControllerTest extends TestCase
 
         \Queue::fake();
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+//        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+//
+//        \Queue::assertNothingPushed();
 
-        \Queue::assertNothingPushed();
-
-        $this->actingAs($this->user)->json('DELETE', $this->uri.$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+        $this->actingAs($this->user)->json('DELETE', $this->uri().$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         \Queue::assertNothingPushed();
     }
@@ -363,7 +377,7 @@ class PayrollControllerTest extends TestCase
             $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
         })->first();
 
-        UpdateProductsStatus::dispatchNow($packing, $this->payroll->products->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
+        UpdateProductsStatus::dispatchNow($packing, [$this->payroll->product_id], ProductStatus::ON_CONSIGNMENT_STATUS);
 
         return $this;
     }
@@ -373,17 +387,15 @@ class PayrollControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        $products = [];
-        foreach ($this->payroll->products()->pluck('reference')->unique()->all() as $reference) {
-            $products[] = [
-                'reference' => $reference,
-                'amount'    => $this->payroll->products()->where('reference', $reference)->count(),
-            ];
-        }
+        $product = $this->payroll->visit->packing->products()->last();
 
-        return $this->actingAs($this->user)->json('PUT', $this->uri.$this->payroll->id, [
-            'visit'    => $this->payroll->visit_id,
-            'products' => $products,
+        return $this->actingAs($this->user)->json('PUT', $this->uri(), [
+            'products' => [
+                [
+                    'reference' => $product->reference,
+                    'amount'    => 1,
+                ],
+            ],
         ]);
     }
 }

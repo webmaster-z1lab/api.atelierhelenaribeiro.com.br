@@ -9,7 +9,7 @@ use Modules\Stock\Models\ProductStatus;
  *
  * @package App\Traits
  *
- * @property-read \Modules\Sales\Models\Packing|\Modules\Sales\Models\Sale $resource
+ * @property-read \Modules\Sales\Models\Packing $resource
  */
 trait AggregateProducts
 {
@@ -37,5 +37,32 @@ trait AggregateProducts
         }
 
         return $products;
+    }
+
+    /**
+     * @param  string  $class
+     * @param  array   $match
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function aggregateProductsByVisit(string $class, array $match)
+    {
+        return $class::raw(function ($collection) use ($match) {
+            return $collection->aggregate([
+                [
+                    '$match' => $match
+                ],
+                [
+                    '$group' => [
+                        '_id'       => '$reference',
+                        'amount'    => ['$sum' => 1],
+                        'thumbnail' => ['$first' => '$thumbnail'],
+                        'size'      => ['$first' => '$size'],
+                        'color'     => ['$first' => '$color'],
+                        'price'     => ['$first' => '$price'],
+                    ],
+                ],
+            ]);
+        });
     }
 }

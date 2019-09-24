@@ -9,11 +9,11 @@ class PayrollUpdateRequest extends PayrollRequest
      *
      * @return array
      */
-    public function rules()
-    {
-        $rules = parent::rules();
-        unset($rules['visit']);
-
-        return $rules;
-    }
+//    public function rules()
+//    {
+//        $rules = parent::rules();
+//        unset($rules['visit']);
+//
+//        return $rules;
+//    }
 }

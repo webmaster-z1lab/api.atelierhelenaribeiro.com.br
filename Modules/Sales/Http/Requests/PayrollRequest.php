@@ -25,7 +25,7 @@ class PayrollRequest extends FormRequest
     public function rules()
     {
         return [
-            'visit'                => $this->getVisitRules(),
+//            'visit'                => $this->getVisitRules(),
             'products'             => 'bail|required|array|min:1',
             'products.*.reference' => 'bail|required|distinct|exists:products,reference',
             'products.*.amount'    => 'bail|required|integer|min:1',

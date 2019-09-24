@@ -10,35 +10,59 @@ use Modules\User\Models\User;
 /**
  * Modules\Sales\Models\Visit
  *
- * @property-read string                            $id
- * @property string                                 $annotations
- * @property \Carbon\Carbon                         $date
- * @property-read \Modules\Customer\Models\Customer $customer
- * @property-read string                            $customer_id
- * @property-read \Modules\User\Models\User         $seller
- * @property-read string                            $seller_id
- * @property-read \Modules\Sales\Models\Packing     $packing
- * @property-read \Modules\Sales\Models\Payroll     $payroll
- * @property-read \Modules\Sales\Models\Sale        $sale
- * @property-read \Carbon\Carbon                    $created_at
- * @property-read \Carbon\Carbon                    $updated_at
- * @property-read \Carbon\Carbon                    $deleted_at
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel disableCache()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Sales\Models\Visit newModelQuery()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Sales\Models\Visit newQuery()
- * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Sales\Models\Visit query()
+ * @property-read string                                                                         $id
+ * @property-read  string                                                                        $annotations
+ * @property-read string                                                                         $status
+ * @property-read  integer                                                                       $discount
+ * @property-read float                                                                          $discount_float
+ * @property-read  integer                                                                       $total_amount
+ * @property-read  integer                                                                       $total_price
+ * @property-read float                                                                          $total_price_float
+ * @property-read  \Carbon\Carbon                                                                $date
+ * @property-read \Carbon\Carbon                                                                 $created_at
+ * @property-read \Carbon\Carbon                                                                 $updated_at
+ * @property-read \Carbon\Carbon                                                                 $deleted_at
+ * @property-read \Modules\User\Models\User                                                      $seller
+ * @property-read string                                                                         $seller_id
+ * @property-read \Modules\Customer\Models\Customer                                              $customer
+ * @property-read string                                                                         $customer_id
+ * @property-read \Modules\Sales\Models\Packing                                                  $packing
+ * @property-read string                                                                         $packing_id
+ * @property-read \Modules\Sales\Models\Information                                              $sale
+ * @property-read \Modules\Sales\Models\Information                                              $payroll
+ * @property-read \Modules\Sales\Models\Information                                              $payroll_sale
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Sales\Models\PaymentMethod[] $payment_methods
+ * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\Visit newModelQuery()
+ * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\Visit newQuery()
+ * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\Visit query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel search($search = NULL)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel searchPaginated($search = NULL, $page = 1, $limit = 10)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
  * @mixin \Eloquent
  */
 class Visit extends BaseModel
 {
     use SoftDeletes;
 
-    protected $fillable = ['annotations', 'date'];
+    public const OPENED_STATUS    = 'opened';
+    public const FINALIZED_STATUS = 'finalized';
+    public const CLOSED_STATUS    = 'closed';
+
+    protected $fillable = ['annotations', 'date', 'discount', 'total_amount', 'total_price', 'status'];
+
+    protected $casts = [
+        'discount'     => 'integer',
+        'total_amount' => 'integer',
+        'total_price'  => 'integer',
+    ];
 
     protected $dates = ['date'];
+
+    protected $attributes = [
+        'discount'     => 0,
+        'total_amount' => 0,
+        'total_price'  => 0,
+        'status'       => self::OPENED_STATUS,
+    ];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -57,26 +81,58 @@ class Visit extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function sale()
-    {
-        return $this->hasOne(Sale::class);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function payroll()
-    {
-        return $this->hasOne(Payroll::class);
-    }
-
-    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function packing()
     {
         return $this->belongsTo(Packing::class);
+    }
+
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
+     */
+    public function sale()
+    {
+        return $this->embedsOne(Information::class);
+    }
+
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
+     */
+    public function payroll()
+    {
+        return $this->embedsOne(Information::class);
+    }
+
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
+     */
+    public function payroll_sale()
+    {
+        return $this->embedsOne(Information::class);
+    }
+
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsMany
+     */
+    public function payment_methods()
+    {
+        return $this->embedsMany(PaymentMethod::class);
+    }
+
+    /**
+     * @return float
+     */
+    public function getDiscountFloatAttribute(): float
+    {
+        return (float) ($this->attributes['discount'] / 100.0);
+    }
+
+    /**
+     * @return float
+     */
+    public function getTotalPriceFloatAttribute(): float
+    {
+        return (float) ($this->attributes['total_price'] / 100.0);
     }
 }

@@ -2,145 +2,97 @@
 
 namespace Modules\Sales\Repositories;
 
+use App\Traits\AggregateProducts;
 use App\Traits\PrepareProducts;
-use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\UpdateProductsStatus;
-use Modules\Sales\Models\PaymentMethod;
 use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\ProductStatus;
 
 class SaleRepository
 {
-    use PrepareProducts;
+    use PrepareProducts, AggregateProducts;
 
     /**
-     * @param  bool  $paginate
-     * @param  int   $items
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
-     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function all(bool $paginate = TRUE, int $items = 10)
+    public function all(Visit $visit)
     {
-        if (\Auth::user()->type === EmployeeTypes::TYPE_ADMIN) {
-            return Sale::orderBy('date', 'desc')->take(30)->get();
-        }
-
-        return Sale::where('seller_id', \Auth::id())->orderBy('date', 'desc')->take(30)->get();
+        return $this->aggregateProductsByVisit(Sale::class, [
+            'visit_id' => $visit->id,
+            '$or'      => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
+        ]);
     }
 
     /**
-     * @param  array  $data
+     * @param  array                        $data
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
-     * @return \Modules\Sales\Models\Sale
+     * @return \Modules\Sales\Models\Visit
      */
-    public function create(array $data): Sale
+    public function create(array $data, Visit $visit): Visit
     {
-        $data['discount'] = intval(floatval($data['discount']) * 100);
-        $visit = Visit::find($data['visit']);
-
-        abort_if($visit->sale()->exists(), 400, 'Já existe uma venda para essa visita.');
-
         $products = $this->prepareProducts($visit->packing, $data['products']);
 
-        abort_if($data['discount'] > $this->total_price, 400, 'O desconto é maior do que o total da venda.');
-
-        $methods = $this->createPaymentMethods($data['payment_methods'], $this->total_price - $data['discount']);
-
-        $sale = new Sale([
-            'date'         => $visit->date,
-            'discount'     => $data['discount'],
-            'total_amount' => count($products),
-            'total_price'  => $this->total_price,
-        ]);
-
-        $sale->visit()->associate($visit);
-        $sale->seller()->associate($visit->seller_id);
-        $sale->customer()->associate($visit->customer_id);
-        foreach ($products as $product) {
-            $sale->products()->associate($product);
-        }
-        foreach ($methods as $method) {
-            $sale->payment_methods()->associate($method);
-        }
-
-        $sale->save();
+        $this->createSales($products, $visit);
 
         UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
 
-        return $sale;
+        return $visit;
     }
 
     /**
-     * @param  array                       $data
-     * @param  \Modules\Sales\Models\Sale  $sale
+     * @param  array                        $data
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
-     * @return \Modules\Sales\Models\Sale
+     * @return \Modules\Sales\Models\Visit
      */
-    public function update(array $data, Sale $sale): Sale
+    public function update(array $data, Visit $visit): Visit
     {
-        $data['discount'] = intval(floatval($data['discount']) * 100);
+        $products = $this->updateProducts(Sale::class, $visit, $data['products']);
 
-        $products = $this->updateProducts($sale, $data['products']);
+        $this->createSales($products, $visit);
 
-        abort_if($data['discount'] > $this->total_price, 400, 'O desconto é maior do que o total da venda.');
+        UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
 
-        $methods = $this->createPaymentMethods($data['payment_methods'], $this->total_price - $data['discount']);
-        $sale->payment_methods()->dissociate($sale->payment_methods->modelKeys());
-
-        foreach ($products as $product) {
-            $sale->products()->associate($product);
-        }
-        foreach ($methods as $method) {
-            $sale->payment_methods()->associate($method);
-        }
-
-        $sale->update([
-            'discount'     => $data['discount'],
-            'total_amount' => count($products),
-            'total_price'  => $this->total_price,
-        ]);
-
-        UpdateProductsStatus::dispatch($sale->visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
-
-        return $sale;
+        return $visit;
     }
 
     /**
-     * @param  \Modules\Sales\Models\Sale  $sale
+     * @param  \Modules\Sales\Models\Visit  $visit
      *
-     * @return bool|null
-     * @throws \Exception
+     * @return mixed
      */
-    public function delete(Sale $sale)
+    public function delete(Visit $visit)
     {
-        $packing = $sale->visit->packing;
+        $packing = $visit->packing;
 
         abort_if(!is_null($packing->checked_out_at), 400, 'Já foi dado baixa no romaneio.');
 
-        UpdateProductsStatus::dispatch($packing, $sale->products->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
+        UpdateProductsStatus::dispatch($packing, Sale::where('visit_id', $visit->id)->get()->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
 
-        return $sale->delete();
+        return Sale::where('visit_id', $visit->id)->delete();
     }
 
     /**
-     * @param  array  $methods
-     * @param  int    $expected_total
-     *
-     * @return array
+     * @param  array                        $products
+     * @param  \Modules\Sales\Models\Visit  $visit
      */
-    private function createPaymentMethods(array $methods, int $expected_total): array
+    private function createSales(array $products, Visit $visit): void
     {
-        $total = 0;
-        $result = [];
-        foreach ($methods as $method) {
-            $method['value'] = (int) ((float) $method['value'] * 100);
-            $result[] = new PaymentMethod($method);
-            $total += $method['value'];
+        foreach ($products as $product) {
+            $product['date'] = $visit->date;
+
+            $sale = new Sale($product);
+
+            $sale->visit()->associate($visit);
+            $sale->seller()->associate($visit->seller_id);
+            $sale->customer()->associate($visit->customer_id);
+            $sale->product()->associate($product['product_id']);
+
+            $sale->save();
         }
-
-        abort_if($expected_total !== $total, 400, 'Os valores de pagamentos informados não coincidem com o valor da venda.');
-
-        return  $result;
     }
 }
