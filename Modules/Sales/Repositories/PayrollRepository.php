@@ -6,7 +6,6 @@ use App\Traits\AggregateProducts;
 use App\Traits\PrepareProducts;
 use Modules\Sales\Jobs\UpdateProductsStatus;
 use Modules\Sales\Models\Payroll;
-use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\ProductStatus;
 
@@ -35,6 +34,8 @@ class PayrollRepository
      */
     public function create(array $data, Visit $visit): Visit
     {
+        abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
+
         $products = $this->prepareProducts($visit->packing, $data['products']);
 
         $this->createPayrolls($products, $visit);
@@ -59,6 +60,8 @@ class PayrollRepository
      */
     public function update(array $data, Visit $visit): Visit
     {
+        abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
+
         $products = $this->updateProducts(Payroll::class, $visit, $data['products']);
 
         $this->createPayrolls($products, $visit);
@@ -82,11 +85,9 @@ class PayrollRepository
      */
     public function delete(Visit $visit)
     {
-        $packing = $visit->packing;
+        abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
 
-        abort_if(!is_null($packing->checked_out_at), 400, 'Já foi dado baixa no romaneio.');
-
-        UpdateProductsStatus::dispatch($packing, Payroll::where('visit_id', $visit->id)->get()->pluck('product_id')->all(),
+        UpdateProductsStatus::dispatch($visit->packing, Payroll::where('visit_id', $visit->id)->get()->pluck('product_id')->all(),
             ProductStatus::IN_TRANSIT_STATUS);
 
         return Payroll::where('visit_id', $visit->id)->delete();

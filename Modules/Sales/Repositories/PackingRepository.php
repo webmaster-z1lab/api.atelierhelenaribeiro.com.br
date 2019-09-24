@@ -7,7 +7,7 @@ use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\CheckOutProducts;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\PaymentMethods;
-use Modules\Sales\Models\Sale;
+use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\Product;
 use Modules\Stock\Models\ProductStatus;
 
@@ -147,6 +147,10 @@ class PackingRepository
      */
     public function checkOut(array $data, Packing $packing)
     {
+        if ($packing->visits()->where('status', '!=', Visit::CLOSED_STATUS)->exists()) {
+            abort(400, 'Existem visitas que não foram fechadas ainda');
+        }
+
         $data[PaymentMethods::MONEY] = (int) ($data[PaymentMethods::MONEY] * 100);
         $data[PaymentMethods::PAYCHECK] = (int) ($data[PaymentMethods::PAYCHECK] * 100);
 
@@ -180,10 +184,13 @@ class PackingRepository
 
         abort_if($result[PaymentMethods::MONEY] !== $data[PaymentMethods::MONEY], 400, 'O valor recebido em dinheiro é diferente do esperado.');
 
-        abort_if($result[PaymentMethods::PAYCHECK] !== $data[PaymentMethods::PAYCHECK], 400, 'O valor recebido em cheque é diferente do esperado.');
+        abort_if($result[PaymentMethods::PAYCHECK] !== $data[PaymentMethods::PAYCHECK], 400,
+            'O valor recebido em cheque é diferente do esperado.');
 
         $packing->checked_out_at = now();
         $packing->save();
+
+        $packing->visits()->update(['status' => Visit::FINALIZED_STATUS]);
 
         CheckOutProducts::dispatch($packing);
 
@@ -278,18 +285,14 @@ class PackingRepository
      */
     private function toReceive(Packing $packing): array
     {
-        $visits = $packing->visits->modelKeys();
-
-        $sales = Sale::whereIn('visit_id', $visits)->whereIn('payment_methods.method', [PaymentMethods::MONEY, PaymentMethods::PAYCHECK])->get();
-
         $result = [
             PaymentMethods::MONEY    => 0,
             PaymentMethods::PAYCHECK => 0,
         ];
 
-        $sales->each(function (Sale $sale, int $key) use (&$result) {
-            $result[PaymentMethods::MONEY] += $sale->payment_methods()->where('method', PaymentMethods::MONEY)->sum('value');
-            $result[PaymentMethods::PAYCHECK] += $sale->payment_methods()->where('method', PaymentMethods::PAYCHECK)->sum('value');
+        $packing->visits->each(function (Visit $visit, int $key) use (&$result) {
+            $result[PaymentMethods::MONEY] += $visit->payment_methods()->where('method', PaymentMethods::MONEY)->sum('value');
+            $result[PaymentMethods::PAYCHECK] += $visit->payment_methods()->where('method', PaymentMethods::PAYCHECK)->sum('value');
         });
 
         return $result;

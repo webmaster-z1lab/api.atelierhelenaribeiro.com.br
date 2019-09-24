@@ -34,6 +34,8 @@ class SaleRepository
      */
     public function create(array $data, Visit $visit): Visit
     {
+        abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
+
         $products = $this->prepareProducts($visit->packing, $data['products']);
 
         $this->createSales($products, $visit);
@@ -53,6 +55,8 @@ class SaleRepository
      */
     public function update(array $data, Visit $visit): Visit
     {
+        abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
+
         $products = $this->updateProducts(Sale::class, $visit, $data['products']);
 
         $this->createSales($products, $visit);
@@ -71,11 +75,10 @@ class SaleRepository
      */
     public function delete(Visit $visit)
     {
-        $packing = $visit->packing;
+        abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
 
-        abort_if(!is_null($packing->checked_out_at), 400, 'Já foi dado baixa no romaneio.');
-
-        UpdateProductsStatus::dispatch($packing, Sale::where('visit_id', $visit->id)->get()->pluck('product_id')->all(), ProductStatus::IN_TRANSIT_STATUS);
+        UpdateProductsStatus::dispatch($visit->packing, Sale::where('visit_id', $visit->id)->get()->pluck('product_id')->all(),
+            ProductStatus::IN_TRANSIT_STATUS);
 
         return Sale::where('visit_id', $visit->id)->delete();
     }
@@ -116,10 +119,16 @@ class SaleRepository
             'price'  => $sale_total,
         ]);
 
-        $visit->fill([
+        $data = [
             'total_price'  => $total,
             'total_amount' => $total_amount,
-        ]);
+        ];
+
+        if ($visit->status === Visit::CLOSED_STATUS) {
+            $data['status'] = Visit::OPENED_STATUS;
+        }
+
+        $visit->fill($data);
 
         $visit->save();
     }
