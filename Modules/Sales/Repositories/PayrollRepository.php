@@ -45,6 +45,8 @@ class PayrollRepository
             'price'  => $this->total_price,
         ]);
 
+        $visit->payroll->save();
+
         $visit->save();
 
         UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
@@ -88,6 +90,15 @@ class PayrollRepository
     public function delete(Visit $visit)
     {
         abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
+
+        $visit->payroll->fill([
+            'amount' => 0,
+            'price'  => 0,
+        ]);
+
+        $visit->payroll->save();
+
+        $visit->save();
 
         UpdateProductsStatus::dispatch($visit->packing, Payroll::where('visit_id', $visit->id)->get()->pluck('product_id')->all(),
             ProductStatus::IN_TRANSIT_STATUS);

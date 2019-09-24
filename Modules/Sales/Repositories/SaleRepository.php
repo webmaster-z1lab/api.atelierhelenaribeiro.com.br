@@ -77,6 +77,8 @@ class SaleRepository
     {
         abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
 
+        $this->updatePrices($visit, 0, 0);
+
         UpdateProductsStatus::dispatch($visit->packing, Sale::where('visit_id', $visit->id)->get()->pluck('product_id')->all(),
             ProductStatus::IN_TRANSIT_STATUS);
 
