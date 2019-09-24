@@ -39,6 +39,13 @@ class PayrollRepository
 
         $this->createPayrolls($products, $visit);
 
+        $visit->payroll->fill([
+            'amount' => count($products),
+            'price'  => $this->total_price,
+        ]);
+
+        $visit->save();
+
         UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
 
         return $visit;
@@ -55,6 +62,13 @@ class PayrollRepository
         $products = $this->updateProducts(Payroll::class, $visit, $data['products']);
 
         $this->createPayrolls($products, $visit);
+
+        $visit->payroll->fill([
+            'amount' => count($products),
+            'price'  => $this->total_price,
+        ]);
+
+        $visit->save();
 
         UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
 

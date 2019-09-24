@@ -143,7 +143,7 @@ class SaleControllerTest extends TestCase
             'updated_at',
         ],
         'customer_credit',
-        'amount',
+        'total_amount',
         'discount',
         'total_price',
         'sale'         => [
@@ -375,6 +375,18 @@ class SaleControllerTest extends TestCase
         $packing = Packing::where('seller_id', $this->sale->seller_id)->where(function ($query) {
             $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
         })->first();
+
+        $visit = $this->sale->visit;
+
+        $visit->sale->fill([
+            'amount' => 1,
+            'price'  => $this->sale->price,
+        ]);
+
+        $visit->fill([
+            'total_price' => $this->sale->price,
+            'amount'      => 1,
+        ]);
 
         UpdateProductsStatus::dispatchNow($packing, [$this->sale->product_id], ProductStatus::SOLD_STATUS);
 

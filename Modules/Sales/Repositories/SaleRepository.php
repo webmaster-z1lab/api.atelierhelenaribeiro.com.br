@@ -38,6 +38,8 @@ class SaleRepository
 
         $this->createSales($products, $visit);
 
+        $this->updatePrices($visit, count($products), $this->total_price);
+
         UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
 
         return $visit;
@@ -54,6 +56,8 @@ class SaleRepository
         $products = $this->updateProducts(Sale::class, $visit, $data['products']);
 
         $this->createSales($products, $visit);
+
+        $this->updatePrices($visit, count($products), $this->total_price);
 
         UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
 
@@ -94,5 +98,29 @@ class SaleRepository
 
             $sale->save();
         }
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Visit  $visit
+     * @param  int                          $amount
+     * @param  int                          $sale_total
+     */
+    private function updatePrices(Visit &$visit, int $amount, int $sale_total): void
+    {
+        $total = $visit->total_price + $sale_total - $visit->sale->price;
+
+        $total_amount = $visit->total_amount + $amount - $visit->sale->amount;
+
+        $visit->sale->fill([
+            'amount' => $amount,
+            'price'  => $sale_total,
+        ]);
+
+        $visit->fill([
+            'total_price'  => $total,
+            'total_amount' => $total_amount,
+        ]);
+
+        $visit->save();
     }
 }

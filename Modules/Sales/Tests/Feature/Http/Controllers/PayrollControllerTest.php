@@ -144,7 +144,7 @@ class PayrollControllerTest extends TestCase
             'updated_at',
         ],
         'customer_credit',
-        'amount',
+        'total_amount',
         'discount',
         'total_price',
         'sale'         => [
@@ -376,6 +376,13 @@ class PayrollControllerTest extends TestCase
         $packing = Packing::where('seller_id', $this->payroll->seller_id)->where(function ($query) {
             $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
         })->first();
+
+        $visit = $this->payroll->visit;
+
+        $visit->payroll->fill([
+            'amount' => 1,
+            'price'  => $this->payroll->price,
+        ]);
 
         UpdateProductsStatus::dispatchNow($packing, [$this->payroll->product_id], ProductStatus::ON_CONSIGNMENT_STATUS);
 
