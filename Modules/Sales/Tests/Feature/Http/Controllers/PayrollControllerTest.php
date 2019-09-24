@@ -384,6 +384,10 @@ class PayrollControllerTest extends TestCase
             'price'  => $this->payroll->price,
         ]);
 
+        $visit->payroll->save();
+
+        $visit->save();
+
         UpdateProductsStatus::dispatchNow($packing, [$this->payroll->product_id], ProductStatus::ON_CONSIGNMENT_STATUS);
 
         return $this;

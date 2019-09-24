@@ -71,6 +71,8 @@ class PayrollRepository
             'price'  => $this->total_price,
         ]);
 
+        $visit->payroll->save();
+
         $visit->save();
 
         UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);

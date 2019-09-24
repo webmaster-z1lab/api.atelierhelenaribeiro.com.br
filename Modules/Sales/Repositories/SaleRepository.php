@@ -119,6 +119,8 @@ class SaleRepository
             'price'  => $sale_total,
         ]);
 
+        $visit->sale->save();
+
         $data = [
             'total_price'  => $total,
             'total_amount' => $total_amount,

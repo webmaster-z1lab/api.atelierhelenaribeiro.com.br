@@ -383,10 +383,14 @@ class SaleControllerTest extends TestCase
             'price'  => $this->sale->price,
         ]);
 
+        $visit->sale->save();
+
         $visit->fill([
             'total_price' => $this->sale->price,
             'amount'      => 1,
         ]);
+
+        $visit->save();
 
         UpdateProductsStatus::dispatchNow($packing, [$this->sale->product_id], ProductStatus::SOLD_STATUS);
 
