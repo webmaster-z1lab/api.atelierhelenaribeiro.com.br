@@ -86,6 +86,8 @@ class PayrollSaleRepository
             ])) $updated++;
         });
 
+        $this->updatePrices($visit, 0, 0);
+
         UpdateProductsStatus::dispatch($visit->packing, $payrolls->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS, FALSE);
 
         return $updated;
