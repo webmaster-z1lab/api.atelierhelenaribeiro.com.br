@@ -41,6 +41,21 @@ Route::prefix('visits/{visit}')
                 Route::match(['PUT', 'PATCH'], '/', 'PayrollController@update')->name('update');
 
                 Route::delete('/', 'PayrollController@destroy')->name('destroy');
+
+                Route::get('{status}', 'PayrollController@getByStatus')
+                    ->where('status', 'available|sold|returned')->name('status');
+
+                Route::prefix('sales')
+                    ->as('sales.')
+                    ->group(function () {
+                        Route::get('/', 'PayrollSaleController@show')->name('show');
+
+                        Route::post('/', 'PayrollSaleController@store')->name('store');
+
+                        Route::match(['PUT', 'PATCH'], '/', 'PayrollSaleController@update')->name('update');
+
+                        Route::delete('/', 'PayrollSaleController@destroy')->name('destroy');
+                    });
             });
     });
 

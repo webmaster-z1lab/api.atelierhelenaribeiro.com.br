@@ -40,17 +40,6 @@ class PayrollRepository
 
         $this->createPayrolls($products, $visit);
 
-        $visit->payroll->fill([
-            'amount' => count($products),
-            'price'  => $this->total_price,
-        ]);
-
-        $visit->payroll->save();
-
-        $visit->save();
-
-        UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
-
         return $visit;
     }
 
@@ -67,17 +56,6 @@ class PayrollRepository
         $products = $this->updateProducts(Payroll::class, $visit, $data['products']);
 
         $this->createPayrolls($products, $visit);
-
-        $visit->payroll->fill([
-            'amount' => count($products),
-            'price'  => $this->total_price,
-        ]);
-
-        $visit->payroll->save();
-
-        $visit->save();
-
-        UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
 
         return $visit;
     }
@@ -107,10 +85,33 @@ class PayrollRepository
     }
 
     /**
+     * @param  \Modules\Sales\Models\Visit  $visit
+     * @param  string                       $status
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getByStatus(Visit $visit, string $status)
+    {
+        if ($status === 'available') {
+            return $this->aggregateProductsByStatus(Payroll::class, [
+                'customer_id' => $visit->customer_id,
+                'status'      => ProductStatus::ON_CONSIGNMENT_STATUS,
+                '$or'         => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
+            ]);
+        }
+
+        return $this->aggregateProductsByStatus(Payroll::class, [
+            'completion_visit_id' => $visit->id,
+            'status'              => $status === 'sold' ? ProductStatus::SOLD_STATUS : ProductStatus::RETURNED_STATUS,
+            '$or'                 => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
+        ]);
+    }
+
+    /**
      * @param  array                        $products
      * @param  \Modules\Sales\Models\Visit  $visit
      */
-    private function createPayrolls(array $products, Visit $visit): void
+    private function createPayrolls(array $products, Visit &$visit): void
     {
         foreach ($products as $product) {
             $product['date'] = $visit->date;
@@ -124,5 +125,16 @@ class PayrollRepository
 
             $payroll->save();
         }
+
+        $visit->payroll->fill([
+            'amount' => count($products),
+            'price'  => $this->total_price,
+        ]);
+
+        $visit->payroll->save();
+
+        $visit->save();
+
+        UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS);
     }
 }

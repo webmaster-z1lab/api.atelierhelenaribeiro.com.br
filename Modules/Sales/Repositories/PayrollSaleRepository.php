@@ -5,11 +5,12 @@ namespace Modules\Sales\Repositories;
 use App\Traits\AggregateProducts;
 use App\Traits\PrepareProducts;
 use Modules\Sales\Jobs\UpdateProductsStatus;
-use Modules\Sales\Models\Sale;
+use Modules\Sales\Models\Information;
+use Modules\Sales\Models\Payroll;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\ProductStatus;
 
-class SaleRepository
+class PayrollSaleRepository
 {
     use PrepareProducts, AggregateProducts;
 
@@ -20,9 +21,10 @@ class SaleRepository
      */
     public function all(Visit $visit)
     {
-        return $this->aggregateProductsByVisit(Sale::class, [
-            'visit_id' => $visit->id,
-            '$or'      => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
+        return $this->aggregateProductsByVisit(Payroll::class, [
+            'completion_visit_id' => $visit->id,
+            'status'              => ProductStatus::SOLD_STATUS,
+            '$or'                 => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
         ]);
     }
 
@@ -36,13 +38,9 @@ class SaleRepository
     {
         abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
 
-        $products = $this->prepareProducts($visit->packing, $data['products']);
+        $products = $this->prepareProductsFromPayroll($visit, $data['products']);
 
-        $this->createSales($products, $visit);
-
-        $this->updatePrices($visit, count($products), $this->total_price);
-
-        UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
+        $this->sellPayrolls($products, $visit);
 
         return $visit;
     }
@@ -57,13 +55,9 @@ class SaleRepository
     {
         abort_if($visit->status === Visit::FINALIZED_STATUS, 400, 'Essa visita já  foi finalizada.');
 
-        $products = $this->updateProducts(Sale::class, $visit, $data['products']);
+        $products = $this->updateProductsFromPayroll($visit, $data['products'], ProductStatus::SOLD_STATUS);
 
-        $this->createSales($products, $visit);
-
-        $this->updatePrices($visit, count($products), $this->total_price);
-
-        UpdateProductsStatus::dispatch($visit->packing, collect($products)->pluck('product_id')->all(), ProductStatus::SOLD_STATUS);
+        $this->sellPayrolls($products, $visit);
 
         return $visit;
     }
@@ -71,7 +65,7 @@ class SaleRepository
     /**
      * @param  \Modules\Sales\Models\Visit  $visit
      *
-     * @return mixed
+     * @return int
      */
     public function delete(Visit $visit)
     {
@@ -79,30 +73,43 @@ class SaleRepository
 
         $this->updatePrices($visit, 0, 0);
 
-        UpdateProductsStatus::dispatch($visit->packing, Sale::where('visit_id', $visit->id)->get()->pluck('product_id')->all(),
-            ProductStatus::IN_TRANSIT_STATUS);
+        $payrolls = Payroll::where('completion_visit_id', $visit->id)
+            ->where('status', ProductStatus::SOLD_STATUS)->get();
 
-        return Sale::where('visit_id', $visit->id)->delete();
+        $updated = 0;
+
+        $payrolls->each(function (Payroll $payroll) use (&$updated) {
+            $payroll->completion_visit()->dissociate();
+            $payroll->unset('completion_date');
+            if ($payroll->update([
+                'status'          => ProductStatus::ON_CONSIGNMENT_STATUS,
+            ])) $updated++;
+        });
+
+        UpdateProductsStatus::dispatch($visit->packing, $payrolls->pluck('product_id')->all(), ProductStatus::ON_CONSIGNMENT_STATUS, FALSE);
+
+        return $updated;
     }
 
     /**
      * @param  array                        $products
      * @param  \Modules\Sales\Models\Visit  $visit
      */
-    private function createSales(array $products, Visit $visit): void
+    private function sellPayrolls(array $products, Visit &$visit): void
     {
-        foreach ($products as $product) {
-            $product['date'] = $visit->date;
+        $payrolls = Payroll::whereKey($products)->get();
 
-            $sale = new Sale($product);
+        $payrolls->each(function (Payroll $payroll) use ($visit) {
+            $payroll->completion_visit()->associate($visit);
+            $payroll->update([
+                'status'          => ProductStatus::SOLD_STATUS,
+                'completion_date' => $visit->date,
+            ]);
+        });
 
-            $sale->visit()->associate($visit);
-            $sale->seller()->associate($visit->seller_id);
-            $sale->customer()->associate($visit->customer_id);
-            $sale->product()->associate($product['product_id']);
+        $this->updatePrices($visit, $payrolls->count(), $payrolls->sum('price'));
 
-            $sale->save();
-        }
+        UpdateProductsStatus::dispatch($visit->packing, $payrolls->pluck('product_id')->all(), ProductStatus::SOLD_STATUS, FALSE);
     }
 
     /**
@@ -112,16 +119,14 @@ class SaleRepository
      */
     private function updatePrices(Visit &$visit, int $amount, int $sale_total): void
     {
-        $total = $visit->total_price + $sale_total - $visit->sale->price;
+        $total = $visit->total_price + $sale_total - $visit->payroll_sale->price;
 
-        $total_amount = $visit->total_amount + $amount - $visit->sale->amount;
+        $total_amount = $visit->total_amount + $amount - $visit->payroll_sale->amount;
 
-        $visit->sale->fill([
+        $visit->payroll_sale()->associate(new Information([
             'amount' => $amount,
             'price'  => $sale_total,
-        ]);
-
-        $visit->sale->save();
+        ]));
 
         $data = [
             'total_price'  => $total,

@@ -5,10 +5,8 @@ namespace Modules\Sales\Http\Controllers;
 use App\Http\Controllers\ApiController;
 use Modules\Sales\Http\Requests\PayrollRequest;
 use Modules\Sales\Http\Requests\PayrollUpdateRequest;
-use Modules\Sales\Http\Resources\PayrollResource;
 use Modules\Sales\Http\Resources\ProductResource;
 use Modules\Sales\Http\Resources\VisitResource;
-use Modules\Sales\Models\Payroll;
 use Modules\Sales\Models\Visit;
 use Modules\Sales\Repositories\PayrollRepository;
 
@@ -41,6 +39,7 @@ class PayrollController extends ApiController
 
     /**
      * @param  \Modules\Sales\Http\Requests\PayrollRequest  $request
+     * @param  \Modules\Sales\Models\Visit                  $visit
      *
      * @return \Modules\Sales\Http\Resources\VisitResource
      */
@@ -80,5 +79,16 @@ class PayrollController extends ApiController
         $this->repository->delete($visit);
 
         return $this->noContentResponse();
+    }
+
+    /**
+     * @param  \Modules\Sales\Models\Visit  $visit
+     * @param  string                       $status
+     *
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function getByStatus(Visit $visit, string $status)
+    {
+        return ProductResource::collection($this->repository->getByStatus($visit, $status));
     }
 }

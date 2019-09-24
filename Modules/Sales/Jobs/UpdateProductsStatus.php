@@ -29,17 +29,24 @@ class UpdateProductsStatus implements ShouldQueue
     public $status;
 
     /**
+     * @var bool
+     */
+    private $update_packing;
+
+    /**
      * Create a new job instance.
      *
      * @param  \Modules\Sales\Models\Packing  $packing
      * @param  array                          $products
      * @param  string                         $status
+     * @param  bool                           $update_packing
      */
-    public function __construct(Packing $packing, array $products, string $status)
+    private function __construct(Packing $packing, array $products, string $status, bool $update_packing = TRUE)
     {
         $this->packing = $packing->fresh();
         $this->products = $products;
         $this->status = $status;
+        $this->update_packing = $update_packing;
     }
 
     /**
@@ -49,6 +56,6 @@ class UpdateProductsStatus implements ShouldQueue
      */
     public function handle()
     {
-        $this->updateStatus($this->packing, $this->products, $this->status);
+        $this->updateStatus($this->packing, $this->products, $this->status, $this->update_packing);
     }
 }

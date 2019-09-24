@@ -50,11 +50,41 @@ trait AggregateProducts
         return $class::raw(function ($collection) use ($match) {
             return $collection->aggregate([
                 [
-                    '$match' => $match
+                    '$match' => $match,
                 ],
                 [
                     '$group' => [
                         '_id'       => '$reference',
+                        'amount'    => ['$sum' => 1],
+                        'thumbnail' => ['$first' => '$thumbnail'],
+                        'size'      => ['$first' => '$size'],
+                        'color'     => ['$first' => '$color'],
+                        'price'     => ['$first' => '$price'],
+                    ],
+                ],
+            ]);
+        });
+    }
+
+    /**
+     * @param  string  $class
+     * @param  array   $match
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function aggregateProductsByStatus(string $class, array $match)
+    {
+        return $class::raw(function ($collection) use ($match) {
+            return $collection->aggregate([
+                [
+                    '$match' => $match,
+                ],
+                [
+                    '$group' => [
+                        '_id'       => [
+                            'reference' => '$reference',
+                            'date'      => '$date',
+                        ],
                         'amount'    => ['$sum' => 1],
                         'thumbnail' => ['$first' => '$thumbnail'],
                         'size'      => ['$first' => '$size'],
