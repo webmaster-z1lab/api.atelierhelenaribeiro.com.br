@@ -68,6 +68,18 @@ Route::prefix('visits/{visit}')
 
                         Route::delete('/', 'PayrollSaleController@destroy')->name('destroy');
                     });
+
+                Route::prefix('refunds')
+                    ->as('refunds.')
+                    ->group(function () {
+                        Route::get('/', 'PayrollRefundController@show')->name('show');
+
+                        Route::post('/', 'PayrollRefundController@store')->name('store');
+
+                        Route::match(['PUT', 'PATCH'], '/', 'PayrollSaleController@update')->name('update');
+
+                        Route::delete('/', 'PayrollRefundController@destroy')->name('destroy');
+                    });
             });
     });
 

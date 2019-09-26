@@ -134,7 +134,7 @@ class RefundRepository
 
         $this->updatePrices($visit, $refunds->count(), $refunds->sum('price'));
 
-        AddProductsToPacking::dispatch($visit, FALSE);
+        AddProductsToPacking::dispatch($visit->packing, $refunds->all());
     }
 
     /**
@@ -162,6 +162,12 @@ class RefundRepository
         $visit->update($data);
     }
 
+    /**
+     * @param  string                          $reference
+     * @param  int                             $amount
+     * @param  \Illuminate\Support\Collection  $refunds
+     * @param  \Carbon\Carbon                  $date
+     */
     private function createProducts(string $reference, int $amount, Collection &$refunds, Carbon $date): void
     {
         $references = explode('-', $reference);

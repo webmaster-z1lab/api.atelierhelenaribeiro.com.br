@@ -7,10 +7,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Modules\Sales\Models\Payroll;
+use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\Product;
-use Modules\Sales\Models\Refund;
-use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\ProductStatus;
 
 class AddProductsToPacking implements ShouldQueue
@@ -18,25 +16,25 @@ class AddProductsToPacking implements ShouldQueue
     use Dispatchable, Queueable, SerializesModels;
 
     /**
-     * @var \Modules\Sales\Models\Visit
+     * @var \Modules\Sales\Models\Packing
      */
-    public $visit;
+    public $packing;
 
     /**
-     * @var bool
+     * @var array
      */
-    public $is_payroll;
+    private $products;
 
     /**
      * Create a new job instance.
      *
-     * @param  \Modules\Sales\Models\Visit  $visit
-     * @param  bool                         $is_payroll
+     * @param  \Modules\Sales\Models\Packing  $packing
+     * @param  array                          $products
      */
-    public function __construct(Visit $visit, bool $is_payroll)
+    public function __construct(Packing $packing, array $products)
     {
-        $this->visit = $visit->fresh();
-        $this->is_payroll = $is_payroll;
+        $this->packing = $packing->fresh();
+        $this->products = $products;
     }
 
     /**
@@ -46,34 +44,21 @@ class AddProductsToPacking implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->is_payroll) {
-            $refunds = Refund::where('visit_id', $this->visit->id)->get();
-        } else {
-            $refunds = Payroll::where('completion_visit_id', $this->visit->id)->where('status', ProductStatus::RETURNED_STATUS)->get();
+        foreach ($this->products as $product) {
+            $this->packing->products()->associate(new Product([
+                'product_id' => $product['product_id'],
+                'reference'  => $product['reference'],
+                'thumbnail'  => $product['thumbnail'],
+                'size'       => $product['size'],
+                'color'      => $product['color'],
+                'price'      => $product['price'],
+                'status'     => ProductStatus::RETURNED_STATUS,
+            ]));
         }
 
-        $products = $refunds->map(function ($refund) {
-            /** @var \Modules\Sales\Models\Refund|\Modules\Sales\Models\Payroll $refund */
-            return new Product([
-                'product_id' => $refund->product_id,
-                'reference'  => $refund->reference,
-                'thumbnail'  => $refund->thumbnail,
-                'size'       => $refund->size,
-                'color'      => $refund->color,
-                'price'      => $refund->price,
-                'status'     => ProductStatus::RETURNED_STATUS,
-            ]);
-        });
+        $this->packing->save();
 
-        $packing = $this->visit->packing;
-
-        $products->each(function (Product $product) use (&$packing) {
-            $packing->products()->associate($product);
-        });
-
-        $packing->save();
-
-        \Modules\Stock\Models\Product::whereKey($products->pluck('product_id')->all())->update(['status' => ProductStatus::RETURNED_STATUS]);
+        \Modules\Stock\Models\Product::whereKey(\Arr::pluck($this->products, 'product_id'))->update(['status' => ProductStatus::RETURNED_STATUS]);
 
     }
 }

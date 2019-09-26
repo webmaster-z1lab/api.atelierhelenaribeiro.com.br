@@ -3,11 +3,10 @@
 namespace Modules\Sales\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Modules\Catalog\Models\Template;
-use Modules\Stock\Models\Color;
-use Modules\Stock\Models\Size;
+use Illuminate\Validation\Rule;
+use Modules\Stock\Models\ProductStatus;
 
-class RefundRequest extends FormRequest
+class PayrollRefundRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,7 +27,7 @@ class RefundRequest extends FormRequest
     {
         return [
             'products'             => 'bail|required|array|min:1',
-            'products.*.reference' => 'bail|required|distinct|exists:products,reference',
+            'products.*.reference' => $this->getReferenceRules(),
             'products.*.amount'    => 'bail|required|integer|min:1',
         ];
     }
@@ -44,19 +43,19 @@ class RefundRequest extends FormRequest
 
     public function getReferenceRules(): array
     {
+        /** @var \Modules\Sales\Models\Visit $visit */
+        $visit = $this->route('visit');
+
         return [
             'bail',
             'required',
             'distinct',
-            function (string $attribute, string $value, \Closure $fail) {
-                $references = explode('-', $value);
-
-                if (!Template::where('reference', $references[0])->exists() ||
-                    !Color::where('reference', $references[1])->exists() ||
-                    !Size::where('reference', $references[2])->exists()) {
-                    $fail(trans('validation.exists', ['attribute' => $this->attributes()[$attribute]]));
-                }
-            },
+            Rule::exists('payrolls', 'reference')->where('customer_id', $visit->customer_id)
+                ->where(function ($query) use ($visit) {
+                    $query->where('status', ProductStatus::ON_CONSIGNMENT_STATUS)->orWhere('completion_visit_id', $visit->id);
+                })->where(function ($query) use ($visit) {
+                    $query->where('deleted_at', 'exists', FALSE)->orWhereNull('deleted_at');
+                }),
         ];
     }
 }

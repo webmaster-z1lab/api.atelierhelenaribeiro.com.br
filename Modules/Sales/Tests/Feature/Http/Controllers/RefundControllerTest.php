@@ -220,12 +220,12 @@ class RefundControllerTest extends TestCase
             ],
         ]);
 
-        $visit_id = $this->sale->visit_id;
+        $packing_id = $this->sale->visit->packing_id;
 
-        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) use ($visit_id) {
+        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) use ($packing_id) {
             $job->handle();
 
-            return $job->visit->id === $visit_id;
+            return $job->packing->id === $packing_id;
         });
 
         $response
@@ -281,12 +281,12 @@ class RefundControllerTest extends TestCase
 
         $response = $this->update();
 
-        $visit_id = $this->sale->visit_id;
+        $packing_id = $this->sale->visit->packing_id;
 
-        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) use ($visit_id) {
+        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) use ($packing_id) {
             $job->handle();
 
-            return $job->visit->id === $visit_id;
+            return $job->packing->id === $packing_id;
         });
 
         $response

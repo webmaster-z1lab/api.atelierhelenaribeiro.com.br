@@ -54,6 +54,7 @@ class VisitResource extends Resource
             'payroll_sale'    => InformationResource::make($this->resource->payroll_sale),
             'payroll_sales'   => ProductResource::collection($this->getPayrollSales($this->resource->id)),
             'payroll_refund'  => InformationResource::make($this->resource->payroll_refund),
+            'payroll_refunds' => ProductResource::collection($this->getPayrollRefunds($this->resource->id)),
             'created_at'      => $this->resource->created_at->toW3cString(),
             'updated_at'      => $this->resource->updated_at->toW3cString(),
         ];
@@ -108,6 +109,20 @@ class VisitResource extends Resource
         return $this->aggregateProductsByVisit(Payroll::class, [
             'completion_visit_id' => $visit_id,
             'status'              => ProductStatus::SOLD_STATUS,
+            '$or'                 => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
+        ]);
+    }
+
+    /**
+     * @param  string  $visit_id
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function getPayrollRefunds(string $visit_id)
+    {
+        return $this->aggregateProductsByVisit(Payroll::class, [
+            'completion_visit_id' => $visit_id,
+            'status'              => ProductStatus::ON_CONSIGNMENT_STATUS,
             '$or'                 => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
         ]);
     }

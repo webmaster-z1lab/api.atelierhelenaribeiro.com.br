@@ -14,6 +14,10 @@ class SizeRepository
      */
     public function all()
     {
+        if (\Request::filled('search')) {
+            return Size::where('name', 'like', '%' . \Request::query('search') . '%')->latest()->get();
+        }
+
         return Size::latest()->get();
     }
 
