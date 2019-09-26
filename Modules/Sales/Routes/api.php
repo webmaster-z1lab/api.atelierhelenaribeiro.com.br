@@ -76,7 +76,7 @@ Route::prefix('visits/{visit}')
 
                         Route::post('/', 'PayrollRefundController@store')->name('store');
 
-                        Route::match(['PUT', 'PATCH'], '/', 'PayrollSaleController@update')->name('update');
+                        Route::match(['PUT', 'PATCH'], '/', 'PayrollRefundController@update')->name('update');
 
                         Route::delete('/', 'PayrollRefundController@destroy')->name('destroy');
                     });

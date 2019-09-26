@@ -3,8 +3,8 @@
 namespace Modules\Sales\Http\Controllers;
 
 use App\Http\Controllers\ApiController;
-use Modules\Sales\Http\Requests\RefundRequest;
-use Modules\Sales\Http\Requests\RefundUpdateRequest;
+use Modules\Sales\Http\Requests\PayrollRefundRequest;
+use Modules\Sales\Http\Requests\PayrollRefundUpdateRequest;
 use Modules\Sales\Http\Resources\ProductResource;
 use Modules\Sales\Http\Resources\VisitResource;
 use Modules\Sales\Models\Visit;
@@ -23,12 +23,12 @@ class PayrollRefundController extends ApiController
     }
 
     /**
-     * @param  \Modules\Sales\Http\Requests\RefundRequest  $request
-     * @param  \Modules\Sales\Models\Visit                 $visit
+     * @param  \Modules\Sales\Http\Requests\PayrollRefundRequest  $request
+     * @param  \Modules\Sales\Models\Visit                        $visit
      *
      * @return \Modules\Sales\Http\Resources\VisitResource
      */
-    public function store(RefundRequest $request, Visit $visit): VisitResource
+    public function store(PayrollRefundRequest $request, Visit $visit): VisitResource
     {
         return VisitResource::make($this->repository->create($request->validated(), $visit));
     }
@@ -44,12 +44,12 @@ class PayrollRefundController extends ApiController
     }
 
     /**
-     * @param  \Modules\Sales\Http\Requests\RefundUpdateRequest  $request
-     * @param  \Modules\Sales\Models\Visit                       $visit
+     * @param  \Modules\Sales\Http\Requests\PayrollRefundUpdateRequest  $request
+     * @param  \Modules\Sales\Models\Visit                              $visit
      *
      * @return \Modules\Sales\Http\Resources\VisitResource
      */
-    public function update(RefundUpdateRequest $request, Visit $visit): VisitResource
+    public function update(PayrollRefundUpdateRequest $request, Visit $visit): VisitResource
     {
         return VisitResource::make($this->repository->update($request->validated(), $visit));
     }

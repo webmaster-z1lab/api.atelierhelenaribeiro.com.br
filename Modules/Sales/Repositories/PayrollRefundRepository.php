@@ -86,7 +86,7 @@ class PayrollRefundRepository
         $productsToRemove = Payroll::where('completion_visit_id', $visit->id)
             ->where('status', ProductStatus::RETURNED_STATUS)->get();
 
-        RemoveProductsFromPacking::dispatch($visit->packing, $productsToRemove->pluck('product_id')->all(), FALSE);
+        RemoveProductsFromPacking::dispatch($visit->packing, $productsToRemove->pluck('product_id')->all(), TRUE);
 
         $productsToRemove->each(function (Payroll $payroll) {
             $payroll->unset('completion_date');
@@ -150,7 +150,7 @@ class PayrollRefundRepository
      */
     private function updatePrices(Visit &$visit, int $amount, int $payroll_refund_total): void
     {
-        $visit->refund()->associate(new Information([
+        $visit->payroll_refund()->associate(new Information([
             'amount' => $amount,
             'price'  => $payroll_refund_total,
         ]));

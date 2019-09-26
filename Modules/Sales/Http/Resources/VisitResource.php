@@ -122,7 +122,7 @@ class VisitResource extends Resource
     {
         return $this->aggregateProductsByVisit(Payroll::class, [
             'completion_visit_id' => $visit_id,
-            'status'              => ProductStatus::ON_CONSIGNMENT_STATUS,
+            'status'              => ProductStatus::RETURNED_STATUS,
             '$or'                 => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
         ]);
     }

@@ -10,10 +10,9 @@ use Modules\Customer\Models\Customer;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Sales\Jobs\AddProductsToPacking;
 use Modules\Sales\Jobs\RemoveProductsFromPacking;
-use Modules\Sales\Jobs\UpdateProductsStatus;
+use Modules\Sales\Models\Information;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\Payroll;
-use Modules\Sales\Models\Refund;
 use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\Color;
@@ -25,7 +24,7 @@ use Tests\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 
-class RefundControllerTest extends TestCase
+class PayrollRefundControllerTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
@@ -34,13 +33,13 @@ class RefundControllerTest extends TestCase
      */
     private function uri(): string
     {
-        return "visits/{$this->sale->visit_id}/refunds/";
+        return "visits/{$this->payroll->visit_id}/payrolls/refunds/";
     }
 
     /**
-     * @var \Modules\Sales\Models\Sale
+     * @var \Modules\Sales\Models\Payroll
      */
-    private $sale;
+    private $payroll;
 
     /**
      * @var \Modules\User\Models\User
@@ -159,7 +158,20 @@ class RefundControllerTest extends TestCase
             'price',
         ],
         'sales',
-        'refunds'        => [
+        'refunds',
+        'payroll'      => [
+            'amount',
+            'price',
+        ],
+        'payroll_sale' => [
+            'amount',
+            'price',
+        ],
+        'payroll_refund' => [
+            'amount',
+            'price',
+        ],
+        'payroll_refunds' => [
             [
                 'reference',
                 'thumbnail',
@@ -168,14 +180,6 @@ class RefundControllerTest extends TestCase
                 'price',
                 'amount',
             ],
-        ],
-        'payroll'      => [
-            'amount',
-            'price',
-        ],
-        'payroll_sale' => [
-            'amount',
-            'price',
         ],
         'created_at',
         'updated_at',
@@ -199,33 +203,31 @@ class RefundControllerTest extends TestCase
 
         $this->faker->addProvider(new PhoneNumber($this->faker));
         $this->user = factory(User::class)->state('fake')->create(['type' => EmployeeTypes::TYPE_ADMIN]);
-        $this->sale = factory(Sale::class)->make();
+        $this->payroll = factory(Payroll::class)->make();
     }
 
     /** @test */
-    public function create_refund(): void
+    public function create_payroll_refund(): void
     {
         \Queue::fake();
 
         \Queue::assertNothingPushed();
 
-        $this->persistSale();
+        $this->payroll->save();
 
         $response = $this->actingAs($this->user)->json('POST', $this->uri(), [
             'products' => [
                 [
-                    'reference' => $this->sale->reference,
+                    'reference' => $this->payroll->reference,
                     'amount'    => 1,
                 ],
             ],
         ]);
 
-        $packing_id = $this->sale->visit->packing_id;
-
-        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) use ($packing_id) {
+        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) {
             $job->handle();
 
-            return $job->packing->id === $packing_id;
+            return $job->packing->id === $this->payroll->visit->packing_id;
         });
 
         $response
@@ -237,11 +239,11 @@ class RefundControllerTest extends TestCase
     }
 
     /** @test */
-    public function create_refund_fails(): void
+    public function create_payroll_refund_fails(): void
     {
         \Queue::fake();
 
-        $this->persistSale();
+        $this->payroll->save();
 
         $this->actingAs($this->user)->json('POST', $this->uri(), [])->assertStatus(422)->assertJsonStructure($this->errorStructure);
 
@@ -249,31 +251,51 @@ class RefundControllerTest extends TestCase
     }
 
     /** @test */
-    public function get_refund(): void
+    public function get_payroll_refund(): void
     {
-        $this->persistRefund();
+        $this->persist();
 
         $this->actingAs($this->user)
             ->json('GET', $this->uri())
             ->assertOk()
-            ->assertJsonStructure($this->jsonStructure['refunds']);
+            ->assertJsonStructure($this->jsonStructure['payroll_refunds']);
     }
 
     /** @test */
-    public function get_refund_fails(): void
+    public function get_payroll_refund_fails(): void
     {
-        $this->persistRefund();
+        $this->persist();
 
         $this->actingAs($this->user)
-            ->json('GET', $this->uri().$this->sale->id.'a')
+            ->json('GET', $this->uri().$this->payroll->id.'a')
             ->assertNotFound()
             ->assertJsonStructure($this->errorStructure);
     }
 
     /** @test */
-    public function update_refund(): void
+//    public function get_payroll_not_modified(): void
+//    {
+//        $this->persist();
+//
+//        $response = $this->actingAs($this->user)->json('GET', $this->uri.$this->payroll->id);
+//
+//        $response
+//            ->assertOk()
+//            ->assertHeader('ETag')
+//            //->assertHeader('Content-Length')
+//            //->assertHeader('Cache-Control')
+//            ->assertJsonStructure($this->jsonStructure);
+//
+//        $this->actingAs($this->user)
+//            ->withHeaders(['If-None-Match' => $response->getEtag()])
+//            ->json('GET', $this->uri.$this->payroll->id)
+//            ->assertStatus(304);
+//    }
+
+    /** @test */
+    public function update_payroll_refund(): void
     {
-        $this->persistRefund();
+        $this->persist();
 
         \Queue::fake();
 
@@ -281,12 +303,10 @@ class RefundControllerTest extends TestCase
 
         $response = $this->update();
 
-        $packing_id = $this->sale->visit->packing_id;
-
-        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) use ($packing_id) {
+        \Queue::assertPushed(AddProductsToPacking::class, function (AddProductsToPacking $job) {
             $job->handle();
 
-            return $job->packing->id === $packing_id;
+            return $job->packing->id === $this->payroll->visit->packing_id;
         });
 
         $response
@@ -298,11 +318,13 @@ class RefundControllerTest extends TestCase
     }
 
     /** @test */
-    public function update_refund_fails(): void
+    public function update_payroll_refund_fails(): void
     {
-        $this->persistRefund();
+        $this->persist();
 
-        $this->actingAs($this->user)->json('PATCH', $this->uri().$this->sale->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+//        $this->actingAs($this->user)->json('PATCH', $this->uri())->assertStatus(405)->assertJsonStructure($this->errorStructure);
+
+        $this->actingAs($this->user)->json('PATCH', $this->uri().$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         $this->actingAs($this->user)
             ->json('PATCH', $this->uri(), [])
@@ -311,32 +333,33 @@ class RefundControllerTest extends TestCase
     }
 
     /** @test */
-    public function delete_refund(): void
+    public function delete_payroll_refund(): void
     {
-        $this->persistRefund();
+        $this->persist();
 
         \Queue::fake();
 
-        \Queue::assertNothingPushed();
         $this->actingAs($this->user)->json('DELETE', $this->uri())->assertStatus(204);
 
-        $packing_id = $this->sale->visit->packing_id;
-
-        \Queue::assertPushed(RemoveProductsFromPacking::class, function (RemoveProductsFromPacking $job) use ($packing_id) {
+        \Queue::assertPushed(RemoveProductsFromPacking::class, function (RemoveProductsFromPacking $job) {
             $job->handle();
 
-            return $job->packing->id === $packing_id && $job->is_payroll === FALSE;
+            return $job->packing->id === $this->payroll->visit->packing_id && $job->is_payroll === TRUE;
         });
     }
 
     /** @test */
-    public function delete_refund_fails(): void
+    public function delete_payroll_refund_fails(): void
     {
-        $this->persistRefund();
+        $this->persist();
 
         \Queue::fake();
 
-        $this->actingAs($this->user)->json('DELETE', $this->uri().$this->sale->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
+//        $this->actingAs($this->user)->json('DELETE', $this->uri)->assertStatus(405)->assertJsonStructure($this->errorStructure);
+//
+//        \Queue::assertNothingPushed();
+
+        $this->actingAs($this->user)->json('DELETE', $this->uri().$this->payroll->id.'a')->assertNotFound()->assertJsonStructure($this->errorStructure);
 
         \Queue::assertNothingPushed();
     }
@@ -346,7 +369,6 @@ class RefundControllerTest extends TestCase
      */
     public function tearDown(): void
     {
-        Refund::truncate();
         Payroll::truncate();
         Sale::truncate();
         Visit::truncate();
@@ -363,40 +385,29 @@ class RefundControllerTest extends TestCase
     }
 
     /**
-     * @return \Modules\Sales\Tests\Feature\Http\Controllers\RefundControllerTest
+     * @return \Modules\Sales\Tests\Feature\Http\Controllers\PayrollRefundControllerTest
      */
-    private function persistSale(): RefundControllerTest
+    private function persist(): PayrollRefundControllerTest
     {
-        $this->sale->save();
-
-        UpdateProductsStatus::dispatchNow($this->sale->visit->packing, [$this->sale->product_id], ProductStatus::SOLD_STATUS);
-
-        return $this;
-    }
-
-    private function persistRefund(): RefundControllerTest
-    {
-        $this->persistSale();
-
-        $visit = $this->sale->visit;
-
-        $refund = new Refund([
-            'date' => $visit->date,
-            'reference' => $this->sale->reference,
-            'thumbnail' => $this->sale->thumbnail ,
-            'size' => $this->sale->size,
-            'color' => $this->sale->color,
-            'price' => $this->sale->price,
+        $this->payroll->completion_visit()->associate($this->payroll->visit_id);
+        $this->payroll->fill([
+            'status' => ProductStatus::RETURNED_STATUS,
+            'completion_date' => $this->payroll->visit->date,
         ]);
 
-        $refund->visit()->associate($visit);
-        $refund->seller()->associate($visit->seller_id);
-        $refund->customer()->associate($visit->customer_id);
-        $refund->product()->associate($this->sale->product_id);
+        $this->payroll->save();
+        $visit = $this->payroll->visit;
 
-        $refund->save();
+        $visit->payroll_refund()->associate(new Information([
+            'amount' => 1,
+            'price'  => $this->payroll->price,
+        ]));
 
-        UpdateProductsStatus::dispatchNow($visit->packing, [$this->sale->product_id], ProductStatus::RETURNED_STATUS, FALSE);
+        $visit->save();
+
+        $product = $visit->packing->products()->where('product_id', $this->payroll->product_id)->first();
+
+        $visit->packing->products()->associate($product->fill(['status' => ProductStatus::RETURNED_STATUS]));
 
         return $this;
     }
@@ -406,7 +417,23 @@ class RefundControllerTest extends TestCase
      */
     private function update(): TestResponse
     {
-        $product = $this->sale->visit->packing->products()->last();
+        $product = $this->payroll->visit->packing->products()->last();
+
+        $payroll = new Payroll([
+            'date' => $this->payroll->visit->date,
+            'reference' => $product->reference,
+            'thumbnail' => $product->thumbnail,
+            'size' => $product->size,
+            'color' => $product->color,
+            'price'  => $product->price
+        ]);
+
+        $payroll->product()->associate($product->product_id);
+        $payroll->visit()->associate($this->payroll->visit_id);
+        $payroll->customer()->associate($this->payroll->customer_id);
+        $payroll->seller()->associate($this->payroll->seller_id);
+
+        $payroll->save();
 
         return $this->actingAs($this->user)->json('PUT', $this->uri(), [
             'products' => [
