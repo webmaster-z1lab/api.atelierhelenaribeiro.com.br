@@ -15,7 +15,7 @@ trait RemoveProductsFromPacking
      */
     protected function removeProducts(Packing $packing, array $product_ids, bool $is_payroll): void
     {
-        $products = $packing->products()->whereIn('product_id', $product_ids)->get()->modelKeys();
+        $products = $packing->products()->whereIn('product_id', $product_ids)->modelKeys();
 
         $packing->products()->dissociate($products);
 

@@ -106,12 +106,12 @@ class RefundRepository
 
             $sales->each(function (Sale $sale) use (&$refunds, $visit) {
                 $refunds->add([
-                    'date' => $visit->date,
-                    'reference' => $sale->reference,
-                    'thumbnail' => $sale->thumbnail ,
-                    'size' => $sale->size,
-                    'color' => $sale->color,
-                    'price' => $sale->price,
+                    'date'       => $visit->date,
+                    'reference'  => $sale->reference,
+                    'thumbnail'  => $sale->thumbnail,
+                    'size'       => $sale->size,
+                    'color'      => $sale->color,
+                    'price'      => $sale->price,
                     'product_id' => $sale->product_id,
                 ]);
             });
@@ -152,7 +152,7 @@ class RefundRepository
         ]));
 
         $data = [
-            'total_price'  => $total,
+            'total_price' => $total,
         ];
 
         if ($visit->status === Visit::CLOSED_STATUS) {
@@ -173,15 +173,15 @@ class RefundRepository
         /** @var \Modules\Stock\Models\Size $size */
         $size = Size::where('reference', $references[2])->first();
         $price = new Price([
-            'price' => $template->price->price,
+            'price'      => $template->price->price,
             'started_at' => $template->price->started_at,
         ]);
 
         $data = [
-            'size' => $size->name,
-            'color' => $color->name,
+            'size'      => $size->name,
+            'color'     => $color->name,
             'reference' => $reference,
-            'status' => ProductStatus::SOLD_STATUS,
+            'status'    => ProductStatus::SOLD_STATUS,
         ];
 
         $productRepository = new ProductRepository();
@@ -189,12 +189,12 @@ class RefundRepository
         for ($i = 0; $i < $amount; $i++) {
             $product = $productRepository->createProduct($data, $template, $price);
             $refunds->add([
-                'date' => $date,
-                'reference' => $product->reference,
-                'thumbnail' => $product->thumbnail ,
-                'size' => $product->size,
-                'color' => $product->color,
-                'price' => $product->price,
+                'date'       => $date,
+                'reference'  => $product->reference,
+                'thumbnail'  => $product->thumbnail,
+                'size'       => $product->size,
+                'color'      => $product->color,
+                'price'      => $product->price->price,
                 'product_id' => $product->id,
             ]);
         }

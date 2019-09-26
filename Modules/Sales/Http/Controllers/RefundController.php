@@ -2,7 +2,7 @@
 
 namespace Modules\Sales\Http\Controllers;
 
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\ApiController;
 use Modules\Sales\Http\Requests\RefundRequest;
 use Modules\Sales\Http\Requests\RefundUpdateRequest;
 use Modules\Sales\Http\Resources\ProductResource;
@@ -10,7 +10,7 @@ use Modules\Sales\Http\Resources\VisitResource;
 use Modules\Sales\Models\Visit;
 use Modules\Sales\Repositories\RefundRepository;
 
-class RefundController extends Controller
+class RefundController extends ApiController
 {
     /**
      * @var \Modules\Sales\Repositories\RefundRepository

@@ -50,7 +50,9 @@ class VisitRepository
         $visit->customer()->associate($data['customer']);
         $visit->packing()->associate($packing);
         $visit->sale()->associate(new Information());
+        $visit->refund()->associate(new Information());
         $visit->payroll()->associate(new Information());
+        $visit->payroll_sale()->associate(new Information());
         $visit->payroll_sale()->associate(new Information());
 
         $visit->save();

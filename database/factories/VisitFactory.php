@@ -27,6 +27,8 @@ $factory->afterMaking(Visit::class, function (Visit $visit) {
     $visit->seller()->associate($packing->seller_id);
     $visit->customer()->associate($customer);
     $visit->sale()->associate(new Information());
+    $visit->refund()->associate(new Information());
     $visit->payroll()->associate(new Information());
     $visit->payroll_sale()->associate(new Information());
+    $visit->payroll_refund()->associate(new Information());
 });
