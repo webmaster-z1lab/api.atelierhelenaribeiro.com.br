@@ -101,7 +101,7 @@ class RefundRepository
             $sales = Sale::where('customer_id', $visit->customer_id)
                 ->where('reference', $product['reference'])
                 ->orderBy('date', 'desc')
-                ->take($product['amount'])
+                ->take((int) $product['amount'])
                 ->get();
 
             $sales->each(function (Sale $sale) use (&$refunds, $visit) {
@@ -179,7 +179,7 @@ class RefundRepository
         /** @var \Modules\Stock\Models\Size $size */
         $size = Size::where('reference', $references[2])->first();
         $price = new Price([
-            'price'      => $template->price->price,
+            'price'      => (float) ($template->price->price / 100.0),
             'started_at' => $template->price->started_at,
         ]);
 

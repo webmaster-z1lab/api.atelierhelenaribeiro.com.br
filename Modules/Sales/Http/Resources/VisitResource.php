@@ -41,7 +41,7 @@ class VisitResource extends Resource
             'seller'          => EmployeeResource::make($this->resource->seller),
             'customer_id'     => $this->resource->customer_id,
             'customer'        => CustomerResource::make($this->resource->customer),
-            'customer_credit' => $this->resource->customer->credit_float ?? 0.0,
+            'customer_credit' => is_null($this->resource->customer->credit) ? 0.0 : $this->resource->customer->credit_float,
             'total_amount'    => $this->resource->total_amount,
             'discount'        => $this->resource->discount_float,
             'total_price'     => $this->resource->total_price_float,

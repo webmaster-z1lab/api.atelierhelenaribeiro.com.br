@@ -110,7 +110,6 @@ class VisitRepository
      * @param  \Modules\Sales\Models\Visit  $visit
      *
      * @return \Modules\Sales\Models\Visit
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function close(array $data, Visit $visit): Visit
     {
@@ -118,19 +117,35 @@ class VisitRepository
 
         abort_if($visit->status === Visit::CLOSED_STATUS, 400, 'A visita já foi fechada.');
 
+        $data['discount'] = (int) ($data['discount'] * 100);
+
         $customer_credit = $visit->customer->credit ?? 0;
 
+        if ($visit->total_price - $customer_credit < $data['discount']) {
+            abort(400, 'O valor do desconto é maior do que o valor total.');
+        }
+
+        $total = $visit->total_price - $data['discount'] - $customer_credit;
         if (!empty($data['payment_methods'])) {
-            $methods = $this->createPaymentMethods($data['payment_methods'], $visit->total_price - $visit->discount - $customer_credit);
+            $methods = $this->createPaymentMethods($data['payment_methods'], $total);
 
             foreach ($methods as $method) {
                 $visit->payment_methods()->associate($method);
             }
-        } elseif ($visit->total_price - $visit->discount - $customer_credit > 0) {
-            throw ValidationException::withMessages(['payment_methods' => [trans('validation.required', ['attribute' => 'métodos de pagamentos'])]]);
         }
 
-        $visit->update(['status' => Visit::CLOSED_STATUS]);
+        $customer = $visit->customer;
+        if ($total < 0) {
+            $customer->update(['credit' => $total]);
+        } else {
+            $customer->unset('credit');
+            $customer->save();
+        }
+
+        $visit->update([
+            'discount' => $data['discount'],
+            'status'   => Visit::CLOSED_STATUS,
+        ]);
 
         return $visit;
     }
@@ -170,6 +185,6 @@ class VisitRepository
 
         abort_if($expected_total !== $total, 400, 'Os valores de pagamentos informados não coincidem com o total da visita.');
 
-        return  $result;
+        return $result;
     }
 }

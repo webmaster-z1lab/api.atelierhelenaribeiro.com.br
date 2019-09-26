@@ -28,7 +28,7 @@ class RefundRequest extends FormRequest
     {
         return [
             'products'             => 'bail|required|array|min:1',
-            'products.*.reference' => 'bail|required|distinct|exists:products,reference',
+            'products.*.reference' => $this->getReferenceRules(),
             'products.*.amount'    => 'bail|required|integer|min:1',
         ];
     }
@@ -42,6 +42,9 @@ class RefundRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array
+     */
     public function getReferenceRules(): array
     {
         return [

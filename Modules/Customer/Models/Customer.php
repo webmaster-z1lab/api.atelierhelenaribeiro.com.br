@@ -22,8 +22,10 @@ use Modules\User\Models\User;
  * @property string                                                                         $contact
  * @property string                                                                         $status
  * @property string                                                                         $annotation
- * @property-read \Modules\User\Models\User                                                $seller
- * @property-read \App\Models\Address                                                      $address
+ * @property integer                                                                        $credit
+ * @property-read float                                                                     $credit_float
+ * @property-read \Modules\User\Models\User                                                 $seller
+ * @property-read \App\Models\Address                                                       $address
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Phone[]              $phones
  * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Customer\Models\Owner[] $owners
  * @property-read \Carbon\Carbon                                                            $created_at
@@ -34,8 +36,8 @@ use Modules\User\Models\User;
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Customer\Models\Customer newQuery()
  * @method static \GeneaLabs\LaravelModelCaching\CachedBuilder|\Modules\Customer\Models\Customer query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel withCacheCooldownSeconds($seconds = NULL)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel search($search = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel searchPaginated($search = null, $page = 1, $limit = 10)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel search($search = NULL)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BaseModel searchPaginated($search = NULL, $page = 1, $limit = 10)
  * @mixin \Eloquent
  */
 class Customer extends BaseModel
@@ -52,7 +54,10 @@ class Customer extends BaseModel
         'contact',
         'status',
         'annotation',
+        'credit',
     ];
+
+    protected $casts = ['credit' => 'integer'];
 
     protected $attributes = [
         'status' => CustomerStatus::ACTIVE,
@@ -88,5 +93,13 @@ class Customer extends BaseModel
     public function seller()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return float
+     */
+    public function getCreditFloatAttribute(): float
+    {
+        return (float) ($this->attributes['credit'] / 100.0);
     }
 }

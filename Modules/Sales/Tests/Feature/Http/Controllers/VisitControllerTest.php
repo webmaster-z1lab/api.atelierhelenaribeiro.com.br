@@ -136,7 +136,7 @@ class VisitControllerTest extends TestCase
             'updated_at',
         ],
         'customer_credit',
-        'amount',
+        'total_amount',
         'discount',
         'total_price',
         'sale'         => [
@@ -297,10 +297,11 @@ class VisitControllerTest extends TestCase
         $this->persist();
 
         $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->visit->id, [
+            'discount'        => 0,
             'payment_methods' => [],
         ]);
 
-        $response->dump()
+        $response
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')

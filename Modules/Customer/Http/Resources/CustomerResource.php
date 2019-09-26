@@ -36,6 +36,9 @@ class CustomerResource extends Resource
             'municipal_registration' => $this->resource->municipal_registration,
             'email'                  => $this->resource->email,
             'annotation'             => $this->resource->annotation,
+            $this->mergeWhen(!is_null($this->resource->credit), function () {
+                return ['credit' => $this->resource->credit_float];
+            }),
             'status'                 => $this->resource->status,
             'contact'                => $this->resource->contact,
             'seller'                 => $this->resource->seller_id,

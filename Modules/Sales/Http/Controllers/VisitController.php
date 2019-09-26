@@ -86,7 +86,6 @@ class VisitController extends ApiController
      * @param  \Modules\Sales\Models\Visit                     $visit
      *
      * @return \Modules\Sales\Http\Resources\VisitResource
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function close(CloseVisitRequest $request, Visit $visit): VisitResource
     {
