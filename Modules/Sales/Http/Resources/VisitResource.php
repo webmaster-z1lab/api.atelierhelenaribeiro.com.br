@@ -8,6 +8,7 @@ use Illuminate\Http\Resources\Json\Resource;
 use Modules\Customer\Http\Resources\CustomerResource;
 use Modules\Employee\Http\Resources\EmployeeResource;
 use Modules\Sales\Models\Payroll;
+use Modules\Sales\Models\Refund;
 use Modules\Sales\Models\Sale;
 use Modules\Stock\Models\ProductStatus;
 
@@ -46,10 +47,13 @@ class VisitResource extends Resource
             'total_price'     => $this->resource->total_price_float,
             'sale'            => InformationResource::make($this->resource->sale),
             'sales'           => ProductResource::collection($this->getSales($this->resource->id)),
+            'refund'          => InformationResource::make($this->resource->refund),
+            'refunds'         => ProductResource::collection($this->getRefunds($this->resource->id)),
             'payroll'         => InformationResource::make($this->resource->payroll),
             'payrolls'        => ProductResource::collection($this->getPayrolls($this->resource->id)),
             'payroll_sale'    => InformationResource::make($this->resource->payroll_sale),
             'payroll_sales'   => ProductResource::collection($this->getPayrollSales($this->resource->id)),
+            'payroll_refund'  => InformationResource::make($this->resource->payroll_refund),
             'created_at'      => $this->resource->created_at->toW3cString(),
             'updated_at'      => $this->resource->updated_at->toW3cString(),
         ];
@@ -63,6 +67,19 @@ class VisitResource extends Resource
     protected function getSales(string $visit_id)
     {
         return $this->aggregateProductsByVisit(Sale::class, [
+            'visit_id' => $visit_id,
+            '$or'      => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
+        ]);
+    }
+
+    /**
+     * @param  string  $visit_id
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function getRefunds(string $visit_id)
+    {
+        return $this->aggregateProductsByVisit(Refund::class, [
             'visit_id' => $visit_id,
             '$or'      => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],
         ]);

@@ -94,6 +94,7 @@ class PayrollRepository
     {
         if ($status === 'available') {
             return $this->aggregateProductsByStatus(Payroll::class, [
+                'visit_id'    => ['$ne' => $visit->id],
                 'customer_id' => $visit->customer_id,
                 'status'      => ProductStatus::ON_CONSIGNMENT_STATUS,
                 '$or'         => [['deleted_at' => ['$exists' => FALSE]], ['deleted_at' => NULL]],

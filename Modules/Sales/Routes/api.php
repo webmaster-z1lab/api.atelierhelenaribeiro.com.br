@@ -19,6 +19,18 @@ Route::prefix('visits/{visit}')
     ->group(function () {
         Route::post('/', 'VisitController@close')->name('close');
 
+        Route::prefix('refunds')
+            ->as('refunds.')
+            ->group(function () {
+                Route::get('/', 'RefundController@show')->name('show');
+
+                Route::post('/', 'RefundController@store')->name('store');
+
+                Route::match(['PUT', 'PATCH'], '/', 'RefundController@update')->name('update');
+
+                Route::delete('/', 'RefundController@destroy')->name('destroy');
+            });
+
         Route::prefix('sales')
             ->as('sales.')
             ->group(function () {

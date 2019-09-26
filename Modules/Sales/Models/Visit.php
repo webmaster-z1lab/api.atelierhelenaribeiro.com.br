@@ -29,8 +29,10 @@ use Modules\User\Models\User;
  * @property-read \Modules\Sales\Models\Packing                                                  $packing
  * @property-read string                                                                         $packing_id
  * @property-read \Modules\Sales\Models\Information                                              $sale
+ * @property-read \Modules\Sales\Models\Information                                              $refund
  * @property-read \Modules\Sales\Models\Information                                              $payroll
  * @property-read \Modules\Sales\Models\Information                                              $payroll_sale
+ * @property-read \Modules\Sales\Models\Information                                              $payroll_refund
  * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Sales\Models\PaymentMethod[] $payment_methods
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\Visit newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\Visit newQuery()
@@ -99,6 +101,14 @@ class Visit extends BaseModel
     /**
      * @return \Jenssegers\Mongodb\Relations\EmbedsOne
      */
+    public function refund()
+    {
+        return $this->embedsOne(Information::class);
+    }
+
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
+     */
     public function payroll()
     {
         return $this->embedsOne(Information::class);
@@ -108,6 +118,14 @@ class Visit extends BaseModel
      * @return \Jenssegers\Mongodb\Relations\EmbedsOne
      */
     public function payroll_sale()
+    {
+        return $this->embedsOne(Information::class);
+    }
+
+    /**
+     * @return \Jenssegers\Mongodb\Relations\EmbedsOne
+     */
+    public function payroll_refund()
     {
         return $this->embedsOne(Information::class);
     }

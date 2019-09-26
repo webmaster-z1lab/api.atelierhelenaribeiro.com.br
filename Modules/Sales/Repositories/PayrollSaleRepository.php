@@ -117,17 +117,17 @@ class PayrollSaleRepository
     /**
      * @param  \Modules\Sales\Models\Visit  $visit
      * @param  int                          $amount
-     * @param  int                          $sale_total
+     * @param  int                          $payroll_sale_total
      */
-    private function updatePrices(Visit &$visit, int $amount, int $sale_total): void
+    private function updatePrices(Visit &$visit, int $amount, int $payroll_sale_total): void
     {
-        $total = $visit->total_price + $sale_total - $visit->payroll_sale->price;
+        $total = $visit->total_price + $payroll_sale_total - $visit->payroll_sale->price;
 
         $total_amount = $visit->total_amount + $amount - $visit->payroll_sale->amount;
 
         $visit->payroll_sale()->associate(new Information([
             'amount' => $amount,
-            'price'  => $sale_total,
+            'price'  => $payroll_sale_total,
         ]));
 
         $data = [
