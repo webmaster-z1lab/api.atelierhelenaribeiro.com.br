@@ -38,8 +38,8 @@ trait PrepareProducts
             $merchandises = $packing->products()
                 ->where('reference', $item['reference'])
                 ->whereIn('status', [ProductStatus::IN_TRANSIT_STATUS, ProductStatus::RETURNED_STATUS])
-                ->take($item['amount'])
-                ->get();
+                ->take($item['amount']);
+
             foreach ($merchandises as $merchandise) {
                 /** @var \Modules\Sales\Models\Product $merchandise */
                 $products[] = [

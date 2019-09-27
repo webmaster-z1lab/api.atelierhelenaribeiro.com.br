@@ -349,9 +349,13 @@ class PayrollControllerTest extends TestCase
     /** @test */
     public function get_payroll_by_status(): void
     {
-        $this->persist();
+        $payroll = factory(Payroll::class)->create();
+        $payroll->customer()->associate($this->payroll->customer);
+        $payroll->save();
 
         $this->actingAs($this->user)->json('GET', $this->uri().'available')->assertOk()->assertJsonStructure($this->jsonStructure['payrolls']);
+
+        $this->persist();
 
         $this->payroll->completion_visit()->associate($this->payroll->visit_id);
         $this->payroll->update([

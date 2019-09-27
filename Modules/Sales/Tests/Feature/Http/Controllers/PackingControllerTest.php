@@ -241,7 +241,7 @@ class PackingControllerTest extends TestCase
 
         $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->packing->id, $data);
 
-        $response->dump()
+        $response
             ->assertOk()
             ->assertHeader('ETag')
             //->assertHeader('Content-Length')
