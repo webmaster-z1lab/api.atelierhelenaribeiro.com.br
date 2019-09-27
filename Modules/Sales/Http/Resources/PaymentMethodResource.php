@@ -23,8 +23,9 @@ class PaymentMethodResource extends Resource
     public function toArray($request)
     {
         return [
-            'id'     => $this->resource->id,
-            'method' => $this->resource->method,
+            'id'           => $this->resource->id,
+            'method'       => $this->resource->method,
+            'installments' => $this->resource->installments,
             'value'  => $this->resource->value_float,
         ];
     }

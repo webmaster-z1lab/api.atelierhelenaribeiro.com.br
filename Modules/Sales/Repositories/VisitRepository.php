@@ -3,11 +3,12 @@
 namespace Modules\Sales\Repositories;
 
 use Carbon\Carbon;
-use Illuminate\Validation\ValidationException;
 use Modules\Employee\Models\EmployeeTypes;
+use Modules\Paycheck\Jobs\CreatePaychecks;
 use Modules\Sales\Models\Information;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\PaymentMethod;
+use Modules\Sales\Models\PaymentMethods;
 use Modules\Sales\Models\Payroll;
 use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
@@ -129,7 +130,24 @@ class VisitRepository
         if (!empty($data['payment_methods'])) {
             $methods = $this->createPaymentMethods($data['payment_methods'], $total);
 
+            $paycheck_total = 0;
+            if (!empty($data['paychecks'])) {
+                foreach ($data['paychecks'] as $key => $paycheck) {
+                    $data['paychecks'][$key]['value'] = $paycheck['value'] = (int) ((float) $paycheck['value'] * 100);
+                    $paycheck_total += $paycheck['value'];
+                }
+            }
+
+            /** @var PaymentMethod $method */
             foreach ($methods as $method) {
+                if ($method->method === PaymentMethods::PAYCHECK) {
+                    if (count($data['paychecks']) !== $method->installments) {
+                        abort(400, 'O número de parcelas é diferente do número de cheques recebidos.');
+                    }
+                    if ($paycheck_total !== $method->value) {
+                        abort(400, 'O valor total em cheques é diferente do esperado.');
+                    }
+                }
                 $visit->payment_methods()->associate($method);
             }
         }
@@ -146,6 +164,8 @@ class VisitRepository
             'discount' => $data['discount'],
             'status'   => Visit::CLOSED_STATUS,
         ]);
+
+        CreatePaychecks::dispatch($visit, $data['paychecks']);
 
         return $visit;
     }
@@ -179,6 +199,7 @@ class VisitRepository
         $result = [];
         foreach ($methods as $method) {
             $method['value'] = (int) ((float) $method['value'] * 100);
+            $method['installments'] = (int) $method['installments'];
             $result[] = new PaymentMethod($method);
             $total += $method['value'];
         }

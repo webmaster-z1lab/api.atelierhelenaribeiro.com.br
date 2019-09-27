@@ -1,0 +1,14 @@
+{
+    "name": "Paycheck",
+    "alias": "paycheck",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\Paycheck\\Providers\\PaycheckServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

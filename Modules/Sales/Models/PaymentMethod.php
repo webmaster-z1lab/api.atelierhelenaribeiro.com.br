@@ -11,6 +11,7 @@ use App\Models\BaseModel;
  * @property string      $method
  * @property integer     $value
  * @property-read float  $value_float
+ * @property integer     $installments
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\PaymentMethod newModelQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\PaymentMethod newQuery()
  * @method static \Jenssegers\Mongodb\Eloquent\Builder|\Modules\Sales\Models\PaymentMethod query()
@@ -22,9 +23,12 @@ class PaymentMethod extends BaseModel
 {
     public $timestamps = FALSE;
 
-    protected $fillable = ['method', 'value'];
+    protected $fillable = ['method', 'value', 'installments'];
 
-    protected $casts = ['value' => 'integer'];
+    protected $casts = [
+        'value'        => 'integer',
+        'installments' => 'integer',
+    ];
 
     /**
      * @return float
