@@ -5,6 +5,7 @@ namespace Modules\Sales\Repositories;
 use Carbon\Carbon;
 use Modules\Employee\Models\EmployeeTypes;
 use Modules\Paycheck\Jobs\CreatePaychecks;
+use Modules\Paycheck\Models\Paycheck;
 use Modules\Sales\Models\Information;
 use Modules\Sales\Models\Packing;
 use Modules\Sales\Models\PaymentMethod;
@@ -127,10 +128,10 @@ class VisitRepository
         }
 
         $total = $visit->total_price - $data['discount'] - $customer_credit;
+        $paycheck_total = 0;
         if (!empty($data['payment_methods'])) {
             $methods = $this->createPaymentMethods($data['payment_methods'], $total);
 
-            $paycheck_total = 0;
             if (!empty($data['paychecks'])) {
                 foreach ($data['paychecks'] as $key => $paycheck) {
                     $data['paychecks'][$key]['value'] = $paycheck['value'] = (int) ((float) $paycheck['value'] * 100);
@@ -165,7 +166,11 @@ class VisitRepository
             'status'   => Visit::CLOSED_STATUS,
         ]);
 
-        CreatePaychecks::dispatch($visit, $data['paychecks']);
+        if ($paycheck_total > 0) {
+            CreatePaychecks::dispatch($visit, $data['paychecks']);
+        } else {
+            Paycheck::where('visit_id', $visit->id)->delete();
+        }
 
         return $visit;
     }

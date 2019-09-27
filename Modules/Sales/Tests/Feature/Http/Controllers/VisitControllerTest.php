@@ -7,10 +7,17 @@ use Faker\Provider\pt_BR\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
 use Modules\Catalog\Models\Template;
 use Modules\Employee\Models\EmployeeTypes;
+use Modules\Paycheck\Jobs\CreatePaychecks;
+use Modules\Paycheck\Models\Paycheck;
+use Modules\Sales\Jobs\UpdateProductsStatus;
+use Modules\Sales\Models\Information;
 use Modules\Sales\Models\Packing;
+use Modules\Sales\Models\PaymentMethods;
+use Modules\Sales\Models\Sale;
 use Modules\Sales\Models\Visit;
 use Modules\Stock\Models\Color;
 use Modules\Stock\Models\Product;
+use Modules\Stock\Models\ProductStatus;
 use Modules\Stock\Models\Size;
 use Modules\User\Models\User;
 use Tests\RefreshDatabase;
@@ -294,12 +301,52 @@ class VisitControllerTest extends TestCase
     /** @test */
     public function close_visit(): void
     {
-        $this->persist();
+        $sale = factory(Sale::class)->create();
 
-        $response = $this->actingAs($this->user)->json('POST', $this->uri.$this->visit->id, [
-            'discount'        => 0,
-            'payment_methods' => [],
+        $packing = Packing::where('seller_id', $sale->seller_id)->where(function ($query) {
+            $query->where('checked_out_at', 'exists', FALSE)->orWhereNull('checked_out_at');
+        })->first();
+
+        $visit = $sale->visit;
+
+        $visit->sale()->associate(new Information([
+            'amount' => 1,
+            'price'  => $sale->price,
+        ]));
+
+        $visit->update([
+            'total_price' => $sale->price,
+            'amount'      => 1,
         ]);
+
+        UpdateProductsStatus::dispatchNow($packing, [$sale->product_id], ProductStatus::SOLD_STATUS);
+
+        $paycheck = factory(Paycheck::class)->make(['value' => $sale->price]);
+
+        $response = $this->actingAs($this->user)->json('POST', $this->uri.$sale->visit_id, [
+            'discount'        => 0,
+            'payment_methods' => [
+                [
+                    'method'       => PaymentMethods::PAYCHECK,
+                    'installments' => 1,
+                    'value'        => $sale->price_float,
+                ],
+            ],
+            'paychecks'       => [
+                [
+                    'holder'   => $paycheck->holder,
+                    'document' => $paycheck->document,
+                    'bank'     => $paycheck->bank,
+                    'number'   => $paycheck->number,
+                    'pay_date' => $paycheck->pay_date->format('d/m/Y'),
+                    'value'    => $paycheck->value_float,
+                ],
+            ],
+        ]);
+
+        \Queue::fake();
+
+        \Queue::assertNothingPushed();
 
         $response
             ->assertOk()
@@ -307,6 +354,12 @@ class VisitControllerTest extends TestCase
             //->assertHeader('Content-Length')
             //->assertHeader('Cache-Control')
             ->assertJsonStructure($this->jsonStructure);
+
+        \Queue::assertPushed(CreatePaychecks::class, function (CreatePaychecks $job) use ($visit) {
+            $job->handle();
+
+            return TRUE;
+        });
     }
 
     /** @test */

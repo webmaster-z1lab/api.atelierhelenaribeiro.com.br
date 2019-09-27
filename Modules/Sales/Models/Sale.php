@@ -87,7 +87,7 @@ class Sale extends BaseModel
      */
     public function getPriceFloatAttribute(): float
     {
-        return floatval($this->attributes['total_price'] / 100.0);
+        return floatval($this->attributes['price'] / 100.0);
     }
 
     /**

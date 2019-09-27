@@ -37,7 +37,7 @@ class CloseVisitRequest extends FormRequest
             'paychecks.*.holder'            => 'bail|required|string|min:3',
             'paychecks.*.document'          => 'bail|nullable|document',
             'paychecks.*.bank'              => 'bail|required|string',
-            'paychecks.*.number'            => 'bail|required|digits',
+            'paychecks.*.number'            => 'bail|required|digits_between:1,99',
             'paychecks.*.pay_date'          => 'bail|required|date_format:d/m/Y',
             'paychecks.*.value'             => 'bail|required|numeric|min:0.01',
         ];

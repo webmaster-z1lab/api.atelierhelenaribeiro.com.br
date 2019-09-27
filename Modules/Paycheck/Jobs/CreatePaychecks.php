@@ -13,7 +13,7 @@ use Modules\Sales\Models\Visit;
 
 class CreatePaychecks implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, Queueable, SerializesModels;
     /**
      * @var \Modules\Sales\Models\Visit
      */
@@ -49,9 +49,12 @@ class CreatePaychecks implements ShouldQueue
             $datum['received_at'] = $this->visit->date;
             $datum['pay_date'] = Carbon::createFromFormat('d/m/Y', $datum['pay_date']);
             $datum['received_by'] = $this->visit->seller->name;
+
             $paycheck = new Paycheck($datum);
 
             $paycheck->visit()->associate($this->visit);
+
+            $paycheck->save();
         }
     }
 }
