@@ -323,6 +323,10 @@ class VisitControllerTest extends TestCase
 
         $paycheck = factory(Paycheck::class)->make(['value' => $sale->price]);
 
+        \Queue::fake();
+
+        \Queue::assertNothingPushed();
+
         $response = $this->actingAs($this->user)->json('POST', $this->uri.$sale->visit_id, [
             'discount'        => 0,
             'payment_methods' => [
@@ -343,10 +347,6 @@ class VisitControllerTest extends TestCase
                 ],
             ],
         ]);
-
-        \Queue::fake();
-
-        \Queue::assertNothingPushed();
 
         $response
             ->assertOk()
