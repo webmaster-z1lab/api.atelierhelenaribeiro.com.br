@@ -166,11 +166,7 @@ class VisitRepository
             'status'   => Visit::CLOSED_STATUS,
         ]);
 
-        if ($paycheck_total > 0) {
-            CreatePaychecks::dispatch($visit, $data['paychecks']);
-        } else {
-            Paycheck::where('visit_id', $visit->id)->delete();
-        }
+        CreatePaychecks::dispatch($visit, $data['paychecks']);
 
         return $visit;
     }
