@@ -7,6 +7,8 @@ use App\Traits\ResourceResponseHeaders;
 use Illuminate\Http\Resources\Json\Resource;
 use Modules\Customer\Http\Resources\CustomerResource;
 use Modules\Employee\Http\Resources\EmployeeResource;
+use Modules\Paycheck\Http\Resources\PaycheckResource;
+use Modules\Paycheck\Models\Paycheck;
 use Modules\Sales\Models\Payroll;
 use Modules\Sales\Models\Refund;
 use Modules\Sales\Models\Sale;
@@ -55,6 +57,9 @@ class VisitResource extends Resource
             'payroll_sales'   => ProductResource::collection($this->getPayrollSales($this->resource->id)),
             'payroll_refund'  => InformationResource::make($this->resource->payroll_refund),
             'payroll_refunds' => ProductResource::collection($this->getPayrollRefunds($this->resource->id)),
+            'paychecks'       => $this->when(Paycheck::where('visit_id', $this->resource->id)->exists(), function () {
+                return PaycheckResource::collection(Paycheck::where('visit_id', $this->resource->id)->get());
+            }),
             'created_at'      => $this->resource->created_at->toW3cString(),
             'updated_at'      => $this->resource->updated_at->toW3cString(),
         ];
