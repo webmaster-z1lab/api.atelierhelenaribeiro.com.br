@@ -1,0 +1,25 @@
+{
+    "name": "z1lab/order",
+    "description": "",
+    "authors": [
+        {
+            "name": "Z1Lab Soluções Digitais",
+            "email": "webmaster@z1lab.com.br"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Order\\Providers\\OrderServiceProvider"
+            ],
+            "aliases": {
+                
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Order\\": ""
+        }
+    }
+}

@@ -205,7 +205,7 @@ class PackingControllerTest extends TestCase
     }
 
     /** @test */
-    public function delete_template(): void
+    public function delete_packing(): void
     {
         $this->persist();
 
@@ -213,7 +213,7 @@ class PackingControllerTest extends TestCase
     }
 
     /** @test */
-    public function delete_template_fails(): void
+    public function delete_packing_fails(): void
     {
         $this->persist();
 

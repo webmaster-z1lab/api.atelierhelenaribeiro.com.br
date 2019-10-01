@@ -22,6 +22,22 @@ use Modules\Catalog\Models\Template;
  * @property string                                                            $size
  * @property string                                                            $color
  * @property boolean                                                           $is_processed
+ * @property integer                                                           $mannequin
+ * @property boolean                                                           $removable_sleeve
+ * @property  boolean                                                          $has_lace
+ * @property integer                                                           $bust
+ * @property integer                                                           $armhole
+ * @property integer                                                           $hip
+ * @property integer                                                           $waist
+ * @property integer                                                           $slit
+ * @property integer                                                           $body
+ * @property integer                                                           $skirt
+ * @property integer                                                           $tail
+ * @property integer                                                           $shoulders
+ * @property integer                                                           $cleavage
+ * @property string                                                            $skirt_type
+ * @property string                                                            $sleeve_model
+ * @property string                                                            $annotations
  * @property-read \Modules\Catalog\Models\Template                             $template
  * @property \App\Models\Price                                                 $price
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Image[] $images
@@ -43,22 +59,14 @@ class Product extends Model
     public const BARCODE_LENGTH = 10;
 
     protected $fillable = [
-        'barcode',
-        'thumbnail',
-        'size',
-        'color',
-        'is_processed',
-        'status',
-        'reference',
+        'barcode', 'thumbnail', 'size', 'color', 'is_processed', 'status', 'reference', 'mannequin', 'removable_sleeve',
+        'has_lace', 'bust', 'armhole', 'hip', 'waist', 'slit', 'body', 'skirt', 'tail', 'shoulders', 'cleavage', 'skirt_type',
+        'sleeve_model', 'annotations',
     ];
 
     protected $attributes = [
         'is_processed' => self::PROCESSED_STATUS,
         'status'       => ProductStatus::AVAILABLE_STATUS,
-    ];
-
-    protected $casts = [
-        'is_processed' => 'boolean',
     ];
 
     /**
@@ -68,6 +76,23 @@ class Product extends Model
     {
         return $this->prices->sortByDesc('started_at')->first();
     }
+
+    protected $casts = [
+        'is_processed'     => 'boolean',
+        'removable_sleeve' => 'boolean',
+        'has_lace'         => 'boolean',
+        'mannequin'        => 'integer',
+        'bust'             => 'integer',
+        'armhole'          => 'integer',
+        'hip'              => 'integer',
+        'waist'            => 'integer',
+        'slit'             => 'integer',
+        'body'             => 'integer',
+        'skirt'            => 'integer',
+        'tail'             => 'integer',
+        'shoulders'        => 'integer',
+        'cleavage'         => 'integer',
+    ];
 
     /**
      * @return string

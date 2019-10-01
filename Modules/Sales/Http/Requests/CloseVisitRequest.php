@@ -28,18 +28,18 @@ class CloseVisitRequest extends FormRequest
         $methods = implode(',', [PaymentMethods::MONEY, PaymentMethods::PAYCHECK, PaymentMethods::CREDIT_CARD, PaymentMethods::BOLETO]);
 
         return [
-            'discount'                      => 'bail|required|numeric|min:0',
-            'payment_methods'               => $this->getPaymentMethodsRules(),
-            'payment_methods.*.method'      => "bail|required|distinct|in:$methods",
-            'payment_methods.*.instalments' => $this->getInstalmentsRules(),
-            'payment_methods.*.value'       => 'bail|required|numeric|min:0.01',
-            'paychecks'                     => $this->getPaychecksRules(),
-            'paychecks.*.holder'            => 'bail|required|string|min:3',
-            'paychecks.*.document'          => 'bail|nullable|document',
-            'paychecks.*.bank'              => 'bail|required|string',
-            'paychecks.*.number'            => 'bail|required|digits_between:1,99',
-            'paychecks.*.pay_date'          => 'bail|required|date_format:d/m/Y',
-            'paychecks.*.value'             => 'bail|required|numeric|min:0.01',
+            'discount'                       => 'bail|required|numeric|min:0',
+            'payment_methods'                => $this->getPaymentMethodsRules(),
+            'payment_methods.*.method'       => "bail|required|distinct|in:$methods",
+            'payment_methods.*.installments' => $this->getInstallmentsRules(),
+            'payment_methods.*.value'        => 'bail|required|numeric|min:0.01',
+            'paychecks'                      => $this->getPaychecksRules(),
+            'paychecks.*.holder'             => 'bail|required|string|min:3',
+            'paychecks.*.document'           => 'bail|nullable|document',
+            'paychecks.*.bank'               => 'bail|required|string',
+            'paychecks.*.number'             => 'bail|required|digits_between:1,99',
+            'paychecks.*.pay_date'           => 'bail|required|date_format:d/m/Y',
+            'paychecks.*.value'              => 'bail|required|numeric|min:0.01',
         ];
     }
 
@@ -81,7 +81,7 @@ class CloseVisitRequest extends FormRequest
     /**
      * @return array
      */
-    protected function getInstalmentsRules(): array
+    protected function getInstallmentsRules(): array
     {
         return [
             'bail',

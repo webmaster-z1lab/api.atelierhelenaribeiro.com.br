@@ -155,7 +155,7 @@ class VisitRepository
 
         $customer = $visit->customer;
         if ($total < 0) {
-            $customer->update(['credit' => $total]);
+            $customer->update(['credit' => -$total]);
         } else {
             $customer->unset('credit');
             $customer->save();
@@ -200,7 +200,11 @@ class VisitRepository
         $result = [];
         foreach ($methods as $method) {
             $method['value'] = (int) ((float) $method['value'] * 100);
-            $method['installments'] = (int) $method['installments'];
+            if ($method['method'] === PaymentMethods::MONEY) {
+                $method['installments'] = 1;
+            } else {
+                $method['installments'] = (int) $method['installments'];
+            }
             $result[] = new PaymentMethod($method);
             $total += $method['value'];
         }
